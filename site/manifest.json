@@ -1,6 +1,53 @@
 {
-  "generated_at": "2026-09-28T20:45:00.282083+00:00",
+  "generated_at": "2026-09-28T21:01:00.581253+00:00",
   "days": [
+    {
+      "day": "2026-09-25",
+      "videos": [
+        {
+          "id": "2026-09-25/RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
+          "name": "RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
+          "source_zip": "capture-20260925T140552-f74bef-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
+          "name": "RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
+          "source_zip": "capture-20260925T141734-c653d2-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-13_05_53-f0ae82-s1.mp4",
+          "name": "RGB_2026-09-25-13_05_53-f0ae82-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-13_05_53-f0ae82-s1.mp4",
+          "source_zip": "capture-20260925T183553-f0ae82-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-13_33_43-9b1d7f-s1.mp4",
+          "name": "RGB_2026-09-25-13_33_43-9b1d7f-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-13_33_43-9b1d7f-s1.mp4",
+          "source_zip": "capture-20260925T190343-9b1d7f-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-13_45_50-1013f6-s1.mp4",
+          "name": "RGB_2026-09-25-13_45_50-1013f6-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-13_45_50-1013f6-s1.mp4",
+          "source_zip": "capture-20260925T191550-1013f6-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-13_47_39-1013f6-s2.mp4",
+          "name": "RGB_2026-09-25-13_47_39-1013f6-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-13_47_39-1013f6-s2.mp4",
+          "source_zip": "capture-20260925T191550-1013f6-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-13_55_50-eb4d31-s1.mp4",
+          "name": "RGB_2026-09-25-13_55_50-eb4d31-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-13_55_50-eb4d31-s1.mp4",
+          "source_zip": "capture-20260925T192550-eb4d31-pipeline.zip"
+        }
+      ]
+    },
     {
       "day": "2026-09-24",
       "videos": [
