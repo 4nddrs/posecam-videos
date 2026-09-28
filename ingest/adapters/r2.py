@@ -1,0 +1,72 @@
+"""Cloudflare R2 adapter implementing the VideoPublisher port.
+
+R2 exposes an S3-compatible API, so this adapter is a thin wrapper
+around a duck-typed boto3 S3 client. The client is always injected by
+the caller (never constructed inside the class) so tests can use a
+fake client with no boto3 dependency. The module-level
+`build_r2_publisher` factory is the only place that lazily imports
+boto3 and wires a real client.
+"""
+from __future__ import annotations
+
+import mimetypes
+from pathlib import Path
+from typing import Any
+from urllib.parse import quote
+
+from ingest.ports import PublishedVideo
+
+_DEFAULT_CONTENT_TYPE = "application/octet-stream"
+
+
+class R2VideoPublisher:
+    """VideoPublisher adapter backed by a Cloudflare R2 S3-compatible bucket."""
+
+    def __init__(self, client: Any, bucket: str, public_base_url: str) -> None:
+        self._client = client
+        self._bucket = bucket
+        self._public_base_url = public_base_url.rstrip("/")
+
+    def publish(self, video_path: Path, day: str) -> PublishedVideo:
+        video_path = Path(video_path)
+        key = f"{day}/{video_path.name}"
+        content_type, _ = mimetypes.guess_type(video_path.name)
+        if content_type is None:
+            content_type = _DEFAULT_CONTENT_TYPE
+
+        self._client.upload_file(
+            str(video_path),
+            self._bucket,
+            key,
+            ExtraArgs={"ContentType": content_type},
+        )
+
+        return PublishedVideo(
+            id=key,
+            name=video_path.name,
+            url=f"{self._public_base_url}/{quote(key)}",
+        )
+
+
+def build_r2_publisher(
+    account_id: str,
+    access_key_id: str,
+    secret_access_key: str,
+    bucket: str,
+    public_base_url: str,
+) -> R2VideoPublisher:
+    """Build an R2VideoPublisher backed by a real boto3 S3 client.
+
+    Imports boto3 lazily so callers that only need the protocol/tests
+    do not require it installed.
+    """
+    import boto3
+
+    client = boto3.client(
+        "s3",
+        endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
+        aws_access_key_id=access_key_id,
+        aws_secret_access_key=secret_access_key,
+        region_name="auto",
+    )
+    return R2VideoPublisher(client, bucket=bucket, public_base_url=public_base_url)

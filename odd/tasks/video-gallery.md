@@ -14,7 +14,7 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 ## Constraints
 - Site is public (decided 2026-09-28).
 - Zips stay as the upload format.
-- Video storage backend is behind a port (`VideoPublisher`); the concrete adapter (Drive public folder vs object bucket) is an open decision.
+- Video storage backend is behind a port (`VideoPublisher`); storage decided 2026-09-28: Cloudflare R2 public bucket, credentials via .env (never committed).
 - TDD: strict (session config, runner `python -m pytest` from repo root). Observe RED before GREEN.
 - Route per task: delegated writer when 2+ non-trivial files (writer trigger).
 
@@ -23,7 +23,7 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - [x] T2 Google Drive adapter for `ZipSource` (list folder, download by id). Tests with fake Drive service. (delegated)
 - [x] T3 Static site `site/` reading `manifest.json`, grouped by day, inline player. (delegated)
 - [ ] T4 GitHub Actions: cron ingest + Pages deploy; docs for secrets and setup. (inline or delegated)
-- [ ] T5 `VideoPublisher` concrete adapter, pending storage decision.
+- [x] T5 `VideoPublisher` adapter for Cloudflare R2 (S3-compatible, boto3) + `ingest/main.py` CLI wiring env vars. (delegated)
 
 ## Acceptance
 - Running ingest twice on the same zips processes them once.
@@ -44,3 +44,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: T2 committed 4a87d40 (delegated writer, TDD, 13 tests). RDD assess: medium, 228 lines, under_budget, pending in slice (base 4ea2e99).
 - 2026-09-28: T3 site written (delegated writer, TDD, 6 node tests; `node --test <dir>` fails on Node 26.6, use explicit file path).
 - 2026-09-28: T3 committed 552bf6c. RDD on range 4ea2e99..552bf6c (T2+T3): medium, 643 lines, consent granted, reliability lens approved, acknowledged (lineage review-31ee0be15315decb). Reviewed boundary = 552bf6c.
+- 2026-09-28: T5 written (delegated writer, TDD, 23 tests total). `.env.example` left uncommitted pending user inspection (writer reported sandbox denied normal writes to `.env*` and used shell redirects).
