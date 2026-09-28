@@ -69,3 +69,4 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - [x] T6 `VideoProcessor` port + ffmpeg adapter: faststart remux (`-c copy -movflags +faststart`) and poster JPG (frame at ~1s, 640px wide). No-op fallback when ffmpeg is missing. Publisher uploads poster; manifest entry gets `poster`. (delegated)
 - [x] T7 Site: cards show `poster` with play overlay; fallback to current behaviour when absent. (delegated)
 - [x] T8 Workflow installs ffmpeg; `python -m ingest.posters` backfills posters for existing R2 objects (reads from R2, no Drive access) + manual workflow. (delegated)
+- 2026-09-28: Phase 2 committed (8189d14 processor, d2193bf CI+backfill, 40a1d91 site). RDD on branch vs main: high, granted, 4 lenses approved, acknowledged (lineage review-6b45c3d982f736c8). Merged to main; poster backfill dispatched via workflow mode=posters.
