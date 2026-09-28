@@ -36,6 +36,7 @@ def test_manifest_groups_sorts_and_serializes():
         "url": "https://example.com/a2.mp4",
         "source_zip": "zip-a.zip",
         "poster": None,
+        "duration": None,
     }
 
 
@@ -92,6 +93,23 @@ def test_load_tolerates_entries_without_poster(tmp_path):
     import json
     from ingest.manifest import load
 
+    path = tmp_path / "m.json"
+    path.write_text(json.dumps({"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}))
+    assert load(path).to_dict()["days"][0]["videos"][0]["id"] == "a"
+
+
+def test_manifest_round_trips_duration(tmp_path):
+    m = Manifest()
+    m.add("2026-09-01", "z.zip", PublishedVideo(id="a", name="a.mp4", url="u", duration_seconds=7.25))
+    m.add("2026-09-01", "z.zip", PublishedVideo(id="b", name="b.mp4", url="u2"))
+    path = tmp_path / "m.json"
+    save(m, path)
+    videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
+    assert videos["a"]["duration"] == 7.25
+    assert videos["b"]["duration"] is None
+
+
+def test_load_tolerates_entries_without_duration(tmp_path):
     path = tmp_path / "m.json"
     path.write_text(json.dumps({"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}))
     assert load(path).to_dict()["days"][0]["videos"][0]["id"] == "a"

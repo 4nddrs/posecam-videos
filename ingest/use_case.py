@@ -1,7 +1,7 @@
 """Ingest use case: download new zips, extract, publish, and record a manifest."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import shutil
 from pathlib import Path
 
@@ -63,6 +63,9 @@ def run_ingest(
                     processed = processor.process(video_path, entry_workdir)
                     published = publisher.publish(
                         processed.video_path, day, poster_path=processed.poster_path
+                    )
+                    published = replace(
+                        published, duration_seconds=processed.duration_seconds
                     )
                 else:
                     published = publisher.publish(video_path, day)

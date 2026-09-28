@@ -38,18 +38,26 @@ def run_posters(
     data = json.loads(manifest_path.read_text())
     pending = [
         v for d in data.get("days", []) for v in d.get("videos", [])
-        if not v.get("poster")
+        if not v.get("poster") or v.get("duration") is None
     ]
     updated: list[str] = []
+    durations: list[str] = []
     failed: dict[str, str] = {}
 
     for video in pending[:max_items]:
         key = video["id"]
-        item_dir = workdir / f"item-{len(updated) + len(failed)}"
+        item_dir = workdir / f"item-{len(updated) + len(durations) + len(failed)}"
         try:
             item_dir.mkdir(parents=True, exist_ok=True)
             local = item_dir / Path(key).name
             client.download_file(bucket, key, str(local))
+            if video.get("poster"):
+                video["duration"] = processor.probe(local)
+                manifest_mod.save(manifest_mod.Manifest.from_dict(data), manifest_path)
+                if video["duration"] is None:
+                    raise RuntimeError("no duration produced")
+                durations.append(key)
+                continue
             result = processor.process(local, item_dir)
             if result.poster_path is None:
                 raise RuntimeError("no poster produced")
@@ -63,6 +71,7 @@ def run_posters(
                 str(result.poster_path), bucket, poster_key,
                 ExtraArgs={"ContentType": "image/jpeg"},
             )
+            video["duration"] = result.duration_seconds
             video["poster"] = f"{base}/{quote(poster_key)}"
             manifest_mod.save(manifest_mod.Manifest.from_dict(data), manifest_path)
             updated.append(key)
@@ -73,8 +82,9 @@ def run_posters(
 
     return {
         "updated": updated,
+        "durations": durations,
         "failed": failed,
-        "remaining": len(pending) - len(updated),
+        "remaining": len(pending) - len(updated) - len(durations),
     }
 
 

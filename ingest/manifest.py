@@ -20,6 +20,7 @@ class Manifest:
             "name": video.name,
             "url": video.url,
             "poster": video.poster_url,
+            "duration": video.duration_seconds,
             "source_zip": source_zip,
         }
 
@@ -40,7 +41,7 @@ class Manifest:
             day = day_entry["day"]
             for video in day_entry.get("videos", []):
                 day_videos = manifest._days.setdefault(day, {})
-                day_videos[video["id"]] = dict(video)
+                day_videos[video["id"]] = {"duration": None, **video}
         return manifest
 
 

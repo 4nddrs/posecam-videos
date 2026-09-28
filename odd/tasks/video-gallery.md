@@ -72,7 +72,7 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - 2026-09-28: Phase 2 committed (8189d14 processor, d2193bf CI+backfill, 40a1d91 site). RDD on branch vs main: high, granted, 4 lenses approved, acknowledged (lineage review-6b45c3d982f736c8). Merged to main; poster backfill dispatched via workflow mode=posters.
 
 ## Phase 3: review tools (2026-09-28, user request)
-- [ ] T9 Ingest: `ffprobe` duration in `FfmpegProcessor` → `ProcessedVideo.duration_seconds` → manifest `duration`; posters backfill also fills missing durations. (delegated)
+- [x] T9 Ingest: `ffprobe` duration in `FfmpegProcessor` → `ProcessedVideo.duration_seconds` → manifest `duration`; posters backfill also fills missing durations. (delegated)
 - [ ] T10 Site filters: duration range slider + per-day hour histogram (00–23) that filters cards on click. (delegated)
 - [ ] T11 Site player tools: playlist mode (auto-advance within a day), speed shortcuts (1x/1.5x/2x/4x), keyboard shortcuts (space, arrows, F), deep links `#<video-id>` that open the day and scroll/ready the video; "Copy link" copies that deep link. (delegated)
 - Note: item 2 of the request (filename metadata parsing) was already delivered in the UI redesign.
