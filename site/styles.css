@@ -102,6 +102,38 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .chip-btn[aria-current="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
 .chip-btn[aria-current="true"] .count { color: inherit; opacity: 0.85; }
 
+/* Filter toolbar */
+.filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.filter-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding-top: 10px; padding-bottom: 10px; }
+.filter-title { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.range-pair { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; max-width: 420px; }
+.range-pair input[type="range"] { flex: 1 1 0; min-width: 0; accent-color: var(--accent); }
+.filter-readout { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.875rem; min-width: 8.5em; }
+.action:disabled { opacity: 0.5; cursor: default; }
+.action:disabled:hover { border-color: var(--border); color: var(--fg); }
+
+/* Hour histogram */
+.hour-hist { display: flex; align-items: flex-end; gap: 2px; height: 44px; margin: -4px 0 14px; position: relative; max-width: 520px; }
+.hour-bar {
+  flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; cursor: pointer; position: relative;
+}
+.hour-bar:disabled { cursor: default; }
+.hour-fill { display: block; background: var(--accent); opacity: 0.55; border-radius: 2px 2px 0 0; min-height: 2px; }
+.hour-bar:disabled .hour-fill { background: var(--border); opacity: 1; }
+.hour-bar:not(:disabled):hover .hour-fill { opacity: 1; }
+.hour-bar[aria-pressed="true"] .hour-fill { opacity: 1; outline: 2px solid var(--fg); outline-offset: 1px; }
+.hour-label { position: absolute; bottom: -14px; left: 0; font-size: 0.6rem; color: var(--muted); pointer-events: none; }
+.hour-hist { padding-bottom: 14px; height: 58px; }
+.hour-clear {
+  position: absolute; right: -28px; top: 0; width: 24px; height: 24px; border-radius: 50%; padding: 0; line-height: 1;
+  border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer;
+}
+.hour-clear:hover { border-color: var(--accent); }
+.filter-empty { grid-column: 1 / -1; padding: 24px 20px; }
+.filter-empty[hidden] { display: none; }
+.chip.duration { font-variant-numeric: tabular-nums; }
+
 /* Days */
 main { padding-top: 24px; padding-bottom: 40px; min-height: 50vh; }
 .day-section { margin-bottom: 32px; }
@@ -192,3 +224,18 @@ footer p { margin: 0; }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stat:last-child { grid-column: 1 / -1; }
 }
+
+/* Playback tools */
+.speed-group { display: flex; gap: 4px; margin: 8px 0 0; }
+.speed-btn { font: inherit; font-size: 0.75rem; padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--muted); cursor: pointer; }
+.speed-btn:hover { border-color: var(--accent); color: var(--accent); }
+.speed-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.toggle-pill[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.video-card.is-active { outline: 2px solid var(--accent); outline-offset: 2px; }
+.video-card:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+kbd { font: inherit; font-size: 0.8em; padding: 1px 6px; border: 1px solid var(--border); border-radius: 4px; background: var(--surface); }
+.shortcuts { position: fixed; right: 16px; bottom: 16px; z-index: 50; max-width: calc(100vw - 32px); padding: 12px 16px; background: var(--surface); color: var(--fg); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35); }
+.shortcuts[hidden] { display: none; }
+.shortcuts-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; }
+.shortcuts dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 0.85rem; }
+.shortcuts dd { margin: 0; color: var(--muted); }

@@ -70,3 +70,10 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - [x] T7 Site: cards show `poster` with play overlay; fallback to current behaviour when absent. (delegated)
 - [x] T8 Workflow installs ffmpeg; `python -m ingest.posters` backfills posters for existing R2 objects (reads from R2, no Drive access) + manual workflow. (delegated)
 - 2026-09-28: Phase 2 committed (8189d14 processor, d2193bf CI+backfill, 40a1d91 site). RDD on branch vs main: high, granted, 4 lenses approved, acknowledged (lineage review-6b45c3d982f736c8). Merged to main; poster backfill dispatched via workflow mode=posters.
+
+## Phase 3: review tools (2026-09-28, user request)
+- [x] T9 Ingest: `ffprobe` duration in `FfmpegProcessor` → `ProcessedVideo.duration_seconds` → manifest `duration`; posters backfill also fills missing durations. (delegated)
+- [x] T10 Site filters: duration range slider + per-day hour histogram (00–23) that filters cards on click. (delegated)
+- [x] T11 Site player tools: playlist mode (auto-advance within a day), speed shortcuts (1x/1.5x/2x/4x), keyboard shortcuts (space, arrows, F), deep links `#<video-id>` that open the day and scroll/ready the video; "Copy link" copies that deep link. (delegated)
+- Note: item 2 of the request (filename metadata parsing) was already delivered in the UI redesign.
+- 2026-09-28: Phase 3 committed (e271d98 duration, 2a8e0ba filters, a1891f1 player tools, fcb0b10 correction). RDD on branch vs main: high, granted, 4 lenses; 1 CRITICAL (stale grid after filter change while collapsed) corrected in fcb0b10; validator first capture malformed (provider), reoffered capture approved; acknowledged (lineage review-79f5ef1bf44bc83e). Posters backfill complete 50/50. Duration backfill dispatched.

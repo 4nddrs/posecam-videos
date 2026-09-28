@@ -243,3 +243,18 @@ def test_run_ingest_publishes_processed_video_with_poster(tmp_path):
     run_ingest(source, publisher, FakeStateStore(), tmp_path / "m.json", tmp_path / "w", processor=Proc())
     assert seen == ["a.mp4"]
     assert publisher.posters[0].name == "a.jpg"
+
+
+def test_run_ingest_attaches_duration_to_manifest(tmp_path):
+    from ingest.ports import ProcessedVideo
+
+    entry = ZipEntry(id="z1", name="z1.zip", uploaded_at=datetime(2026, 9, 1, tzinfo=timezone.utc), day="2026-09-01")
+    source = FakeZipSource([entry], {"z1": _make_zip_bytes(tmp_path, "z1.zip", ["a.mp4"])})
+
+    class Proc:
+        def process(self, video_path, workdir):
+            return ProcessedVideo(video_path=video_path, poster_path=None, duration_seconds=42.5)
+
+    run_ingest(source, FakePublisher(), FakeStateStore(), tmp_path / "m.json", tmp_path / "w", processor=Proc())
+    videos = load(tmp_path / "m.json").to_dict()["days"][0]["videos"]
+    assert videos[0]["duration"] == 42.5

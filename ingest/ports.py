@@ -26,12 +26,14 @@ class PublishedVideo:
     name: str
     url: str
     poster_url: str | None = None
+    duration_seconds: float | None = None
 
 
 @dataclass(frozen=True)
 class ProcessedVideo:
     video_path: Path
     poster_path: Path | None
+    duration_seconds: float | None = None
 
 
 class VideoProcessor(Protocol):

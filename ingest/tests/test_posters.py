@@ -30,17 +30,33 @@ class FakeProcessor:
         remux.write_bytes(b"remux")
         poster = out / f"{Path(video_path).stem}.jpg"
         poster.write_bytes(b"jpg")
-        return ProcessedVideo(video_path=remux, poster_path=poster)
+        return ProcessedVideo(video_path=remux, poster_path=poster, duration_seconds=9.5)
+
+    def probe(self, video_path):
+        return 9.5
 
 
 def _write_manifest(path, entries):
     videos = [
         {"id": i, "name": i.split("/")[-1], "url": f"{BASE}/{i}",
-         "poster": p, "source_zip": "z"}
+         "poster": p, "duration": 5.0, "source_zip": "z"}
         for i, p in entries
     ]
     path.write_text(json.dumps({"generated_at": "x", "days": [
         {"day": "2026-01-01", "videos": videos}]}))
+
+
+def _null_durations(path):
+    data = json.loads(path.read_text())
+    for d in data["days"]:
+        for v in d["videos"]:
+            v["duration"] = None
+    path.write_text(json.dumps(data))
+
+
+def _durations(path):
+    data = json.loads(path.read_text())
+    return {v["id"]: v.get("duration") for d in data["days"] for v in d["videos"]}
 
 
 def _posters(path):
@@ -113,3 +129,22 @@ def test_records_failures_without_aborting(tmp_path):
     assert report["updated"] == ["2026-01-01/b.mp4"]
     assert "2026-01-01/a.mp4" in report["failed"]
     assert report["remaining"] == 1
+
+
+def test_records_duration_for_new_posters(tmp_path):
+    _write_manifest(tmp_path / "m.json", [("2026-01-01/a.mp4", None)])
+    _null_durations(tmp_path / "m.json")
+    _run(tmp_path)
+    assert _durations(tmp_path / "m.json") == {"2026-01-01/a.mp4": 9.5}
+
+
+def test_backfills_duration_without_uploading(tmp_path):
+    _write_manifest(tmp_path / "m.json", [
+        ("2026-01-01/b.mp4", f"{BASE}/2026-01-01/b.jpg")])
+    _null_durations(tmp_path / "m.json")
+    client = FakeClient()
+    report = _run(tmp_path, client)
+    assert _durations(tmp_path / "m.json") == {"2026-01-01/b.mp4": 9.5}
+    assert [c for c in client.calls if c[0] == "upload"] == []
+    assert report["durations"] == ["2026-01-01/b.mp4"]
+    assert _posters(tmp_path / "m.json") == {"2026-01-01/b.mp4": f"{BASE}/2026-01-01/b.jpg"}

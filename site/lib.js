@@ -113,3 +113,146 @@ export function posterUrl(video) {
   const poster = video && video.poster;
   return typeof poster === "string" && poster !== "" ? poster : null;
 }
+
+/**
+ * Start hour (0-23) of a recording, parsed from its file name; null if unknown.
+ * @param {{name?: string}|undefined|null} video
+ * @returns {number|null}
+ */
+export function hourOf(video) {
+  const parsed = parseRecordingName(video && video.name);
+  return parsed ? Number(parsed.time.slice(0, 2)) : null;
+}
+
+/**
+ * Count recordings per start hour.
+ * @param {any[]|undefined} videos
+ * @returns {number[]} 24 counts, index = hour
+ */
+export function histogram(videos) {
+  const counts = new Array(24).fill(0);
+  if (!Array.isArray(videos)) return counts;
+  for (const v of videos) {
+    const h = hourOf(v);
+    if (h !== null && h >= 0 && h < 24) counts[h] += 1;
+  }
+  return counts;
+}
+
+const isNum = (n) => typeof n === "number" && Number.isFinite(n);
+
+/**
+ * Duration + hour filter. A video with unknown duration only matches when no
+ * duration bound is set.
+ * @param {{name?: string, duration?: number|null}} video
+ * @param {{minSec?: number|null, maxSec?: number|null, hour?: number|null}} filters
+ * @returns {boolean}
+ */
+export function matchesFilters(video, filters = {}) {
+  const { minSec = null, maxSec = null, hour = null } = filters || {};
+  if (isNum(hour) && hourOf(video) !== hour) return false;
+  if (minSec === null && maxSec === null) return true;
+  const d = video && video.duration;
+  if (!isNum(d)) return false;
+  if (isNum(minSec) && d < minSec) return false;
+  if (isNum(maxSec) && d > maxSec) return false;
+  return true;
+}
+
+/**
+ * "4:53" or "1:02:03"; empty string for missing/invalid input.
+ * @param {number|null|undefined} seconds
+ * @returns {string}
+ */
+export function formatDuration(seconds) {
+  if (!isNum(seconds) || seconds < 0) return "";
+  const total = Math.round(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const ss = String(s).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${ss}` : `${m}:${ss}`;
+}
+
+/**
+ * Parse `?min=<minutes>&max=<minutes>` into second bounds (null when unset/invalid).
+ * @param {string} search
+ * @returns {{minSec: number|null, maxSec: number|null}}
+ */
+export function parseFilterQuery(search) {
+  const params = new URLSearchParams(typeof search === "string" ? search : "");
+  const read = (key) => {
+    const raw = params.get(key);
+    if (raw === null || raw.trim() === "") return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 ? n * 60 : null;
+  };
+  return { minSec: read("min"), maxSec: read("max") };
+}
+
+/**
+ * Inverse of parseFilterQuery; "" when no bound is set.
+ * @param {{minSec?: number|null, maxSec?: number|null}} filters
+ * @returns {string}
+ */
+export function filterQuery(filters = {}) {
+  const params = new URLSearchParams();
+  if (isNum(filters.minSec)) params.set("min", String(filters.minSec / 60));
+  if (isNum(filters.maxSec)) params.set("max", String(filters.maxSec / 60));
+  const q = params.toString();
+  return q ? `?${q}` : "";
+}
+
+/**
+ * Stable DOM id / URL fragment for a video: `v-<hash>` from the recording
+ * name, else `v-<slug of name>`.
+ * @param {{name?: string}|null|undefined} video
+ * @returns {string}
+ */
+export function videoAnchorId(video) {
+  // The manifest id is the storage key, unique across days and sessions;
+  // the recording hash alone repeats for s1/s2 of the same capture.
+  const id = video && typeof video.id === "string" && video.id ? video.id : "";
+  const name = video && typeof video.name === "string" ? video.name : "";
+  const source = id || name;
+  const slug = source.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `v-${slug || "video"}`;
+}
+
+/**
+ * Shareable link to a video card: the base URL without its fragment plus the anchor.
+ * @param {string} baseUrl
+ * @param {{name?: string}} video
+ * @returns {string}
+ */
+export function deepLink(baseUrl, video) {
+  const base = String(baseUrl ?? "").replace(/#.*$/, "");
+  return `${base}#${videoAnchorId(video)}`;
+}
+
+/**
+ * Index of the next (direction 1) or previous (-1) visible entry, no wrapping.
+ * @param {boolean[]} list visibility flags
+ * @param {number} current index to move from (may be -1)
+ * @param {1|-1} direction
+ * @returns {number} -1 when none
+ */
+export function nextVisibleIndex(list, current, direction) {
+  if (!Array.isArray(list)) return -1;
+  const step = direction < 0 ? -1 : 1;
+  for (let i = current + step; i >= 0 && i < list.length; i += step) {
+    if (list[i]) return i;
+  }
+  return -1;
+}
+
+export const SPEEDS = [1, 1.5, 2, 4];
+
+/**
+ * @param {unknown} value
+ * @returns {number} an allowed playback speed, default 1
+ */
+export function clampSpeed(value) {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return SPEEDS.includes(n) ? n : 1;
+}

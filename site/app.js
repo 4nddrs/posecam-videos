@@ -7,6 +7,16 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
+  histogram,
+  matchesFilters,
+  formatDuration,
+  parseFilterQuery,
+  filterQuery,
+  videoAnchorId,
+  deepLink,
+  nextVisibleIndex,
+  clampSpeed,
+  SPEEDS,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -53,6 +63,178 @@ function initTheme() {
     paint();
   });
   paint();
+}
+
+/* ---------- Playback state ---------- */
+const store = {
+  get(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      /* storage unavailable: setting applies for this visit only */
+    }
+  },
+};
+const playback = { speed: clampSpeed(store.get("speed")), autoplay: store.get("autoplay") === "1", active: null };
+
+const cardVideo = (card) => (card ? card.querySelector("video") : null);
+
+function setActive(card) {
+  if (playback.active && playback.active !== card) playback.active.classList.remove("is-active");
+  playback.active = card;
+  if (card) card.classList.add("is-active");
+}
+
+function paintSpeed() {
+  for (const btn of document.querySelectorAll(".speed-btn")) {
+    btn.setAttribute("aria-pressed", String(Number(btn.dataset.speed) === playback.speed));
+  }
+}
+
+function setSpeed(value) {
+  playback.speed = clampSpeed(value);
+  store.set("speed", String(playback.speed));
+  for (const v of document.querySelectorAll(".video-card video")) v.playbackRate = playback.speed;
+  paintSpeed();
+}
+
+/** Cards of the day grid that holds `card`, in display order. */
+const siblingCards = (card) => (card && card.parentElement ? [...card.parentElement.querySelectorAll(".video-card")] : []);
+
+/** Move to the next/previous playable card in the same day and start it. */
+function stepFrom(card, direction) {
+  const cards = siblingCards(card);
+  const idx = nextVisibleIndex(cards.map((c) => Boolean(cardVideo(c))), cards.indexOf(card), direction);
+  if (idx === -1) return false;
+  playCard(cards[idx]);
+  return true;
+}
+
+function playCard(card) {
+  const video = cardVideo(card);
+  if (!video) return;
+  setActive(card);
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  video.playbackRate = playback.speed;
+  video.play().catch(() => {});
+}
+
+function initPlayback() {
+  // `play`/`ended` do not bubble, so listen in the capture phase once.
+  document.addEventListener(
+    "play",
+    (e) => {
+      const video = e.target;
+      if (!(video instanceof HTMLVideoElement)) return;
+      for (const other of document.querySelectorAll(".video-card video")) {
+        if (other !== video && !other.paused) other.pause();
+      }
+      video.playbackRate = playback.speed;
+      setActive(video.closest(".video-card"));
+    },
+    true
+  );
+  document.addEventListener(
+    "ended",
+    (e) => {
+      if (!playback.autoplay || !(e.target instanceof HTMLVideoElement)) return;
+      stepFrom(e.target.closest(".video-card"), 1);
+    },
+    true
+  );
+  document.addEventListener("focusin", (e) => {
+    const card = e.target instanceof Element ? e.target.closest(".video-card") : null;
+    if (card) setActive(card);
+  });
+
+  const toggle = document.getElementById("autoplay-toggle");
+  if (toggle) {
+    const paint = () => toggle.setAttribute("aria-pressed", String(playback.autoplay));
+    toggle.addEventListener("click", () => {
+      playback.autoplay = !playback.autoplay;
+      store.set("autoplay", playback.autoplay ? "1" : "0");
+      paint();
+    });
+    paint();
+  }
+
+  const help = document.getElementById("shortcuts");
+  const toggleHelp = (force) => {
+    if (!help) return;
+    help.hidden = typeof force === "boolean" ? !force : !help.hidden;
+  };
+  document.getElementById("shortcuts-close")?.addEventListener("click", () => toggleHelp(false));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (t instanceof Element && t.closest("input, textarea, select, [contenteditable='true']")) return;
+    const card = playback.active && playback.active.isConnected ? playback.active : null;
+    const video = cardVideo(card);
+    switch (e.key) {
+      case " ": {
+        // Buttons, links and native controls already handle Space themselves.
+        if (t instanceof Element && t.closest("button, a, video")) return;
+        if (!video) return;
+        e.preventDefault();
+        if (video.paused) {
+          video.playbackRate = playback.speed;
+          video.play().catch(() => {});
+        } else video.pause();
+        break;
+      }
+      case "ArrowRight":
+      case "ArrowLeft": {
+        if (t instanceof Element && t.closest("video")) return; // native seeking
+        e.preventDefault();
+        const dir = e.key === "ArrowRight" ? 1 : -1;
+        if (card) stepFrom(card, dir);
+        else {
+          const first = document.querySelector(".video-card");
+          if (first && dir === 1) playCard(first);
+        }
+        break;
+      }
+      case "f":
+      case "F": {
+        if (!video) return;
+        e.preventDefault();
+        if (video.requestFullscreen) video.requestFullscreen().catch(() => {});
+        else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+        break;
+      }
+      case "?":
+        e.preventDefault();
+        toggleHelp();
+        break;
+      case "Escape":
+        toggleHelp(false);
+        break;
+      default:
+    }
+  });
+}
+
+/** Expand the day holding the linked card, scroll to it and mark it active (no autoplay). */
+function openDeepLink(days, sections) {
+  const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+  if (!id.startsWith("v-")) return;
+  const day = days.find((d) => (d.videos || []).some((v) => videoAnchorId(v) === id));
+  if (!day) return;
+  const section = sections.get(day.day);
+  if (section) section.expand();
+  const card = document.getElementById(id);
+  if (!card) return;
+  setActive(card);
+  card.scrollIntoView({ block: "center" });
+  card.focus({ preventScroll: true });
 }
 
 /* ---------- Cards ---------- */
@@ -104,24 +286,39 @@ export function renderVideo(video) {
     chips.appendChild(el("span", { className: "chip", text: parsed.time }));
     chips.appendChild(el("span", { className: "chip", text: parsed.session }));
   }
+  const durationText = formatDuration(video.duration);
+  if (durationText) {
+    chips.appendChild(el("span", { className: "chip duration", title: "Duration", text: `⏱ ${durationText}` }));
+  }
   if (isPipelineZip(video.source_zip)) {
     chips.appendChild(el("span", { className: "chip pipeline", text: "pipeline" }));
   }
 
   const copyBtn = el("button", { type: "button", className: "action", text: "Copy link" });
   copyBtn.addEventListener("click", async () => {
-    const ok = await copyText(video.url);
+    const ok = await copyText(deepLink(location.origin + location.pathname + location.search, video));
     copyBtn.textContent = ok ? "Copied" : "Copy failed";
     setTimeout(() => (copyBtn.textContent = "Copy link"), 1800);
   });
 
-  return el("article", { className: "video-card" }, [
+  const speedGroup = el("div", { className: "speed-group", role: "group", "aria-label": "Playback speed" });
+  for (const value of driveId ? [] : SPEEDS) {
+    const btn = el("button", { type: "button", className: "speed-btn", text: `${value}×` });
+    btn.dataset.speed = String(value);
+    btn.setAttribute("aria-pressed", String(value === playback.speed));
+    btn.addEventListener("click", () => setSpeed(value));
+    speedGroup.appendChild(btn);
+  }
+  if (!driveId) player.playbackRate = playback.speed;
+
+  return el("article", { className: "video-card", id: videoAnchorId(video), tabIndex: -1 }, [
     el("div", { className: "player" }, playOverlay ? [player, playOverlay] : [player]),
     el("div", { className: "video-meta" }, [
       el("h3", { className: "video-name", text: title }),
       chips,
       parsed ? el("span", { className: "hash", text: parsed.hash }) : null,
       el("p", { className: "video-source", text: `Source: ${video.source_zip || "unknown"}` }),
+      driveId ? null : speedGroup,
       el("div", { className: "actions" }, [
         el("a", { className: "action", href: video.url, download: video.name || "", text: "Download" }),
         copyBtn,
@@ -131,24 +328,97 @@ export function renderVideo(video) {
 }
 
 /* ---------- Days ---------- */
-function renderDay(dayGroup, expanded) {
+const filters = { minSec: null, maxSec: null };
+
+function renderHistogram(videos, state, onChange) {
+  const counts = histogram(videos);
+  const peak = Math.max(1, ...counts);
+  const wrap = el("div", { className: "hour-hist", role: "group", "aria-label": "Recordings by start hour" });
+  const bars = counts.map((n, h) => {
+    const hh = String(h).padStart(2, "0");
+    const next = String((h + 1) % 24).padStart(2, "0");
+    const btn = el("button", {
+      type: "button",
+      className: "hour-bar",
+      title: `${hh}:00–${next}:00, ${plural(n, "recording")}`,
+      "aria-label": `${hh}:00, ${plural(n, "recording")}`,
+      disabled: n === 0,
+    });
+    btn.setAttribute("aria-pressed", "false");
+    btn.appendChild(el("span", { className: "hour-fill" }));
+    btn.firstChild.style.height = n ? `${Math.max(12, Math.round((n / peak) * 100))}%` : "2px";
+    btn.appendChild(el("span", { className: "hour-label", text: h % 6 === 0 ? hh : "" }));
+    btn.addEventListener("click", () => {
+      state.hour = state.hour === h ? null : h;
+      onChange();
+    });
+    return btn;
+  });
+  const clear = el("button", { type: "button", className: "hour-clear", text: "×", title: "Clear hour filter", hidden: true });
+  clear.setAttribute("aria-label", "Clear hour filter");
+  clear.addEventListener("click", () => {
+    state.hour = null;
+    onChange();
+  });
+  wrap.append(...bars, clear);
+  wrap.sync = () => {
+    bars.forEach((b, h) => b.setAttribute("aria-pressed", String(state.hour === h)));
+    clear.hidden = state.hour === null;
+  };
+  return wrap;
+}
+
+function renderDay(dayGroup, expanded, onCount) {
   const videos = dayGroup.videos || [];
+  const state = { hour: null };
   const grid = el("div", { className: "video-grid", id: `grid-${dayGroup.day}` });
+  const empty = el("div", { className: "empty-state filter-empty", hidden: true }, [
+    el("span", { className: "state-title", text: "No recordings match" }),
+    el("span", { text: "Try widening the duration range or clearing the hour filter." }),
+  ]);
   let rendered = false;
+  let visible = videos;
   const section = el("section", { className: "day-section", id: `day-${dayGroup.day}` });
   section.dataset.day = dayGroup.day;
 
   const toggle = el("button", { type: "button", className: "toggle-btn" });
   toggle.setAttribute("aria-controls", grid.id);
+  const badge = el("span", { className: "badge" });
 
-  const setCollapsed = (collapsed) => {
-    if (!collapsed && !rendered) {
-      grid.replaceChildren(...videos.map(renderVideo));
+  const paint = () => {
+    const collapsed = section.dataset.collapsed === "true";
+    if (!collapsed) {
+      grid.replaceChildren(...visible.map(renderVideo));
       rendered = true;
     }
+    empty.hidden = collapsed || visible.length > 0;
+    toggle.textContent = collapsed ? `Show ${plural(visible.length, "video")}` : "Hide videos";
+  };
+
+  const hist = renderHistogram(videos, state, () => section.refresh());
+
+  section.refresh = () => {
+    visible = videos.filter((v) => matchesFilters(v, { ...filters, hour: state.hour }));
+    const text =
+      visible.length === videos.length ? plural(videos.length, "video") : `${visible.length} of ${videos.length}`;
+    badge.textContent = text;
+    hist.sync();
+    onCount(dayGroup.day, visible.length, videos.length);
+    if (section.dataset.collapsed !== "true") paint();
+    else {
+      // The grid is stale until the next expand repaints it.
+      rendered = false;
+      toggle.textContent = `Show ${plural(visible.length, "video")}`;
+    }
+  };
+
+  const setCollapsed = (collapsed) => {
     section.dataset.collapsed = String(collapsed);
     toggle.setAttribute("aria-expanded", String(!collapsed));
-    toggle.textContent = collapsed ? `Show ${plural(videos.length, "video")}` : "Hide videos";
+    if (!collapsed && rendered) {
+      empty.hidden = visible.length > 0;
+      toggle.textContent = "Hide videos";
+    } else paint();
   };
   toggle.addEventListener("click", () => setCollapsed(section.dataset.collapsed !== "true"));
   section.expand = () => setCollapsed(false);
@@ -156,16 +426,73 @@ function renderDay(dayGroup, expanded) {
   section.append(
     el("div", { className: "day-head" }, [
       el("h2", { text: formatDayLabel(dayGroup.day) }),
-      el("span", { className: "badge", text: plural(videos.length, "video") }),
+      badge,
       toggle,
     ]),
-    grid
+    hist,
+    grid,
+    empty
   );
-  setCollapsed(!expanded);
+  section.dataset.collapsed = String(!expanded);
+  toggle.setAttribute("aria-expanded", String(expanded));
+  section.refresh();
   return section;
 }
 
+/* ---------- Duration filter toolbar ---------- */
+function initToolbar(days, sections) {
+  const bar = document.getElementById("filter-bar");
+  if (!bar) return;
+  const maxDur = Math.max(0, ...days.flatMap((d) => (d.videos || []).map((v) => (Number.isFinite(v.duration) ? v.duration : 0))));
+  const top = Math.max(1, Math.ceil(maxDur / 60));
+  const lo = document.getElementById("filter-min");
+  const hi = document.getElementById("filter-max");
+  const readout = document.getElementById("filter-readout");
+  const reset = document.getElementById("filter-reset");
+  for (const input of [lo, hi]) {
+    input.min = "0";
+    input.max = String(top);
+    input.step = "1";
+  }
+  const clamp = (n) => Math.min(top, Math.max(0, Math.round(n)));
+  const initial = parseFilterQuery(location.search);
+  lo.value = String(initial.minSec === null ? 0 : clamp(initial.minSec / 60));
+  hi.value = String(initial.maxSec === null ? top : clamp(initial.maxSec / 60));
+
+  const apply = (changed) => {
+    let a = Number(lo.value);
+    let b = Number(hi.value);
+    if (a > b) {
+      if (changed === lo) { b = a; hi.value = String(b); } else { a = b; lo.value = String(a); }
+    }
+    filters.minSec = a === 0 ? null : a * 60;
+    filters.maxSec = b === top ? null : b * 60;
+    const any = filters.minSec === null && filters.maxSec === null;
+    readout.textContent = any ? "Any duration" : `${a} min – ${b === top ? `${top}+ min` : `${b} min`}`;
+    reset.disabled = any;
+    const q = filterQuery(filters);
+    try {
+      history.replaceState(null, "", `${location.pathname}${q}${location.hash}`);
+    } catch (e) {
+      /* history unavailable: filter still applies */
+    }
+    for (const section of sections.values()) section.refresh();
+  };
+  lo.addEventListener("input", () => apply(lo));
+  hi.addEventListener("input", () => apply(hi));
+  reset.addEventListener("click", () => {
+    lo.value = "0";
+    hi.value = String(top);
+    apply(null);
+  });
+  bar.hidden = false;
+  apply(null);
+}
+
+let navCounts = () => {};
+
 function renderNav(days, sections) {
+  const counts = new Map();
   const nav = document.getElementById("day-nav");
   const list = document.getElementById("day-nav-list");
   if (!nav || !list) return;
@@ -176,6 +503,7 @@ function renderNav(days, sections) {
       el("span", { text: formatDayLabel(d.day).replace(/^\w+, /, "").replace(/ \d{4}$/, "") }),
       el("span", { className: "count", text: String((d.videos || []).length) }),
     ]);
+    counts.set(d.day, btn.lastChild);
     btn.addEventListener("click", () => {
       const section = sections.get(d.day);
       if (!section) return;
@@ -198,6 +526,11 @@ function renderNav(days, sections) {
     }
   };
   setCurrent(days[0].day);
+  navCounts = (day, shown, total) => {
+    const node = counts.get(day);
+    if (node) node.textContent = shown === total ? String(total) : `${shown} of ${total}`;
+  };
+  for (const [day, section] of sections) section.refresh();
 
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver(
@@ -251,6 +584,7 @@ async function loadManifest() {
 
 async function main() {
   initTheme();
+  initPlayback();
   const app = document.getElementById("app");
   if (!app) return;
 
@@ -267,11 +601,14 @@ async function main() {
 
     const sections = new Map();
     days.forEach((day, i) => {
-      const section = renderDay(day, i === 0);
+      const section = renderDay(day, i === 0, (d, n, t) => navCounts(d, n, t));
       sections.set(day.day, section);
       app.appendChild(section);
     });
     renderNav(days, sections);
+    initToolbar(days, sections);
+    openDeepLink(days, sections);
+    window.addEventListener("hashchange", () => openDeepLink(days, sections));
   } catch (error) {
     app.replaceChildren();
     app.appendChild(renderError(error instanceof Error ? error.message : String(error)));
