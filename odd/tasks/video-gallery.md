@@ -54,3 +54,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - User creates GitHub repo, pushes `feat/video-gallery`, opens PR to `main`.
 - User configures secrets/vars listed in README and enables Pages (source: GitHub Actions).
 - First real run: `workflow_dispatch` on ingest.yml; verify manifest.json gets committed and site renders.
+- 2026-09-28: Follow-up 772618a: accept R2_BUCKET_NAME (alias of R2_BUCKET) and optional R2_ENDPOINT to match the user .env; 29 tests. RDD: high (workflow), consent granted, 4 lenses approved, acknowledged (lineage review-e2be0a0f17954697). Reviewed boundary = 772618a.
