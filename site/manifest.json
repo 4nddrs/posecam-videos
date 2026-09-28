@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-09-28T09:15:00+00:00",
+  "days": [
+    {
+      "day": "2026-09-28",
+      "videos": [
+        {
+          "id": "vid-001",
+          "name": "Morning session - camera A",
+          "url": "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWx/view?usp=sharing",
+          "source_zip": "2026-09-28_recordings.zip"
+        }
+      ]
+    },
+    {
+      "day": "2026-09-27",
+      "videos": [
+        {
+          "id": "vid-002",
+          "name": "Evening session - camera B",
+          "url": "https://example.com/videos/2026-09-27-camera-b.mp4",
+          "source_zip": "2026-09-27_recordings.zip"
+        }
+      ]
+    }
+  ]
+}

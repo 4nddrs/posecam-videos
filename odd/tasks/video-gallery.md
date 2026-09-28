@@ -21,7 +21,7 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 ## Tasks
 - [x] T1 Ingest core with ports: `ZipSource`, `VideoPublisher`, `StateStore`; `unzip` extractor; `manifest` builder; `run_ingest` use case. Tests with fixture zips. (delegated, writer trigger)
 - [x] T2 Google Drive adapter for `ZipSource` (list folder, download by id). Tests with fake Drive service. (delegated)
-- [ ] T3 Static site `site/` reading `manifest.json`, grouped by day, inline player. (delegated)
+- [x] T3 Static site `site/` reading `manifest.json`, grouped by day, inline player. (delegated)
 - [ ] T4 GitHub Actions: cron ingest + Pages deploy; docs for secrets and setup. (inline or delegated)
 - [ ] T5 `VideoPublisher` concrete adapter, pending storage decision.
 
@@ -42,3 +42,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: repo initialized, branch `feat/video-gallery`, scaffold commit 01fc934.
 - 2026-09-28: T1 committed 4ea2e99 (delegated writer, TDD RED→GREEN, 10 tests). RDD: medium, consent granted, reliability lens approved, acknowledged (lineage review-b647c221b480fc7c). Reviewed boundary = 4ea2e99.
 - 2026-09-28: T2 committed 4a87d40 (delegated writer, TDD, 13 tests). RDD assess: medium, 228 lines, under_budget, pending in slice (base 4ea2e99).
+- 2026-09-28: T3 site written (delegated writer, TDD, 6 node tests; `node --test <dir>` fails on Node 26.6, use explicit file path).
