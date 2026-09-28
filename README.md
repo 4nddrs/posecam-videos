@@ -17,6 +17,7 @@ The ingest pipeline follows a ports-and-adapters (hexagonal) style: the use case
 - `ingest/state.py` — `JsonStateStore`, idempotency tracking (`ingest/state.json`).
 - `ingest/adapters/drive.py` — Google Drive adapter for `ZipSource`.
 - `ingest/adapters/r2.py` — Cloudflare R2 adapter for `VideoPublisher`.
+- `ingest/posters.py` — backfill command: `python -m ingest.posters`.
 - `ingest/main.py` — CLI entry point; wires adapters from environment variables and runs the use case.
 - `site/` — static site (vanilla HTML/JS) that reads `manifest.json` and renders the gallery.
 
@@ -59,7 +60,8 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | `R2_PUBLIC_BASE_URL` | yes | Public base URL the bucket is served from (used to build playable video URLs). It is the bucket's public domain (r2.dev subdomain or custom domain), not the S3 API endpoint. |
 | `MANIFEST_PATH` | no | Output path for the manifest (default `site/manifest.json`). |
 | `STATE_PATH` | no | Path to the idempotency state file (default `ingest/state.json`). |
-| `MAX_ZIPS_PER_RUN` | no | Maximum number of new zips processed per run, oldest first (default `10`). The rest are reported as `deferred` and picked up by later runs. |
+| `MAX_ZIPS_PER_RUN` | no | Maximum number of new zips processed per run, oldest first (default `10`; also the max videos per `ingest.posters` run). The rest are reported as `deferred` and picked up by later runs. |
+| `FFMPEG_BIN` | no | ffmpeg binary (default `ffmpeg`). If missing, posters and faststart are skipped. |
 | `WORKDIR` | no | Working directory for downloads/extraction (default a fresh temp directory). |
 
 ## Deployment
@@ -77,3 +79,17 @@ Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 - `ingest/state.json` tracks which zip ids have already been processed, so running the ingest twice on the same zips processes them once (idempotency).
 - The Drive folder holds `DD-MM-YYYY` date subfolders containing the zips; the subfolder name sets the video's day. Each run processes at most `MAX_ZIPS_PER_RUN` new zips (oldest first), so the initial backfill happens over several runs; the remaining zips appear as `deferred` in the printed report. Each zip's download and extracted files are deleted after it is processed.
 - To reprocess a zip, remove its id from `ingest/state.json` and re-run the ingest; the zip will be downloaded and published again.
+
+## Posters and faststart
+
+ffmpeg is required for this step (the workflow installs it; locally install it or set `FFMPEG_BIN`). Every published video is remuxed to faststart (`-c copy -movflags +faststart`, no re-encode) and gets a JPG poster (`<day>/<name>.jpg`), so browsers can preview it without stalling.
+
+To backfill videos published before this existed:
+
+```bash
+python -m ingest.posters
+```
+
+It downloads each video without a `poster` from R2, remuxes it, uploads the video back to the same key plus the poster, and updates `site/manifest.json` after each video. At most `MAX_ZIPS_PER_RUN` videos are handled per run; the printed JSON report `{"updated": [...], "failed": {...}, "remaining": n}` shows what is left. It exits 1 only if nothing could be processed and there were failures.
+
+In GitHub Actions, run the workflow manually (workflow_dispatch) with `mode` set to `posters`; the default `ingest` mode is the normal ingest.

@@ -3,7 +3,15 @@ name: Ingest and deploy
 on:
   schedule:
     - cron: "*/30 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "ingest = process new zips; posters = backfill posters for existing videos"
+        type: choice
+        options:
+          - ingest
+          - posters
+        default: ingest
   push:
     branches:
       - main
@@ -34,6 +42,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -1
+
       - name: Run ingest
         env:
           DRIVE_FOLDER_ID: ${{ vars.DRIVE_FOLDER_ID }}
@@ -44,7 +57,12 @@ jobs:
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
           R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
           MAX_ZIPS_PER_RUN: ${{ vars.MAX_ZIPS_PER_RUN || '10' }}
-        run: python -m ingest.main
+        run: |
+          if [ "${{ inputs.mode }}" = "posters" ]; then
+            python -m ingest.posters
+          else
+            python -m ingest.main
+          fi
 
       - name: Commit and push updated manifest and state
         if: ${{ !cancelled() }}
