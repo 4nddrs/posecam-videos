@@ -405,7 +405,11 @@ function renderDay(dayGroup, expanded, onCount) {
     hist.sync();
     onCount(dayGroup.day, visible.length, videos.length);
     if (section.dataset.collapsed !== "true") paint();
-    else toggle.textContent = `Show ${plural(visible.length, "video")}`;
+    else {
+      // The grid is stale until the next expand repaints it.
+      rendered = false;
+      toggle.textContent = `Show ${plural(visible.length, "video")}`;
+    }
   };
 
   const setCollapsed = (collapsed) => {
