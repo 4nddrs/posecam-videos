@@ -67,5 +67,5 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 ## Phase 2: posters and faststart (2026-09-28)
 User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s are not faststart, so browser-side previews stall.
 - [x] T6 `VideoProcessor` port + ffmpeg adapter: faststart remux (`-c copy -movflags +faststart`) and poster JPG (frame at ~1s, 640px wide). No-op fallback when ffmpeg is missing. Publisher uploads poster; manifest entry gets `poster`. (delegated)
-- [ ] T7 Site: cards show `poster` with play overlay; fallback to current behaviour when absent. (delegated)
+- [x] T7 Site: cards show `poster` with play overlay; fallback to current behaviour when absent. (delegated)
 - [x] T8 Workflow installs ffmpeg; `python -m ingest.posters` backfills posters for existing R2 objects (reads from R2, no Drive access) + manual workflow. (delegated)

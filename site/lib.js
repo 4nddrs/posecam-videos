@@ -103,3 +103,13 @@ export function relativeTime(isoTimestamp, now = new Date()) {
 export function isPipelineZip(sourceZip) {
   return typeof sourceZip === "string" && sourceZip.includes("-pipeline");
 }
+
+/**
+ * Poster image URL for a video entry, or null when absent/empty/non-string.
+ * @param {{poster?: unknown}|undefined|null} video
+ * @returns {string|null}
+ */
+export function posterUrl(video) {
+  const poster = video && video.poster;
+  return typeof poster === "string" && poster !== "" ? poster : null;
+}

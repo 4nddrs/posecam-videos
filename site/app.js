@@ -6,6 +6,7 @@ import {
   formatDayLabel,
   relativeTime,
   isPipelineZip,
+  posterUrl,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -75,7 +76,13 @@ export function renderVideo(video) {
   const driveId = extractDriveId(video.url);
   const player = driveId
     ? el("iframe", { src: drivePreviewUrl(driveId), allow: "autoplay", loading: "lazy", title })
-    : el("video", { controls: true, preload: "none", playsInline: true, src: video.url });
+    : el("video", {
+        controls: true,
+        preload: "none",
+        playsInline: true,
+        src: video.url,
+        poster: posterUrl(video),
+      });
 
   // Nothing is fetched until the viewer presses play, so many cards on one
   // page do not compete for connections (the MP4 index lives at the file end).

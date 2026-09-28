@@ -7,6 +7,7 @@ import {
   formatDayLabel,
   relativeTime,
   isPipelineZip,
+  posterUrl,
 } from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
@@ -82,4 +83,16 @@ test("isPipelineZip detects pipeline zips", () => {
   assert.equal(isPipelineZip("capture-20260925T140552-f74bef-pipeline.zip"), true);
   assert.equal(isPipelineZip("capture-20260925T140552-f74bef.zip"), false);
   assert.equal(isPipelineZip(undefined), false);
+});
+
+test("posterUrl returns the poster string when present", () => {
+  assert.equal(posterUrl({ poster: "https://example.com/p.jpg" }), "https://example.com/p.jpg");
+});
+
+test("posterUrl returns null for null, missing, empty or non-string posters", () => {
+  assert.equal(posterUrl({ poster: null }), null);
+  assert.equal(posterUrl({}), null);
+  assert.equal(posterUrl({ poster: "" }), null);
+  assert.equal(posterUrl({ poster: 42 }), null);
+  assert.equal(posterUrl(undefined), null);
 });
