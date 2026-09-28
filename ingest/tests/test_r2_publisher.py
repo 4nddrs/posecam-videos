@@ -1,6 +1,8 @@
+import sys
+import types
 from pathlib import Path
 
-from ingest.adapters.r2 import R2VideoPublisher
+from ingest.adapters.r2 import R2VideoPublisher, build_r2_publisher
 
 
 class FakeClient:
@@ -66,3 +68,29 @@ def test_publish_strips_trailing_slash_from_public_base_url(tmp_path):
     published = publisher.publish(video_path, day="2026-09-04")
 
     assert published.url == "https://videos.example.com/2026-09-04/clip.mp4"
+
+
+def _fake_boto3(monkeypatch):
+    calls = []
+    module = types.SimpleNamespace(client=lambda *a, **kw: calls.append((a, kw)) or FakeClient())
+    monkeypatch.setitem(sys.modules, "boto3", module)
+    return calls
+
+
+def test_build_r2_publisher_derives_default_endpoint(monkeypatch):
+    calls = _fake_boto3(monkeypatch)
+
+    build_r2_publisher("acc", "kid", "secret", "bucket", "https://v.example.com")
+
+    assert calls[0][1]["endpoint_url"] == "https://acc.r2.cloudflarestorage.com"
+
+
+def test_build_r2_publisher_uses_explicit_endpoint(monkeypatch):
+    calls = _fake_boto3(monkeypatch)
+
+    build_r2_publisher(
+        "acc", "kid", "secret", "bucket", "https://v.example.com",
+        endpoint_url="https://custom.example.com",
+    )
+
+    assert calls[0][1]["endpoint_url"] == "https://custom.example.com"

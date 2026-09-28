@@ -31,6 +31,39 @@ def test_load_config_builds_config_with_defaults():
     assert config.state_path == Path("ingest/state.json")
 
 
+def _env_with_bucket(**extra):
+    env = {k: v for k, v in REQUIRED_ENV.items() if k != "R2_BUCKET"}
+    env.update(extra)
+    return env
+
+
+def test_load_config_accepts_r2_bucket_name():
+    config = load_config(_env_with_bucket(R2_BUCKET_NAME="named-bucket"))
+
+    assert config.r2_bucket == "named-bucket"
+
+
+def test_load_config_still_accepts_legacy_r2_bucket():
+    config = load_config(_env_with_bucket(R2_BUCKET="legacy-bucket"))
+
+    assert config.r2_bucket == "legacy-bucket"
+
+
+def test_load_config_missing_bucket_lists_canonical_name():
+    with pytest.raises(ValueError) as exc_info:
+        load_config(_env_with_bucket())
+
+    assert "R2_BUCKET_NAME" in str(exc_info.value)
+
+
+def test_load_config_reads_optional_r2_endpoint():
+    assert load_config(REQUIRED_ENV).r2_endpoint is None
+
+    config = load_config({**REQUIRED_ENV, "R2_ENDPOINT": "https://custom.example.com"})
+
+    assert config.r2_endpoint == "https://custom.example.com"
+
+
 def test_load_config_honors_optional_overrides():
     env = dict(REQUIRED_ENV)
     env["MANIFEST_PATH"] = "custom/manifest.json"
@@ -56,7 +89,7 @@ def test_load_config_raises_with_every_missing_var_name():
         "R2_ACCOUNT_ID",
         "R2_ACCESS_KEY_ID",
         "R2_SECRET_ACCESS_KEY",
-        "R2_BUCKET",
+        "R2_BUCKET_NAME",
         "R2_PUBLIC_BASE_URL",
     ):
         assert missing in message

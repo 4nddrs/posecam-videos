@@ -51,8 +51,9 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | `R2_ACCOUNT_ID` | yes | Cloudflare account id that owns the R2 bucket. |
 | `R2_ACCESS_KEY_ID` | yes | R2 S3-compatible access key id. |
 | `R2_SECRET_ACCESS_KEY` | yes | R2 S3-compatible secret access key. |
-| `R2_BUCKET` | yes | R2 bucket name videos are published to. |
-| `R2_PUBLIC_BASE_URL` | yes | Public base URL the bucket is served from (used to build playable video URLs). |
+| `R2_BUCKET_NAME` | yes | R2 bucket name videos are published to (preferred; the legacy `R2_BUCKET` is also accepted). |
+| `R2_ENDPOINT` | no | Overrides the S3 API endpoint; defaults to `https://<R2_ACCOUNT_ID>.r2.cloudflarestorage.com`. |
+| `R2_PUBLIC_BASE_URL` | yes | Public base URL the bucket is served from (used to build playable video URLs). It is the bucket's public domain (r2.dev subdomain or custom domain), not the S3 API endpoint. |
 | `MANIFEST_PATH` | no | Output path for the manifest (default `site/manifest.json`). |
 | `STATE_PATH` | no | Path to the idempotency state file (default `ingest/state.json`). |
 | `WORKDIR` | no | Working directory for downloads/extraction (default a fresh temp directory). |
@@ -62,7 +63,7 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 
 - Create these repository secrets: `GOOGLE_SERVICE_ACCOUNT_JSON` (the full service account key JSON, not a path), `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
-- Create these repository (or environment) variables: `DRIVE_FOLDER_ID`, `R2_BUCKET`, `R2_PUBLIC_BASE_URL`.
+- Create these repository (or environment) variables: `DRIVE_FOLDER_ID`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`.
 - In repository Settings → Pages, set the source to "GitHub Actions".
 - The R2 bucket must be configured for public access; `R2_PUBLIC_BASE_URL` is its public domain.
 - The Drive folder must be shared read-only with the service account's email address.

@@ -54,6 +54,7 @@ def build_r2_publisher(
     secret_access_key: str,
     bucket: str,
     public_base_url: str,
+    endpoint_url: str | None = None,
 ) -> R2VideoPublisher:
     """Build an R2VideoPublisher backed by a real boto3 S3 client.
 
@@ -64,7 +65,7 @@ def build_r2_publisher(
 
     client = boto3.client(
         "s3",
-        endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
+        endpoint_url=endpoint_url or f"https://{account_id}.r2.cloudflarestorage.com",
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key,
         region_name="auto",

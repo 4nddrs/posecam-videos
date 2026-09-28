@@ -29,7 +29,6 @@ _REQUIRED_VARS = (
     "R2_ACCOUNT_ID",
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
-    "R2_BUCKET",
     "R2_PUBLIC_BASE_URL",
 )
 
@@ -46,6 +45,7 @@ class Config:
     r2_secret_access_key: str
     r2_bucket: str
     r2_public_base_url: str
+    r2_endpoint: str | None
     manifest_path: Path
     state_path: Path
     workdir: Path
@@ -57,6 +57,9 @@ def load_config(env: Mapping[str, str]) -> Config:
     Raises ValueError listing every missing required variable name.
     """
     missing = [name for name in _REQUIRED_VARS if not env.get(name)]
+    bucket = env.get("R2_BUCKET_NAME") or env.get("R2_BUCKET")
+    if not bucket:
+        missing.append("R2_BUCKET_NAME")
     if missing:
         raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
 
@@ -67,8 +70,9 @@ def load_config(env: Mapping[str, str]) -> Config:
         r2_account_id=env["R2_ACCOUNT_ID"],
         r2_access_key_id=env["R2_ACCESS_KEY_ID"],
         r2_secret_access_key=env["R2_SECRET_ACCESS_KEY"],
-        r2_bucket=env["R2_BUCKET"],
+        r2_bucket=bucket,
         r2_public_base_url=env["R2_PUBLIC_BASE_URL"],
+        r2_endpoint=env.get("R2_ENDPOINT") or None,
         manifest_path=Path(env.get("MANIFEST_PATH", _DEFAULT_MANIFEST_PATH)),
         state_path=Path(env.get("STATE_PATH", _DEFAULT_STATE_PATH)),
         workdir=Path(workdir) if workdir else Path(tempfile.mkdtemp(prefix="ingest-")),
@@ -115,6 +119,7 @@ DEFAULT_PUBLISHER_BUILDER: Callable[[Config], VideoPublisher] = lambda cfg: buil
     cfg.r2_secret_access_key,
     cfg.r2_bucket,
     cfg.r2_public_base_url,
+    endpoint_url=cfg.r2_endpoint,
 )
 
 
