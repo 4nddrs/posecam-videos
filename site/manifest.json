@@ -1,9 +1,50 @@
 {
-  "generated_at": "2026-09-28T21:47:19.300606+00:00",
+  "generated_at": "2026-09-28T21:50:28.554612+00:00",
   "days": [
+    {
+      "day": "2026-09-26",
+      "videos": [
+        {
+          "id": "2026-09-26/RGB_2026-09-25-14_27_00-3212cb-s1.mp4",
+          "name": "RGB_2026-09-25-14_27_00-3212cb-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-26/RGB_2026-09-25-14_27_00-3212cb-s1.mp4",
+          "source_zip": "capture-20260925T195700-3212cb-pipeline.zip"
+        },
+        {
+          "id": "2026-09-26/RGB_2026-09-26-11_14_24-3060d8-s1.mp4",
+          "name": "RGB_2026-09-26-11_14_24-3060d8-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-26/RGB_2026-09-26-11_14_24-3060d8-s1.mp4",
+          "source_zip": "capture-20260926T164424-3060d8-pipeline.zip"
+        },
+        {
+          "id": "2026-09-26/RGB_2026-09-26-11_50_43-1b0694-s1.mp4",
+          "name": "RGB_2026-09-26-11_50_43-1b0694-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-26/RGB_2026-09-26-11_50_43-1b0694-s1.mp4",
+          "source_zip": "capture-20260926T172043-1b0694-pipeline.zip"
+        },
+        {
+          "id": "2026-09-26/RGB_2026-09-26-12_14_40-28aef5-s1.mp4",
+          "name": "RGB_2026-09-26-12_14_40-28aef5-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-26/RGB_2026-09-26-12_14_40-28aef5-s1.mp4",
+          "source_zip": "capture-20260926T174440-28aef5-pipeline.zip"
+        },
+        {
+          "id": "2026-09-26/RGB_2026-09-26-12_20_57-a48645-s1.mp4",
+          "name": "RGB_2026-09-26-12_20_57-a48645-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-26/RGB_2026-09-26-12_20_57-a48645-s1.mp4",
+          "source_zip": "capture-20260926T175057-a48645-pipeline.zip"
+        }
+      ]
+    },
     {
       "day": "2026-09-25",
       "videos": [
+        {
+          "id": "2026-09-25/RGB_2026-09-25-08_28_20-bcdbce-s1.mp4",
+          "name": "RGB_2026-09-25-08_28_20-bcdbce-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_28_20-bcdbce-s1.mp4",
+          "source_zip": "capture-20260925T135820-bcdbce-pipeline.zip"
+        },
         {
           "id": "2026-09-25/RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
           "name": "RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
@@ -113,10 +154,34 @@
           "source_zip": "capture-20260925T152128-01e944-pipeline.zip"
         },
         {
+          "id": "2026-09-25/RGB_2026-09-25-09_54_53-b7bcaa-s1.mp4",
+          "name": "RGB_2026-09-25-09_54_53-b7bcaa-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_54_53-b7bcaa-s1.mp4",
+          "source_zip": "capture-20260925T152453-b7bcaa-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_55_26-b7bcaa-s2.mp4",
+          "name": "RGB_2026-09-25-09_55_26-b7bcaa-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_55_26-b7bcaa-s2.mp4",
+          "source_zip": "capture-20260925T152453-b7bcaa-pipeline.zip"
+        },
+        {
           "id": "2026-09-25/RGB_2026-09-25-12_34_26-72f397-s1.mp4",
           "name": "RGB_2026-09-25-12_34_26-72f397-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-12_34_26-72f397-s1.mp4",
           "source_zip": "capture-20260925T180426-72f397-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-12_41_03-7e1788-s1.mp4",
+          "name": "RGB_2026-09-25-12_41_03-7e1788-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-12_41_03-7e1788-s1.mp4",
+          "source_zip": "capture-20260925T181104-7e1788-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-12_41_18-7e1788-s2.mp4",
+          "name": "RGB_2026-09-25-12_41_18-7e1788-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-12_41_18-7e1788-s2.mp4",
+          "source_zip": "capture-20260925T181104-7e1788-pipeline.zip"
         },
         {
           "id": "2026-09-25/RGB_2026-09-25-12_48_01-78c7ce-s1.mp4",
