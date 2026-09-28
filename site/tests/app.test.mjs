@@ -8,6 +8,12 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
+  hourOf,
+  histogram,
+  matchesFilters,
+  formatDuration,
+  parseFilterQuery,
+  filterQuery,
 } from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
@@ -95,4 +101,71 @@ test("posterUrl returns null for null, missing, empty or non-string posters", ()
   assert.equal(posterUrl({ poster: "" }), null);
   assert.equal(posterUrl({ poster: 42 }), null);
   assert.equal(posterUrl(undefined), null);
+});
+
+const rec = (h, m, duration) => ({
+  name: `RGB_2026-09-25-${String(h).padStart(2, "0")}_${m}_00-abc123-s1.mp4`,
+  duration,
+});
+
+test("hourOf returns the start hour or null", () => {
+  assert.equal(hourOf(rec(8, "35")), 8);
+  assert.equal(hourOf(rec(23, "01")), 23);
+  assert.equal(hourOf({ name: "clip.mp4" }), null);
+  assert.equal(hourOf(undefined), null);
+});
+
+test("histogram returns 24 counts by start hour", () => {
+  const h = histogram([rec(0, "01"), rec(14, "05"), rec(14, "40"), { name: "x" }]);
+  assert.equal(h.length, 24);
+  assert.equal(h[0], 1);
+  assert.equal(h[14], 2);
+  assert.equal(h.reduce((a, b) => a + b, 0), 3);
+  assert.deepEqual(histogram(undefined), new Array(24).fill(0));
+});
+
+test("matchesFilters applies duration range inclusively", () => {
+  const v = rec(9, "00", 120);
+  assert.equal(matchesFilters(v, { minSec: 60, maxSec: 600 }), true);
+  assert.equal(matchesFilters(v, { minSec: 120, maxSec: 120 }), true);
+  assert.equal(matchesFilters(v, { minSec: 121, maxSec: null }), false);
+  assert.equal(matchesFilters(v, { minSec: null, maxSec: 119 }), false);
+});
+
+test("matchesFilters treats null duration as matching only when unfiltered", () => {
+  const v = rec(9, "00", null);
+  assert.equal(matchesFilters(v, { minSec: null, maxSec: null }), true);
+  assert.equal(matchesFilters(v, { minSec: 0, maxSec: null }), false);
+  assert.equal(matchesFilters(v, { minSec: null, maxSec: 600 }), false);
+  assert.equal(matchesFilters({ name: v.name }, { minSec: null, maxSec: null }), true);
+});
+
+test("matchesFilters composes hour with duration", () => {
+  const v = rec(14, "10", 300);
+  assert.equal(matchesFilters(v, { minSec: null, maxSec: null, hour: 14 }), true);
+  assert.equal(matchesFilters(v, { minSec: null, maxSec: null, hour: 13 }), false);
+  assert.equal(matchesFilters(v, { minSec: 600, maxSec: null, hour: 14 }), false);
+  assert.equal(matchesFilters(v, {}), true);
+});
+
+test("formatDuration renders m:ss and h:mm:ss", () => {
+  assert.equal(formatDuration(293), "4:53");
+  assert.equal(formatDuration(5), "0:05");
+  assert.equal(formatDuration(3723), "1:02:03");
+  assert.equal(formatDuration(292.6), "4:53");
+  assert.equal(formatDuration(null), "");
+  assert.equal(formatDuration(-1), "");
+});
+
+test("parseFilterQuery reads min/max minutes as seconds", () => {
+  assert.deepEqual(parseFilterQuery("?min=2&max=10"), { minSec: 120, maxSec: 600 });
+  assert.deepEqual(parseFilterQuery("?min=2"), { minSec: 120, maxSec: null });
+  assert.deepEqual(parseFilterQuery(""), { minSec: null, maxSec: null });
+  assert.deepEqual(parseFilterQuery("?min=abc&max=-3"), { minSec: null, maxSec: null });
+});
+
+test("filterQuery serializes minutes and omits unset bounds", () => {
+  assert.equal(filterQuery({ minSec: 120, maxSec: 600 }), "?min=2&max=10");
+  assert.equal(filterQuery({ minSec: null, maxSec: 90 }), "?max=1.5");
+  assert.equal(filterQuery({ minSec: null, maxSec: null }), "");
 });

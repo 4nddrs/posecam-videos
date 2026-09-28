@@ -39,6 +39,18 @@
     <div class="wrap"><ul id="day-nav-list"></ul></div>
   </nav>
 
+  <div class="filter-bar" id="filter-bar" role="search" aria-label="Filter recordings" hidden>
+    <div class="wrap filter-inner">
+      <span class="filter-title">Duration filter</span>
+      <div class="range-pair">
+        <input type="range" id="filter-min" aria-label="Minimum duration in minutes" value="0" />
+        <input type="range" id="filter-max" aria-label="Maximum duration in minutes" value="0" />
+      </div>
+      <output id="filter-readout" class="filter-readout" for="filter-min filter-max">Any duration</output>
+      <button type="button" id="filter-reset" class="action" disabled>Any</button>
+    </div>
+  </div>
+
   <main id="app" class="wrap" aria-live="polite">
     <div id="loading" class="video-grid" role="status" aria-label="Loading videos">
       <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>

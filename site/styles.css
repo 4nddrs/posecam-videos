@@ -102,6 +102,38 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .chip-btn[aria-current="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
 .chip-btn[aria-current="true"] .count { color: inherit; opacity: 0.85; }
 
+/* Filter toolbar */
+.filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); }
+.filter-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding-top: 10px; padding-bottom: 10px; }
+.filter-title { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.range-pair { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; max-width: 420px; }
+.range-pair input[type="range"] { flex: 1 1 0; min-width: 0; accent-color: var(--accent); }
+.filter-readout { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.875rem; min-width: 8.5em; }
+.action:disabled { opacity: 0.5; cursor: default; }
+.action:disabled:hover { border-color: var(--border); color: var(--fg); }
+
+/* Hour histogram */
+.hour-hist { display: flex; align-items: flex-end; gap: 2px; height: 44px; margin: -4px 0 14px; position: relative; max-width: 520px; }
+.hour-bar {
+  flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; cursor: pointer; position: relative;
+}
+.hour-bar:disabled { cursor: default; }
+.hour-fill { display: block; background: var(--accent); opacity: 0.55; border-radius: 2px 2px 0 0; min-height: 2px; }
+.hour-bar:disabled .hour-fill { background: var(--border); opacity: 1; }
+.hour-bar:not(:disabled):hover .hour-fill { opacity: 1; }
+.hour-bar[aria-pressed="true"] .hour-fill { opacity: 1; outline: 2px solid var(--fg); outline-offset: 1px; }
+.hour-label { position: absolute; bottom: -14px; left: 0; font-size: 0.6rem; color: var(--muted); pointer-events: none; }
+.hour-hist { padding-bottom: 14px; height: 58px; }
+.hour-clear {
+  position: absolute; right: -28px; top: 0; width: 24px; height: 24px; border-radius: 50%; padding: 0; line-height: 1;
+  border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer;
+}
+.hour-clear:hover { border-color: var(--accent); }
+.filter-empty { grid-column: 1 / -1; padding: 24px 20px; }
+.filter-empty[hidden] { display: none; }
+.chip.duration { font-variant-numeric: tabular-nums; }
+
 /* Days */
 main { padding-top: 24px; padding-bottom: 40px; min-height: 50vh; }
 .day-section { margin-bottom: 32px; }
