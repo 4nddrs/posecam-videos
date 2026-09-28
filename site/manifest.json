@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T21:01:00.581253+00:00",
+  "generated_at": "2026-09-28T21:47:19.300606+00:00",
   "days": [
     {
       "day": "2026-09-25",
@@ -11,10 +11,118 @@
           "source_zip": "capture-20260925T140552-f74bef-pipeline.zip"
         },
         {
+          "id": "2026-09-25/RGB_2026-09-25-08_40_35-6ec2a3-s1.mp4",
+          "name": "RGB_2026-09-25-08_40_35-6ec2a3-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_40_35-6ec2a3-s1.mp4",
+          "source_zip": "capture-20260925T141035-6ec2a3-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-08_41_18-6ec2a3-s2.mp4",
+          "name": "RGB_2026-09-25-08_41_18-6ec2a3-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_41_18-6ec2a3-s2.mp4",
+          "source_zip": "capture-20260925T141035-6ec2a3-pipeline.zip"
+        },
+        {
           "id": "2026-09-25/RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
           "name": "RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-08_47_34-c653d2-s1.mp4",
           "source_zip": "capture-20260925T141734-c653d2-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_22_11-7ce828-s1.mp4",
+          "name": "RGB_2026-09-25-09_22_11-7ce828-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_22_11-7ce828-s1.mp4",
+          "source_zip": "capture-20260925T145211-7ce828-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_25_36-0d7310-s1.mp4",
+          "name": "RGB_2026-09-25-09_25_36-0d7310-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_25_36-0d7310-s1.mp4",
+          "source_zip": "capture-20260925T145536-0d7310-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_25_58-0d7310-s2.mp4",
+          "name": "RGB_2026-09-25-09_25_58-0d7310-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_25_58-0d7310-s2.mp4",
+          "source_zip": "capture-20260925T145536-0d7310-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_29_00-a87831-s1.mp4",
+          "name": "RGB_2026-09-25-09_29_00-a87831-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_29_00-a87831-s1.mp4",
+          "source_zip": "capture-20260925T145900-a87831-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_29_21-a87831-s2.mp4",
+          "name": "RGB_2026-09-25-09_29_21-a87831-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_29_21-a87831-s2.mp4",
+          "source_zip": "capture-20260925T145900-a87831-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_34_51-a2de45-s1.mp4",
+          "name": "RGB_2026-09-25-09_34_51-a2de45-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_34_51-a2de45-s1.mp4",
+          "source_zip": "capture-20260925T150452-a2de45-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_37_41-9774b5-s1.mp4",
+          "name": "RGB_2026-09-25-09_37_41-9774b5-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_37_41-9774b5-s1.mp4",
+          "source_zip": "capture-20260925T150741-9774b5-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_39_59-9774b5-s2.mp4",
+          "name": "RGB_2026-09-25-09_39_59-9774b5-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_39_59-9774b5-s2.mp4",
+          "source_zip": "capture-20260925T150741-9774b5-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_41_27-22a5cb-s1.mp4",
+          "name": "RGB_2026-09-25-09_41_27-22a5cb-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_41_27-22a5cb-s1.mp4",
+          "source_zip": "capture-20260925T151127-22a5cb-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_41_58-22a5cb-s2.mp4",
+          "name": "RGB_2026-09-25-09_41_58-22a5cb-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_41_58-22a5cb-s2.mp4",
+          "source_zip": "capture-20260925T151127-22a5cb-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_47_33-59a265-s1.mp4",
+          "name": "RGB_2026-09-25-09_47_33-59a265-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_47_33-59a265-s1.mp4",
+          "source_zip": "capture-20260925T151733-59a265-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_51_28-01e944-s1.mp4",
+          "name": "RGB_2026-09-25-09_51_28-01e944-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_51_28-01e944-s1.mp4",
+          "source_zip": "capture-20260925T152128-01e944-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_53_12-01e944-s2.mp4",
+          "name": "RGB_2026-09-25-09_53_12-01e944-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_53_12-01e944-s2.mp4",
+          "source_zip": "capture-20260925T152128-01e944-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-09_53_30-01e944-s3.mp4",
+          "name": "RGB_2026-09-25-09_53_30-01e944-s3.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-09_53_30-01e944-s3.mp4",
+          "source_zip": "capture-20260925T152128-01e944-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-12_34_26-72f397-s1.mp4",
+          "name": "RGB_2026-09-25-12_34_26-72f397-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-12_34_26-72f397-s1.mp4",
+          "source_zip": "capture-20260925T180426-72f397-pipeline.zip"
+        },
+        {
+          "id": "2026-09-25/RGB_2026-09-25-12_48_01-78c7ce-s1.mp4",
+          "name": "RGB_2026-09-25-12_48_01-78c7ce-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-25/RGB_2026-09-25-12_48_01-78c7ce-s1.mp4",
+          "source_zip": "capture-20260925T181801-78c7ce-pipeline.zip"
         },
         {
           "id": "2026-09-25/RGB_2026-09-25-13_05_53-f0ae82-s1.mp4",
