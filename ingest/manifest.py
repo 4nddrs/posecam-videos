@@ -19,6 +19,7 @@ class Manifest:
             "id": video.id,
             "name": video.name,
             "url": video.url,
+            "poster": video.poster_url,
             "source_zip": source_zip,
         }
 

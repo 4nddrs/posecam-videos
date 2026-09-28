@@ -27,7 +27,9 @@ class R2VideoPublisher:
         self._bucket = bucket
         self._public_base_url = public_base_url.rstrip("/")
 
-    def publish(self, video_path: Path, day: str) -> PublishedVideo:
+    def publish(
+        self, video_path: Path, day: str, poster_path: Path | None = None
+    ) -> PublishedVideo:
         video_path = Path(video_path)
         key = f"{day}/{video_path.name}"
         content_type, _ = mimetypes.guess_type(video_path.name)
@@ -41,10 +43,22 @@ class R2VideoPublisher:
             ExtraArgs={"ContentType": content_type},
         )
 
+        poster_url = None
+        if poster_path is not None:
+            poster_key = f"{day}/{video_path.stem}.jpg"
+            self._client.upload_file(
+                str(poster_path),
+                self._bucket,
+                poster_key,
+                ExtraArgs={"ContentType": "image/jpeg"},
+            )
+            poster_url = f"{self._public_base_url}/{quote(poster_key)}"
+
         return PublishedVideo(
             id=key,
             name=video_path.name,
             url=f"{self._public_base_url}/{quote(key)}",
+            poster_url=poster_url,
         )
 
 

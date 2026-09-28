@@ -22,6 +22,7 @@ from ingest.adapters.drive import (
     build_drive_source,
     build_drive_source_with_api_key,
 )
+from ingest.adapters.ffmpeg import build_processor
 from ingest.adapters.r2 import R2VideoPublisher, build_r2_publisher
 from ingest.ports import VideoPublisher, ZipSource
 from ingest.state import JsonStateStore
@@ -155,6 +156,7 @@ def run(
         manifest_path=config.manifest_path,
         workdir=config.workdir,
         max_zips=config.max_zips_per_run,
+        processor=build_processor(),
     )
 
 

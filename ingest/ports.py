@@ -25,6 +25,18 @@ class PublishedVideo:
     id: str
     name: str
     url: str
+    poster_url: str | None = None
+
+
+@dataclass(frozen=True)
+class ProcessedVideo:
+    video_path: Path
+    poster_path: Path | None
+
+
+class VideoProcessor(Protocol):
+    def process(self, video_path: Path, workdir: Path) -> ProcessedVideo:
+        ...
 
 
 class ZipSource(Protocol):
@@ -36,7 +48,9 @@ class ZipSource(Protocol):
 
 
 class VideoPublisher(Protocol):
-    def publish(self, video_path: Path, day: str) -> PublishedVideo:
+    def publish(
+        self, video_path: Path, day: str, poster_path: Path | None = None
+    ) -> PublishedVideo:
         ...
 
 

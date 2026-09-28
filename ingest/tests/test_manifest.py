@@ -35,6 +35,7 @@ def test_manifest_groups_sorts_and_serializes():
         "name": "a.mp4",
         "url": "https://example.com/a2.mp4",
         "source_zip": "zip-a.zip",
+        "poster": None,
     }
 
 
@@ -71,3 +72,26 @@ def test_save_and_load_merge_without_duplicates(tmp_path):
 
     raw = json.loads(path.read_text())
     assert raw["days"][0]["day"] == "2026-09-28"
+
+
+def test_manifest_round_trips_poster(tmp_path):
+    from ingest.manifest import Manifest, load, save
+    from ingest.ports import PublishedVideo
+
+    m = Manifest()
+    m.add("2026-09-01", "z.zip", PublishedVideo(id="a", name="a.mp4", url="u", poster_url="p.jpg"))
+    m.add("2026-09-01", "z.zip", PublishedVideo(id="b", name="b.mp4", url="u2"))
+    path = tmp_path / "m.json"
+    save(m, path)
+    videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
+    assert videos["a"]["poster"] == "p.jpg"
+    assert videos["b"]["poster"] is None
+
+
+def test_load_tolerates_entries_without_poster(tmp_path):
+    import json
+    from ingest.manifest import load
+
+    path = tmp_path / "m.json"
+    path.write_text(json.dumps({"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}))
+    assert load(path).to_dict()["days"][0]["videos"][0]["id"] == "a"

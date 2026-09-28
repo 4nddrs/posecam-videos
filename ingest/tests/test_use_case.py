@@ -25,7 +25,8 @@ class FakePublisher:
         self.published = []
         self._fail_for_names = fail_for_names or set()
 
-    def publish(self, video_path, day):
+    def publish(self, video_path, day, poster_path=None):
+        self.posters = getattr(self, 'posters', []) + [poster_path]
         if video_path.name in self._fail_for_names:
             raise RuntimeError(f"publish failed for {video_path.name}")
         video_id = f"{day}-{video_path.name}"
@@ -223,3 +224,22 @@ def test_run_ingest_cleans_workdir_after_success_and_failure(tmp_path):
     assert report.processed == ["zg"]
     assert "zb" in report.failed
     assert list(workdir.iterdir()) == []
+
+
+def test_run_ingest_publishes_processed_video_with_poster(tmp_path):
+    from datetime import datetime, timezone
+    from ingest.ports import ProcessedVideo, ZipEntry
+
+    entry = ZipEntry(id="z1", name="z1.zip", uploaded_at=datetime(2026, 9, 1, tzinfo=timezone.utc), day="2026-09-01")
+    source = FakeZipSource([entry], {"z1": _make_zip_bytes(tmp_path, "z1.zip", ["a.mp4"])})
+    publisher = FakePublisher()
+    seen = []
+
+    class Proc:
+        def process(self, video_path, workdir):
+            seen.append(video_path.name)
+            return ProcessedVideo(video_path=video_path, poster_path=workdir / "a.jpg")
+
+    run_ingest(source, publisher, FakeStateStore(), tmp_path / "m.json", tmp_path / "w", processor=Proc())
+    assert seen == ["a.mp4"]
+    assert publisher.posters[0].name == "a.jpg"

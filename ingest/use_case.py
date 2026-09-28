@@ -6,7 +6,7 @@ import shutil
 from pathlib import Path
 
 from ingest.manifest import Manifest, save
-from ingest.ports import StateStore, VideoPublisher, ZipSource
+from ingest.ports import StateStore, VideoProcessor, VideoPublisher, ZipSource
 from ingest.unzip import extract_videos
 
 
@@ -25,6 +25,7 @@ def run_ingest(
     manifest_path: Path,
     workdir: Path,
     max_zips: int | None = None,
+    processor: VideoProcessor | None = None,
 ) -> IngestReport:
     manifest_path = Path(manifest_path)
     workdir = Path(workdir)
@@ -58,7 +59,13 @@ def run_ingest(
             day = entry.day or entry.uploaded_at.date().isoformat()
             manifest = Manifest()
             for video_path in video_paths:
-                published = publisher.publish(video_path, day)
+                if processor is not None:
+                    processed = processor.process(video_path, entry_workdir)
+                    published = publisher.publish(
+                        processed.video_path, day, poster_path=processed.poster_path
+                    )
+                else:
+                    published = publisher.publish(video_path, day)
                 manifest.add(day, entry.name, published)
 
             save(manifest, manifest_path)
