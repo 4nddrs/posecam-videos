@@ -47,3 +47,10 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: T5 written (delegated writer, TDD, 23 tests total). `.env.example` left uncommitted pending user inspection (writer reported sandbox denied normal writes to `.env*` and used shell redirects).
 - 2026-09-28: T5 committed e650138. RDD on range 552bf6c..e650138: medium, 432 lines, consent granted, reliability lens approved, acknowledged (lineage review-b983c03072bb48ef, untracked .env.example excluded). Reviewed boundary = e650138.
 - 2026-09-28: T4 written (delegated writer): ingest.yml (cron 30m + Pages deploy), ci.yml, README. Un-ignored ingest/state.json so the workflow can persist it. DRIVE_FOLDER_ID, R2_BUCKET, R2_PUBLIC_BASE_URL are repo variables; the rest are secrets.
+- 2026-09-28: T4 committed aa01adf. RDD on range e650138..aa01adf: high (shell in workflow), consent granted, 4 lenses; 4 CRITICAL findings (same root cause: service account JSON interpolated into shell). Corrected in 058b7ce (env + printf, fail fast when empty), targeted validation approved, acknowledged (lineage review-549633f5eb6abad4). Reviewed boundary = 058b7ce.
+
+## Next step
+- User inspects and commits `.env.example` (sandbox blocks the agent from reading `.env*`).
+- User creates GitHub repo, pushes `feat/video-gallery`, opens PR to `main`.
+- User configures secrets/vars listed in README and enables Pages (source: GitHub Actions).
+- First real run: `workflow_dispatch` on ingest.yml; verify manifest.json gets committed and site renders.
