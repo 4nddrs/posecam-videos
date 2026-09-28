@@ -33,6 +33,8 @@ python3 -m http.server -d site 8000
 
 Then open `http://localhost:8000`.
 
+To create the Google API key: in the Google Cloud Console, enable the Google Drive API for a project, then go to APIs & Services → Credentials → Create credentials → API key, and put it in `.env` as `GOOGLE_API_KEY`. Share the Drive folder as "anyone with the link".
+
 ## Tests
 
 ```bash
@@ -47,7 +49,8 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | Name | Required | Meaning |
 |------|----------|---------|
 | `DRIVE_FOLDER_ID` | yes | Google Drive folder id to watch for zip uploads. |
-| `GOOGLE_SERVICE_ACCOUNT_FILE` | yes | Path to the Google service account JSON key file. |
+| `GOOGLE_API_KEY` | yes, unless `GOOGLE_SERVICE_ACCOUNT_FILE` is set | Google API key used to read the Drive folder. The folder must be shared as "anyone with the link". |
+| `GOOGLE_SERVICE_ACCOUNT_FILE` | no | Alternative to `GOOGLE_API_KEY`: path to a Google service account JSON key file (used only when no API key is set). |
 | `R2_ACCOUNT_ID` | yes | Cloudflare account id that owns the R2 bucket. |
 | `R2_ACCESS_KEY_ID` | yes | R2 S3-compatible access key id. |
 | `R2_SECRET_ACCESS_KEY` | yes | R2 S3-compatible secret access key. |
@@ -62,11 +65,11 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 
 Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 
-- Create these repository secrets: `GOOGLE_SERVICE_ACCOUNT_JSON` (the full service account key JSON, not a path), `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
+- Create these repository secrets: `GOOGLE_API_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
 - Create these repository (or environment) variables: `DRIVE_FOLDER_ID`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`.
 - In repository Settings → Pages, set the source to "GitHub Actions".
 - The R2 bucket must be configured for public access; `R2_PUBLIC_BASE_URL` is its public domain.
-- The Drive folder must be shared read-only with the service account's email address.
+- The Drive folder must be shared as "anyone with the link" (viewer) so the API key can read it.
 
 ## Operations
 

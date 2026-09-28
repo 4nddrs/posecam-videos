@@ -116,3 +116,30 @@ def test_download_writes_full_bytes_and_returns_path(tmp_path):
     assert expected_path.read_bytes() == b"hello world"
     assert len(calls) == 1
     assert service.files().get_media_calls == ["42"]
+
+
+def test_build_drive_source_with_api_key_passes_developer_key(monkeypatch):
+    import sys
+    import types
+
+    from ingest.adapters.drive import build_drive_source_with_api_key
+
+    captured = {}
+
+    def fake_build(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        return FakeService([])
+
+    discovery = types.ModuleType("googleapiclient.discovery")
+    discovery.build = fake_build
+    package = types.ModuleType("googleapiclient")
+    package.discovery = discovery
+    monkeypatch.setitem(sys.modules, "googleapiclient", package)
+    monkeypatch.setitem(sys.modules, "googleapiclient.discovery", discovery)
+
+    source = build_drive_source_with_api_key("folder-1", "key-xyz")
+
+    assert isinstance(source, DriveZipSource)
+    assert captured["args"] == ("drive", "v3")
+    assert captured["kwargs"] == {"developerKey": "key-xyz", "cache_discovery": False}

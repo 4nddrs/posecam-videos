@@ -102,3 +102,11 @@ def build_drive_source(folder_id: str, service_account_file: Path) -> DriveZipSo
     )
     service = build("drive", "v3", credentials=credentials)
     return DriveZipSource(service, folder_id=folder_id)
+
+
+def build_drive_source_with_api_key(folder_id: str, api_key: str) -> DriveZipSource:
+    """Build a DriveZipSource using a Google API key (public folders only)."""
+    from googleapiclient.discovery import build
+
+    service = build("drive", "v3", developerKey=api_key, cache_discovery=False)
+    return DriveZipSource(service, folder_id=folder_id)

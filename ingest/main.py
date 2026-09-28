@@ -17,7 +17,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Mapping, MutableMapping
 
-from ingest.adapters.drive import DriveZipSource, build_drive_source
+from ingest.adapters.drive import (
+    DriveZipSource,
+    build_drive_source,
+    build_drive_source_with_api_key,
+)
 from ingest.adapters.r2 import R2VideoPublisher, build_r2_publisher
 from ingest.ports import VideoPublisher, ZipSource
 from ingest.state import JsonStateStore
@@ -25,7 +29,6 @@ from ingest.use_case import IngestReport, run_ingest
 
 _REQUIRED_VARS = (
     "DRIVE_FOLDER_ID",
-    "GOOGLE_SERVICE_ACCOUNT_FILE",
     "R2_ACCOUNT_ID",
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
@@ -39,7 +42,8 @@ _DEFAULT_STATE_PATH = "ingest/state.json"
 @dataclass(frozen=True)
 class Config:
     drive_folder_id: str
-    google_service_account_file: Path
+    google_api_key: str | None
+    google_service_account_file: Path | None
     r2_account_id: str
     r2_access_key_id: str
     r2_secret_access_key: str
@@ -57,6 +61,10 @@ def load_config(env: Mapping[str, str]) -> Config:
     Raises ValueError listing every missing required variable name.
     """
     missing = [name for name in _REQUIRED_VARS if not env.get(name)]
+    api_key = env.get("GOOGLE_API_KEY") or None
+    sa_file = env.get("GOOGLE_SERVICE_ACCOUNT_FILE") or None
+    if not api_key and not sa_file:
+        missing.insert(1, "GOOGLE_API_KEY")
     bucket = env.get("R2_BUCKET_NAME") or env.get("R2_BUCKET")
     if not bucket:
         missing.append("R2_BUCKET_NAME")
@@ -66,7 +74,8 @@ def load_config(env: Mapping[str, str]) -> Config:
     workdir = env.get("WORKDIR")
     return Config(
         drive_folder_id=env["DRIVE_FOLDER_ID"],
-        google_service_account_file=Path(env["GOOGLE_SERVICE_ACCOUNT_FILE"]),
+        google_api_key=api_key,
+        google_service_account_file=Path(sa_file) if sa_file else None,
         r2_account_id=env["R2_ACCOUNT_ID"],
         r2_access_key_id=env["R2_ACCESS_KEY_ID"],
         r2_secret_access_key=env["R2_SECRET_ACCESS_KEY"],
@@ -110,9 +119,14 @@ def load_dotenv_file(path: Path, env: MutableMapping[str, str]) -> None:
         apply_dotenv(path.read_text(), env)
 
 
-DEFAULT_SOURCE_BUILDER: Callable[[Config], ZipSource] = lambda cfg: build_drive_source(
-    cfg.drive_folder_id, cfg.google_service_account_file
-)
+def _default_source_builder(cfg: Config) -> ZipSource:
+    if cfg.google_api_key:
+        return build_drive_source_with_api_key(cfg.drive_folder_id, cfg.google_api_key)
+    assert cfg.google_service_account_file is not None
+    return build_drive_source(cfg.drive_folder_id, cfg.google_service_account_file)
+
+
+DEFAULT_SOURCE_BUILDER: Callable[[Config], ZipSource] = _default_source_builder
 DEFAULT_PUBLISHER_BUILDER: Callable[[Config], VideoPublisher] = lambda cfg: build_r2_publisher(
     cfg.r2_account_id,
     cfg.r2_access_key_id,
