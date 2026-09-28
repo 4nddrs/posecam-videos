@@ -14,6 +14,10 @@ import {
   formatDuration,
   parseFilterQuery,
   filterQuery,
+  videoAnchorId,
+  deepLink,
+  nextVisibleIndex,
+  clampSpeed,
 } from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
@@ -168,4 +172,45 @@ test("filterQuery serializes minutes and omits unset bounds", () => {
   assert.equal(filterQuery({ minSec: 120, maxSec: 600 }), "?min=2&max=10");
   assert.equal(filterQuery({ minSec: null, maxSec: 90 }), "?max=1.5");
   assert.equal(filterQuery({ minSec: null, maxSec: null }), "");
+});
+
+test("videoAnchorId is unique per manifest id, falling back to the name", () => {
+  assert.equal(
+    videoAnchorId({ id: "2026-09-25/RGB_2026-09-25-14_03_22-a1B2c3-s1.mp4", name: "RGB_2026-09-25-14_03_22-a1B2c3-s1.mp4" }),
+    "v-2026-09-25-rgb-2026-09-25-14-03-22-a1b2c3-s1-mp4",
+  );
+  assert.notEqual(
+    videoAnchorId({ id: "d/RGB_2026-09-25-14_03_22-a1B2c3-s1.mp4" }),
+    videoAnchorId({ id: "d/RGB_2026-09-25-14_03_22-a1B2c3-s2.mp4" }),
+  );
+  assert.equal(videoAnchorId({ name: "My Clip (final).mp4" }), "v-my-clip-final-mp4");
+  assert.equal(videoAnchorId({}), "v-video");
+  assert.equal(videoAnchorId(null), "v-video");
+});
+
+test("deepLink appends the anchor and drops any existing hash", () => {
+  const v = { id: "d/clip-1.mp4", name: "clip-1.mp4" };
+  assert.equal(deepLink("https://x.io/site/?min=2", v), "https://x.io/site/?min=2#v-d-clip-1-mp4");
+  assert.equal(deepLink("https://x.io/site/#v-old", v), "https://x.io/site/#v-d-clip-1-mp4");
+});
+
+test("nextVisibleIndex finds the next/previous visible entry without wrapping", () => {
+  const list = [true, false, true, false, true];
+  assert.equal(nextVisibleIndex(list, 0, 1), 2);
+  assert.equal(nextVisibleIndex(list, 2, 1), 4);
+  assert.equal(nextVisibleIndex(list, 4, 1), -1);
+  assert.equal(nextVisibleIndex(list, 4, -1), 2);
+  assert.equal(nextVisibleIndex(list, 0, -1), -1);
+  assert.equal(nextVisibleIndex([false, false], 0, 1), -1);
+  assert.equal(nextVisibleIndex([], 0, 1), -1);
+  assert.equal(nextVisibleIndex(list, -1, 1), 0);
+});
+
+test("clampSpeed accepts only the allowed set, default 1", () => {
+  assert.equal(clampSpeed(2), 2);
+  assert.equal(clampSpeed("1.5"), 1.5);
+  assert.equal(clampSpeed(4), 4);
+  assert.equal(clampSpeed(3), 1);
+  assert.equal(clampSpeed(null), 1);
+  assert.equal(clampSpeed("abc"), 1);
 });

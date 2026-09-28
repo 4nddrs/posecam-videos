@@ -202,3 +202,57 @@ export function filterQuery(filters = {}) {
   const q = params.toString();
   return q ? `?${q}` : "";
 }
+
+/**
+ * Stable DOM id / URL fragment for a video: `v-<hash>` from the recording
+ * name, else `v-<slug of name>`.
+ * @param {{name?: string}|null|undefined} video
+ * @returns {string}
+ */
+export function videoAnchorId(video) {
+  // The manifest id is the storage key, unique across days and sessions;
+  // the recording hash alone repeats for s1/s2 of the same capture.
+  const id = video && typeof video.id === "string" && video.id ? video.id : "";
+  const name = video && typeof video.name === "string" ? video.name : "";
+  const source = id || name;
+  const slug = source.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return `v-${slug || "video"}`;
+}
+
+/**
+ * Shareable link to a video card: the base URL without its fragment plus the anchor.
+ * @param {string} baseUrl
+ * @param {{name?: string}} video
+ * @returns {string}
+ */
+export function deepLink(baseUrl, video) {
+  const base = String(baseUrl ?? "").replace(/#.*$/, "");
+  return `${base}#${videoAnchorId(video)}`;
+}
+
+/**
+ * Index of the next (direction 1) or previous (-1) visible entry, no wrapping.
+ * @param {boolean[]} list visibility flags
+ * @param {number} current index to move from (may be -1)
+ * @param {1|-1} direction
+ * @returns {number} -1 when none
+ */
+export function nextVisibleIndex(list, current, direction) {
+  if (!Array.isArray(list)) return -1;
+  const step = direction < 0 ? -1 : 1;
+  for (let i = current + step; i >= 0 && i < list.length; i += step) {
+    if (list[i]) return i;
+  }
+  return -1;
+}
+
+export const SPEEDS = [1, 1.5, 2, 4];
+
+/**
+ * @param {unknown} value
+ * @returns {number} an allowed playback speed, default 1
+ */
+export function clampSpeed(value) {
+  const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
+  return SPEEDS.includes(n) ? n : 1;
+}

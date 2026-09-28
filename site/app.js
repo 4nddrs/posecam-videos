@@ -12,6 +12,11 @@ import {
   formatDuration,
   parseFilterQuery,
   filterQuery,
+  videoAnchorId,
+  deepLink,
+  nextVisibleIndex,
+  clampSpeed,
+  SPEEDS,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -58,6 +63,178 @@ function initTheme() {
     paint();
   });
   paint();
+}
+
+/* ---------- Playback state ---------- */
+const store = {
+  get(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      return null;
+    }
+  },
+  set(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      /* storage unavailable: setting applies for this visit only */
+    }
+  },
+};
+const playback = { speed: clampSpeed(store.get("speed")), autoplay: store.get("autoplay") === "1", active: null };
+
+const cardVideo = (card) => (card ? card.querySelector("video") : null);
+
+function setActive(card) {
+  if (playback.active && playback.active !== card) playback.active.classList.remove("is-active");
+  playback.active = card;
+  if (card) card.classList.add("is-active");
+}
+
+function paintSpeed() {
+  for (const btn of document.querySelectorAll(".speed-btn")) {
+    btn.setAttribute("aria-pressed", String(Number(btn.dataset.speed) === playback.speed));
+  }
+}
+
+function setSpeed(value) {
+  playback.speed = clampSpeed(value);
+  store.set("speed", String(playback.speed));
+  for (const v of document.querySelectorAll(".video-card video")) v.playbackRate = playback.speed;
+  paintSpeed();
+}
+
+/** Cards of the day grid that holds `card`, in display order. */
+const siblingCards = (card) => (card && card.parentElement ? [...card.parentElement.querySelectorAll(".video-card")] : []);
+
+/** Move to the next/previous playable card in the same day and start it. */
+function stepFrom(card, direction) {
+  const cards = siblingCards(card);
+  const idx = nextVisibleIndex(cards.map((c) => Boolean(cardVideo(c))), cards.indexOf(card), direction);
+  if (idx === -1) return false;
+  playCard(cards[idx]);
+  return true;
+}
+
+function playCard(card) {
+  const video = cardVideo(card);
+  if (!video) return;
+  setActive(card);
+  card.scrollIntoView({ behavior: "smooth", block: "center" });
+  video.playbackRate = playback.speed;
+  video.play().catch(() => {});
+}
+
+function initPlayback() {
+  // `play`/`ended` do not bubble, so listen in the capture phase once.
+  document.addEventListener(
+    "play",
+    (e) => {
+      const video = e.target;
+      if (!(video instanceof HTMLVideoElement)) return;
+      for (const other of document.querySelectorAll(".video-card video")) {
+        if (other !== video && !other.paused) other.pause();
+      }
+      video.playbackRate = playback.speed;
+      setActive(video.closest(".video-card"));
+    },
+    true
+  );
+  document.addEventListener(
+    "ended",
+    (e) => {
+      if (!playback.autoplay || !(e.target instanceof HTMLVideoElement)) return;
+      stepFrom(e.target.closest(".video-card"), 1);
+    },
+    true
+  );
+  document.addEventListener("focusin", (e) => {
+    const card = e.target instanceof Element ? e.target.closest(".video-card") : null;
+    if (card) setActive(card);
+  });
+
+  const toggle = document.getElementById("autoplay-toggle");
+  if (toggle) {
+    const paint = () => toggle.setAttribute("aria-pressed", String(playback.autoplay));
+    toggle.addEventListener("click", () => {
+      playback.autoplay = !playback.autoplay;
+      store.set("autoplay", playback.autoplay ? "1" : "0");
+      paint();
+    });
+    paint();
+  }
+
+  const help = document.getElementById("shortcuts");
+  const toggleHelp = (force) => {
+    if (!help) return;
+    help.hidden = typeof force === "boolean" ? !force : !help.hidden;
+  };
+  document.getElementById("shortcuts-close")?.addEventListener("click", () => toggleHelp(false));
+
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (t instanceof Element && t.closest("input, textarea, select, [contenteditable='true']")) return;
+    const card = playback.active && playback.active.isConnected ? playback.active : null;
+    const video = cardVideo(card);
+    switch (e.key) {
+      case " ": {
+        // Buttons, links and native controls already handle Space themselves.
+        if (t instanceof Element && t.closest("button, a, video")) return;
+        if (!video) return;
+        e.preventDefault();
+        if (video.paused) {
+          video.playbackRate = playback.speed;
+          video.play().catch(() => {});
+        } else video.pause();
+        break;
+      }
+      case "ArrowRight":
+      case "ArrowLeft": {
+        if (t instanceof Element && t.closest("video")) return; // native seeking
+        e.preventDefault();
+        const dir = e.key === "ArrowRight" ? 1 : -1;
+        if (card) stepFrom(card, dir);
+        else {
+          const first = document.querySelector(".video-card");
+          if (first && dir === 1) playCard(first);
+        }
+        break;
+      }
+      case "f":
+      case "F": {
+        if (!video) return;
+        e.preventDefault();
+        if (video.requestFullscreen) video.requestFullscreen().catch(() => {});
+        else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
+        break;
+      }
+      case "?":
+        e.preventDefault();
+        toggleHelp();
+        break;
+      case "Escape":
+        toggleHelp(false);
+        break;
+      default:
+    }
+  });
+}
+
+/** Expand the day holding the linked card, scroll to it and mark it active (no autoplay). */
+function openDeepLink(days, sections) {
+  const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+  if (!id.startsWith("v-")) return;
+  const day = days.find((d) => (d.videos || []).some((v) => videoAnchorId(v) === id));
+  if (!day) return;
+  const section = sections.get(day.day);
+  if (section) section.expand();
+  const card = document.getElementById(id);
+  if (!card) return;
+  setActive(card);
+  card.scrollIntoView({ block: "center" });
+  card.focus({ preventScroll: true });
 }
 
 /* ---------- Cards ---------- */
@@ -119,18 +296,29 @@ export function renderVideo(video) {
 
   const copyBtn = el("button", { type: "button", className: "action", text: "Copy link" });
   copyBtn.addEventListener("click", async () => {
-    const ok = await copyText(video.url);
+    const ok = await copyText(deepLink(location.origin + location.pathname + location.search, video));
     copyBtn.textContent = ok ? "Copied" : "Copy failed";
     setTimeout(() => (copyBtn.textContent = "Copy link"), 1800);
   });
 
-  return el("article", { className: "video-card" }, [
+  const speedGroup = el("div", { className: "speed-group", role: "group", "aria-label": "Playback speed" });
+  for (const value of driveId ? [] : SPEEDS) {
+    const btn = el("button", { type: "button", className: "speed-btn", text: `${value}×` });
+    btn.dataset.speed = String(value);
+    btn.setAttribute("aria-pressed", String(value === playback.speed));
+    btn.addEventListener("click", () => setSpeed(value));
+    speedGroup.appendChild(btn);
+  }
+  if (!driveId) player.playbackRate = playback.speed;
+
+  return el("article", { className: "video-card", id: videoAnchorId(video), tabIndex: -1 }, [
     el("div", { className: "player" }, playOverlay ? [player, playOverlay] : [player]),
     el("div", { className: "video-meta" }, [
       el("h3", { className: "video-name", text: title }),
       chips,
       parsed ? el("span", { className: "hash", text: parsed.hash }) : null,
       el("p", { className: "video-source", text: `Source: ${video.source_zip || "unknown"}` }),
+      driveId ? null : speedGroup,
       el("div", { className: "actions" }, [
         el("a", { className: "action", href: video.url, download: video.name || "", text: "Download" }),
         copyBtn,
@@ -392,6 +580,7 @@ async function loadManifest() {
 
 async function main() {
   initTheme();
+  initPlayback();
   const app = document.getElementById("app");
   if (!app) return;
 
@@ -414,6 +603,8 @@ async function main() {
     });
     renderNav(days, sections);
     initToolbar(days, sections);
+    openDeepLink(days, sections);
+    window.addEventListener("hashchange", () => openDeepLink(days, sections));
   } catch (error) {
     app.replaceChildren();
     app.appendChild(renderError(error instanceof Error ? error.message : String(error)));
