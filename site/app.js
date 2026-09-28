@@ -75,7 +75,22 @@ export function renderVideo(video) {
   const driveId = extractDriveId(video.url);
   const player = driveId
     ? el("iframe", { src: drivePreviewUrl(driveId), allow: "autoplay", loading: "lazy", title })
-    : el("video", { controls: true, preload: "metadata", playsInline: true, src: video.url });
+    : el("video", { controls: true, preload: "none", playsInline: true, src: video.url });
+
+  // Nothing is fetched until the viewer presses play, so many cards on one
+  // page do not compete for connections (the MP4 index lives at the file end).
+  const playOverlay = driveId
+    ? null
+    : el("button", { className: "play-overlay", type: "button", "aria-label": `Play ${title}` }, [
+        el("span", { className: "play-icon", text: "▶" }),
+      ]);
+  if (playOverlay) {
+    playOverlay.addEventListener("click", () => {
+      playOverlay.remove();
+      player.play().catch(() => {});
+    });
+    player.addEventListener("play", () => playOverlay.remove(), { once: true });
+  }
 
   const chips = el("div", { className: "chips" });
   if (parsed) {
@@ -94,7 +109,7 @@ export function renderVideo(video) {
   });
 
   return el("article", { className: "video-card" }, [
-    el("div", { className: "player" }, [player]),
+    el("div", { className: "player" }, playOverlay ? [player, playOverlay] : [player]),
     el("div", { className: "video-meta" }, [
       el("h3", { className: "video-name", text: title }),
       chips,
