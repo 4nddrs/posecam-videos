@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-28T23:25:07.724981+00:00",
+  "generated_at": "2026-09-28T23:26:38.513660+00:00",
   "days": [
     {
       "day": "2026-09-26",
@@ -354,13 +354,15 @@
           "id": "2026-09-24/RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
           "name": "RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
-          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip"
+          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_11_36-e899d6-s1.jpg"
         },
         {
           "id": "2026-09-24/RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
           "name": "RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
-          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip"
+          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_14_29-e899d6-s2.jpg"
         }
       ]
     }
