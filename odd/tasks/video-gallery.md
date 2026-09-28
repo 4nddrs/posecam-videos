@@ -63,3 +63,9 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: Backfill run with cap 50 failed after 22 zips: Google Drive returned 403 "Sorry..." (download abuse throttle on the API key); commit step was skipped so those 22 videos in R2 were not recorded. Fix 202b1a7: commit step runs unless cancelled. Cap variable lowered to 12. RDD: high, granted, 4 lenses approved, acknowledged (lineage review-d14e734a698739fc).
 - 2026-09-28: Backfill complete: 45/45 zips processed, 50 videos live (26-09: 17, 25-09: 30, 24-09: 3), deferred empty. Cap stays at 12 per 30-min run.
 - 2026-09-28: d333a15 videos use preload=none with a play overlay; MP4s from the camera are not faststart (moov at file end, codec H.264), so many simultaneous metadata fetches stalled Firefox-based browsers (Zen). RDD: medium, granted, reliability approved, acknowledged (lineage review-69089b82974637b8). Follow-up idea: ffmpeg -movflags +faststart in ingest.
+
+## Phase 2: posters and faststart (2026-09-28)
+User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s are not faststart, so browser-side previews stall.
+- [ ] T6 `VideoProcessor` port + ffmpeg adapter: faststart remux (`-c copy -movflags +faststart`) and poster JPG (frame at ~1s, 640px wide). No-op fallback when ffmpeg is missing. Publisher uploads poster; manifest entry gets `poster`. (delegated)
+- [ ] T7 Site: cards show `poster` with play overlay; fallback to current behaviour when absent. (delegated)
+- [ ] T8 Workflow installs ffmpeg; `python -m ingest.posters` backfills posters for existing R2 objects (reads from R2, no Drive access) + manual workflow. (delegated)
