@@ -3,21 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Daily Videos</title>
-  <meta name="description" content="Daily video gallery, grouped by upload day." />
+  <title>PoseCam Daily Videos</title>
+  <meta name="description" content="Daily PoseCam recordings, grouped by day." />
+  <meta name="color-scheme" content="dark light" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    try {
+      var t = localStorage.getItem("theme");
+      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  </script>
 </head>
 <body>
-  <header>
-    <h1>Daily Videos</h1>
-    <p class="subtitle">Recordings grouped by day, newest first.</p>
+  <header class="site-header">
+    <div class="wrap">
+      <div class="title-row">
+        <div>
+          <h1>PoseCam Daily Videos</h1>
+          <p class="subtitle">Today's recordings, grouped by day, newest first.</p>
+        </div>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch to light theme"></button>
+      </div>
+      <dl class="stats" id="stats">
+        <div class="stat"><dt>Days</dt><dd id="stat-days">-</dd></div>
+        <div class="stat"><dt>Videos</dt><dd id="stat-videos">-</dd></div>
+        <div class="stat"><dt>Last updated</dt><dd id="stat-updated">-</dd><dd class="stat-sub" id="stat-updated-rel"></dd></div>
+      </dl>
+    </div>
   </header>
 
-  <main id="app">
-    <p id="loading" role="status">Loading videos…</p>
+  <nav class="day-nav" id="day-nav" aria-label="Jump to day" hidden>
+    <div class="wrap"><ul id="day-nav-list"></ul></div>
+  </nav>
+
+  <main id="app" class="wrap" aria-live="polite">
+    <div id="loading" class="video-grid" role="status" aria-label="Loading videos">
+      <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+    </div>
   </main>
 
-  <footer>
+  <footer class="wrap">
     <p>Generated from the daily ingest manifest.</p>
   </footer>
 

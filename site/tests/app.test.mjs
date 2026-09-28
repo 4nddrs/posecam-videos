@@ -1,6 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { extractDriveId, sortDaysDesc } from "../lib.js";
+import {
+  extractDriveId,
+  sortDaysDesc,
+  parseRecordingName,
+  formatDayLabel,
+  relativeTime,
+  isPipelineZip,
+} from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
   const url = "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing";
@@ -40,4 +47,39 @@ test("sortDaysDesc does not mutate the input array", () => {
 test("sortDaysDesc handles an empty or missing list", () => {
   assert.deepEqual(sortDaysDesc([]), []);
   assert.deepEqual(sortDaysDesc(undefined), []);
+});
+
+test("parseRecordingName parses a valid recording filename", () => {
+  assert.deepEqual(parseRecordingName("RGB_2026-09-25-08_35_52-f74bef-s1.mp4"), {
+    title: "Recording 08:35:52",
+    time: "08:35:52",
+    session: "s1",
+    hash: "f74bef",
+  });
+});
+
+test("parseRecordingName returns null for unknown patterns", () => {
+  assert.equal(parseRecordingName("clip.mp4"), null);
+  assert.equal(parseRecordingName(undefined), null);
+});
+
+test("formatDayLabel renders a human date", () => {
+  assert.equal(formatDayLabel("2026-09-25"), "Fri, Sep 25 2026");
+  assert.equal(formatDayLabel("garbage"), "garbage");
+});
+
+test("relativeTime covers minutes, hours and days", () => {
+  const now = new Date("2026-09-28T12:00:00Z");
+  assert.equal(relativeTime("2026-09-28T11:59:40Z", now), "just now");
+  assert.equal(relativeTime("2026-09-28T11:55:00Z", now), "5 minutes ago");
+  assert.equal(relativeTime("2026-09-28T11:00:00Z", now), "1 hour ago");
+  assert.equal(relativeTime("2026-09-28T09:00:00Z", now), "3 hours ago");
+  assert.equal(relativeTime("2026-09-26T12:00:00Z", now), "2 days ago");
+  assert.equal(relativeTime("not a date", now), "");
+});
+
+test("isPipelineZip detects pipeline zips", () => {
+  assert.equal(isPipelineZip("capture-20260925T140552-f74bef-pipeline.zip"), true);
+  assert.equal(isPipelineZip("capture-20260925T140552-f74bef.zip"), false);
+  assert.equal(isPipelineZip(undefined), false);
 });
