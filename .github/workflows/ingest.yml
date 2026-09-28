@@ -1,0 +1,91 @@
+name: Ingest and deploy
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ingest-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    # On a push to main the site is already up to date; only deploy it.
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write Google service account credentials
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > "${RUNNER_TEMP}/service-account.json"
+          echo "GOOGLE_SERVICE_ACCOUNT_FILE=${RUNNER_TEMP}/service-account.json" >> "$GITHUB_ENV"
+
+      - name: Run ingest
+        env:
+          DRIVE_FOLDER_ID: ${{ vars.DRIVE_FOLDER_ID }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ vars.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
+        run: python -m ingest.main
+
+      - name: Commit and push updated manifest and state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # NOTE: ingest/state.json is currently listed in .gitignore, so
+          # `git add` silently skips it below until the repository owner
+          # removes that entry. site/manifest.json is not ignored and will
+          # still be committed correctly.
+          git add site/manifest.json ingest/state.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(ingest): update manifest and state"
+            git push origin HEAD:main
+          fi
+
+  deploy:
+    needs: ingest
+    if: always() && (needs.ingest.result == 'success' || needs.ingest.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

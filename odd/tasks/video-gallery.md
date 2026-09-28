@@ -22,7 +22,7 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - [x] T1 Ingest core with ports: `ZipSource`, `VideoPublisher`, `StateStore`; `unzip` extractor; `manifest` builder; `run_ingest` use case. Tests with fixture zips. (delegated, writer trigger)
 - [x] T2 Google Drive adapter for `ZipSource` (list folder, download by id). Tests with fake Drive service. (delegated)
 - [x] T3 Static site `site/` reading `manifest.json`, grouped by day, inline player. (delegated)
-- [ ] T4 GitHub Actions: cron ingest + Pages deploy; docs for secrets and setup. (inline or delegated)
+- [x] T4 GitHub Actions: cron ingest + Pages deploy; docs for secrets and setup. (inline or delegated)
 - [x] T5 `VideoPublisher` adapter for Cloudflare R2 (S3-compatible, boto3) + `ingest/main.py` CLI wiring env vars. (delegated)
 
 ## Acceptance
@@ -46,3 +46,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: T3 committed 552bf6c. RDD on range 4ea2e99..552bf6c (T2+T3): medium, 643 lines, consent granted, reliability lens approved, acknowledged (lineage review-31ee0be15315decb). Reviewed boundary = 552bf6c.
 - 2026-09-28: T5 written (delegated writer, TDD, 23 tests total). `.env.example` left uncommitted pending user inspection (writer reported sandbox denied normal writes to `.env*` and used shell redirects).
 - 2026-09-28: T5 committed e650138. RDD on range 552bf6c..e650138: medium, 432 lines, consent granted, reliability lens approved, acknowledged (lineage review-b983c03072bb48ef, untracked .env.example excluded). Reviewed boundary = e650138.
+- 2026-09-28: T4 written (delegated writer): ingest.yml (cron 30m + Pages deploy), ci.yml, README. Un-ignored ingest/state.json so the workflow can persist it. DRIVE_FOLDER_ID, R2_BUCKET, R2_PUBLIC_BASE_URL are repo variables; the rest are secrets.
