@@ -14,6 +14,7 @@ from typing import Any, Callable, Optional
 
 from ingest.ports import ZipEntry
 
+_FOLDER_MIME = "application/vnd.google-apps.folder"
 _DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
 
 DownloaderFactory = Callable[[Any, Any], Any]
@@ -33,41 +34,57 @@ class DriveZipSource:
         self._downloader_factory = downloader_factory
 
     def list_zips(self) -> list[ZipEntry]:
+        entries = self._list_zips_in(self._folder_id, day=None)
+        for folder in self._list_subfolders():
+            entries.extend(
+                self._list_zips_in(folder["id"], day=_parse_day(folder["name"]))
+            )
+        return entries
+
+    def _list_subfolders(self) -> list[dict]:
         query = (
             f"'{self._folder_id}' in parents and trashed = false and "
-            "(mimeType = 'application/zip' or name contains '.zip')"
+            f"mimeType = '{_FOLDER_MIME}'"
+        )
+        return list(self._paginate(query, "nextPageToken, files(id, name)"))
+
+    def _list_zips_in(self, parent_id: str, day: Optional[str]) -> list[ZipEntry]:
+        query = (
+            f"'{parent_id}' in parents and trashed = false and "
+            "(mimeType = 'application/zip' or "
+            "mimeType = 'application/x-zip-compressed' or name contains '.zip')"
         )
         entries: list[ZipEntry] = []
+        for file_info in self._paginate(
+            query, "nextPageToken, files(id, name, createdTime)"
+        ):
+            name = file_info["name"]
+            if not name.lower().endswith(".zip"):
+                continue
+            entries.append(
+                ZipEntry(
+                    id=file_info["id"],
+                    name=name,
+                    uploaded_at=_parse_created_time(file_info["createdTime"]),
+                    day=day,
+                )
+            )
+        return entries
+
+    def _paginate(self, query: str, fields: str):
         page_token = None
         while True:
             response = self._service.files().list(
-                q=query,
-                fields="nextPageToken, files(id, name, createdTime)",
-                pageSize=100,
-                pageToken=page_token,
+                q=query, fields=fields, pageSize=100, pageToken=page_token
             ).execute()
-
-            for file_info in response.get("files", []):
-                name = file_info["name"]
-                if not name.lower().endswith(".zip"):
-                    continue
-                entries.append(
-                    ZipEntry(
-                        id=file_info["id"],
-                        name=name,
-                        uploaded_at=_parse_created_time(file_info["createdTime"]),
-                    )
-                )
-
+            yield from response.get("files", [])
             page_token = response.get("nextPageToken")
             if not page_token:
                 break
 
-        return entries
-
     def download(self, entry: ZipEntry, dest: Path) -> Path:
         request = self._service.files().get_media(fileId=entry.id)
-        target_path = dest / entry.name
+        target_path = dest / entry.name if dest.is_dir() else dest
 
         downloader_factory = self._downloader_factory
         if downloader_factory is None:
@@ -82,6 +99,14 @@ class DriveZipSource:
                 _, done = downloader.next_chunk()
 
         return target_path
+
+
+def _parse_day(folder_name: str) -> Optional[str]:
+    """Parse a `DD-MM-YYYY` folder name into ISO `YYYY-MM-DD`, or None."""
+    try:
+        return datetime.strptime(folder_name.strip(), "%d-%m-%Y").date().isoformat()
+    except ValueError:
+        return None
 
 
 def _parse_created_time(created_time: str) -> datetime:

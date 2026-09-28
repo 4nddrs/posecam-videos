@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 
 from ingest.adapters.drive import DriveZipSource
@@ -12,17 +13,25 @@ class FakeFilesList:
 
 
 class FakeFiles:
-    def __init__(self, pages):
-        self._pages = pages
-        self._index = 0
+    """Query-aware fake: `pages` maps a parent id to its zip pages, `folders`
+    maps the root parent id to its subfolder listing."""
+
+    def __init__(self, pages, folders=None):
+        self._pages = {"folder-123": pages} if isinstance(pages, list) else pages
+        self._folders = folders or {}
+        self._index = {}
         self.captured_queries = []
         self.get_media_calls = []
 
     def list(self, q, fields, pageSize, pageToken=None):
         self.captured_queries.append(q)
-        page = self._pages[self._index]
-        self._index += 1
-        return FakeFilesList(page)
+        parent = re.match(r"'([^']+)' in parents", q).group(1)
+        if "mimeType = 'application/vnd.google-apps.folder'" in q:
+            return FakeFilesList({"files": self._folders.get(parent, [])})
+        pages = self._pages.get(parent, [{"files": []}])
+        i = self._index.get(parent, 0)
+        self._index[parent] = i + 1
+        return FakeFilesList(pages[i])
 
     def get_media(self, fileId):
         self.get_media_calls.append(fileId)
@@ -30,8 +39,8 @@ class FakeFiles:
 
 
 class FakeService:
-    def __init__(self, pages):
-        self._files = FakeFiles(pages)
+    def __init__(self, pages, folders=None):
+        self._files = FakeFiles(pages, folders)
 
     def files(self):
         return self._files
@@ -91,13 +100,13 @@ def test_list_zips_paginates_filters_non_zip_and_parses_dates():
 
 
 def test_list_zips_query_contains_folder_id():
-    pages = [{"files": []}]
-    service = FakeService(pages)
+    service = FakeService({"folder-abc": [{"files": []}]})
     source = DriveZipSource(service, folder_id="folder-abc")
 
     source.list_zips()
 
-    assert "folder-abc" in service.files().captured_queries[0]
+    assert all("'folder-abc' in parents" in q for q in service.files().captured_queries)
+    assert len(service.files().captured_queries) == 2
 
 
 def test_download_writes_full_bytes_and_returns_path(tmp_path):
@@ -143,3 +152,61 @@ def test_build_drive_source_with_api_key_passes_developer_key(monkeypatch):
     assert isinstance(source, DriveZipSource)
     assert captured["args"] == ("drive", "v3")
     assert captured["kwargs"] == {"developerKey": "key-xyz", "cache_discovery": False}
+
+
+def test_list_zips_walks_dated_subfolders_and_parses_day():
+    folders = {
+        "folder-123": [
+            {"id": "f1", "name": "26-09-2026"},
+            {"id": "f2", "name": "misc"},
+        ]
+    }
+    pages = {
+        "folder-123": [
+            {"files": [{"id": "r", "name": "root.zip", "createdTime": "2026-09-01T10:00:00Z"}]}
+        ],
+        "f1": [
+            {
+                "nextPageToken": "n",
+                "files": [{"id": "a", "name": "a.zip", "createdTime": "2026-09-27T01:00:00Z"}],
+            },
+            {"files": [{"id": "b", "name": "b.zip", "createdTime": "2026-09-27T02:00:00Z"}]},
+        ],
+        "f2": [
+            {"files": [{"id": "c", "name": "c.zip", "createdTime": "2026-09-27T03:00:00Z"}]}
+        ],
+    }
+    service = FakeService(pages, folders)
+    source = DriveZipSource(service, folder_id="folder-123")
+
+    entries = source.list_zips()
+
+    by_id = {e.id: e for e in entries}
+    assert set(by_id) == {"r", "a", "b", "c"}
+    assert by_id["a"].day == "2026-09-26"
+    assert by_id["b"].day == "2026-09-26"
+    assert by_id["c"].day is None  # unparseable folder name
+    assert by_id["r"].day is None  # root-level zip
+    assert all("in parents" in q for q in service.files().captured_queries)
+
+
+def test_list_zips_accepts_x_zip_compressed_mime():
+    service = FakeService([{"files": []}])
+    source = DriveZipSource(service, folder_id="folder-123")
+
+    source.list_zips()
+
+    zip_queries = [q for q in service.files().captured_queries if "folder'" not in q]
+    assert zip_queries and all("application/x-zip-compressed" in q for q in zip_queries)
+
+
+def test_download_accepts_file_destination(tmp_path):
+    from ingest.ports import ZipEntry
+
+    factory, _ = make_downloader_factory()
+    source = DriveZipSource(FakeService([{"files": []}]), "folder-123", downloader_factory=factory)
+    entry = ZipEntry(id="1", name="d.zip", uploaded_at=datetime(2026, 9, 1, tzinfo=timezone.utc))
+    target = tmp_path / "d.zip"
+
+    assert source.download(entry, target) == target
+    assert target.read_bytes() == b"hello world"

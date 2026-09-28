@@ -141,3 +141,85 @@ def test_run_ingest_continues_after_a_failing_zip(tmp_path):
     assert report.processed == ["zip-good"]
     assert list(report.failed.keys()) == ["zip-bad"]
     assert state.processed_ids() == {"zip-good"}
+
+
+def _entry(zid, name, day=None, hour=10):
+    return ZipEntry(
+        id=zid,
+        name=name,
+        uploaded_at=datetime(2026, 9, 27, hour, 0, tzinfo=timezone.utc),
+        day=day,
+    )
+
+
+def test_run_ingest_uses_entry_day_when_set(tmp_path):
+    entry = _entry("z1", "a.zip", day="2026-09-26")
+    source = FakeZipSource([entry], {"z1": _make_zip_bytes(tmp_path, "a.zip", ["a.mp4"])})
+
+    run_ingest(source, FakePublisher(), FakeStateStore(), tmp_path / "m.json", tmp_path / "w")
+
+    assert load(tmp_path / "m.json").to_dict()["days"][0]["day"] == "2026-09-26"
+
+
+def test_run_ingest_caps_at_max_zips_oldest_first_and_reports_deferred(tmp_path):
+    entries = [
+        _entry("z3", "c.zip", day="2026-09-27", hour=9),
+        _entry("z2", "b.zip", day="2026-09-26", hour=12),
+        _entry("z1", "a.zip", day="2026-09-26", hour=8),
+    ]
+    data = {
+        e.id: _make_zip_bytes(tmp_path, e.name, [e.name + ".mp4"]) for e in entries
+    }
+    state = FakeStateStore()
+
+    report = run_ingest(
+        FakeZipSource(entries, data),
+        FakePublisher(),
+        state,
+        tmp_path / "m.json",
+        tmp_path / "w",
+        max_zips=2,
+    )
+
+    assert report.processed == ["z1", "z2"]
+    assert report.deferred == ["z3"]
+    assert report.skipped == []
+    assert state.processed_ids() == {"z1", "z2"}
+
+
+def test_run_ingest_max_zips_ignores_already_processed(tmp_path):
+    entries = [_entry("z1", "a.zip", day="2026-09-01"), _entry("z2", "b.zip", day="2026-09-02")]
+    data = {e.id: _make_zip_bytes(tmp_path, e.name, ["v.mp4"]) for e in entries}
+    state = FakeStateStore()
+    state.mark_processed("z1")
+
+    report = run_ingest(
+        FakeZipSource(entries, data), FakePublisher(), state,
+        tmp_path / "m.json", tmp_path / "w", max_zips=1,
+    )
+
+    assert report.skipped == ["z1"]
+    assert report.processed == ["z2"]
+    assert report.deferred == []
+
+
+def test_run_ingest_cleans_workdir_after_success_and_failure(tmp_path):
+    good = _entry("zg", "ok.zip", day="2026-09-26")
+    bad = _entry("zb", "bad.zip", day="2026-09-27")
+    data = {
+        "zg": _make_zip_bytes(tmp_path, "ok.zip", ["good.mp4"]),
+        "zb": _make_zip_bytes(tmp_path, "bad.zip", ["bad.mp4"]),
+    }
+    workdir = tmp_path / "work"
+
+    report = run_ingest(
+        FakeZipSource([good, bad], data),
+        FakePublisher(fail_for_names={"bad.mp4"}),
+        FakeStateStore(),
+        tmp_path / "m.json",
+        workdir,
+    )
+
+    assert report.processed == ["zg"]
+    assert "zb" in report.failed
+    assert list(workdir.iterdir()) == []

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import shutil
 from pathlib import Path
 
 from ingest.manifest import Manifest, save
@@ -14,6 +15,7 @@ class IngestReport:
     processed: list[str] = field(default_factory=list)
     skipped: list[str] = field(default_factory=list)
     failed: dict[str, str] = field(default_factory=dict)
+    deferred: list[str] = field(default_factory=list)
 
 
 def run_ingest(
@@ -22,6 +24,7 @@ def run_ingest(
     state: StateStore,
     manifest_path: Path,
     workdir: Path,
+    max_zips: int | None = None,
 ) -> IngestReport:
     manifest_path = Path(manifest_path)
     workdir = Path(workdir)
@@ -30,13 +33,21 @@ def run_ingest(
     report = IngestReport()
     already_processed = state.processed_ids()
 
+    pending = []
     for entry in source.list_zips():
         if entry.id in already_processed:
             report.skipped.append(entry.id)
-            continue
+        else:
+            pending.append(entry)
 
+    pending.sort(key=lambda e: (e.day or e.uploaded_at.date().isoformat(), e.uploaded_at))
+    if max_zips is not None:
+        report.deferred = [e.id for e in pending[max_zips:]]
+        pending = pending[:max_zips]
+
+    for entry in pending:
+        entry_workdir = workdir / entry.id
         try:
-            entry_workdir = workdir / entry.id
             entry_workdir.mkdir(parents=True, exist_ok=True)
             zip_path = entry_workdir / entry.name
             source.download(entry, zip_path)
@@ -44,7 +55,7 @@ def run_ingest(
             extract_dir = entry_workdir / "videos"
             video_paths = extract_videos(zip_path, extract_dir)
 
-            day = entry.uploaded_at.date().isoformat()
+            day = entry.day or entry.uploaded_at.date().isoformat()
             manifest = Manifest()
             for video_path in video_paths:
                 published = publisher.publish(video_path, day)
@@ -54,6 +65,8 @@ def run_ingest(
         except Exception as exc:  # noqa: BLE001 - recorded per zip, not re-raised
             report.failed[entry.id] = str(exc)
             continue
+        finally:
+            shutil.rmtree(entry_workdir, ignore_errors=True)
 
         state.mark_processed(entry.id)
         report.processed.append(entry.id)

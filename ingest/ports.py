@@ -17,6 +17,7 @@ class ZipEntry:
     id: str
     name: str
     uploaded_at: datetime
+    day: str | None = None
 
 
 @dataclass(frozen=True)

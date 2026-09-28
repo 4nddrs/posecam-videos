@@ -59,6 +59,7 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | `R2_PUBLIC_BASE_URL` | yes | Public base URL the bucket is served from (used to build playable video URLs). It is the bucket's public domain (r2.dev subdomain or custom domain), not the S3 API endpoint. |
 | `MANIFEST_PATH` | no | Output path for the manifest (default `site/manifest.json`). |
 | `STATE_PATH` | no | Path to the idempotency state file (default `ingest/state.json`). |
+| `MAX_ZIPS_PER_RUN` | no | Maximum number of new zips processed per run, oldest first (default `10`). The rest are reported as `deferred` and picked up by later runs. |
 | `WORKDIR` | no | Working directory for downloads/extraction (default a fresh temp directory). |
 
 ## Deployment
@@ -74,4 +75,5 @@ Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 ## Operations
 
 - `ingest/state.json` tracks which zip ids have already been processed, so running the ingest twice on the same zips processes them once (idempotency).
+- The Drive folder holds `DD-MM-YYYY` date subfolders containing the zips; the subfolder name sets the video's day. Each run processes at most `MAX_ZIPS_PER_RUN` new zips (oldest first), so the initial backfill happens over several runs; the remaining zips appear as `deferred` in the printed report. Each zip's download and extracted files are deleted after it is processed.
 - To reprocess a zip, remove its id from `ingest/state.json` and re-run the ingest; the zip will be downloaded and published again.

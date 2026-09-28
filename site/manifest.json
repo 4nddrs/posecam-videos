@@ -1,25 +1,26 @@
 {
-  "generated_at": "2026-09-28T09:15:00+00:00",
+  "generated_at": "2026-09-28T20:45:00.282083+00:00",
   "days": [
     {
-      "day": "2026-09-28",
+      "day": "2026-09-24",
       "videos": [
         {
-          "id": "vid-001",
-          "name": "Morning session - camera A",
-          "url": "https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWx/view?usp=sharing",
-          "source_zip": "2026-09-28_recordings.zip"
-        }
-      ]
-    },
-    {
-      "day": "2026-09-27",
-      "videos": [
+          "id": "2026-09-24/RGB_2026-09-24-12_58_41-877763-s1.mp4",
+          "name": "RGB_2026-09-24-12_58_41-877763-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-12_58_41-877763-s1.mp4",
+          "source_zip": "capture-20260924T182841-877763-pipeline.zip"
+        },
         {
-          "id": "vid-002",
-          "name": "Evening session - camera B",
-          "url": "https://example.com/videos/2026-09-27-camera-b.mp4",
-          "source_zip": "2026-09-27_recordings.zip"
+          "id": "2026-09-24/RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
+          "name": "RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_11_36-e899d6-s1.mp4",
+          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip"
+        },
+        {
+          "id": "2026-09-24/RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
+          "name": "RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-24/RGB_2026-09-24-13_14_29-e899d6-s2.mp4",
+          "source_zip": "capture-20260924T184136-e899d6-pipeline.zip"
         }
       ]
     }

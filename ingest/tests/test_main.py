@@ -220,3 +220,33 @@ def test_run_uses_service_account_builder_when_no_key(monkeypatch, tmp_path):
     calls = _run_with_patched_builders(monkeypatch, env)
 
     assert calls == [("sa", "folder-123", Path("/creds/sa.json"))]
+
+
+def test_load_config_max_zips_per_run_defaults_to_10():
+    assert load_config(REQUIRED_ENV).max_zips_per_run == 10
+
+
+def test_load_config_parses_max_zips_per_run():
+    assert load_config({**REQUIRED_ENV, "MAX_ZIPS_PER_RUN": "3"}).max_zips_per_run == 3
+
+
+def test_run_passes_max_zips_to_use_case(monkeypatch, tmp_path):
+    import ingest.main as main_mod
+
+    captured = {}
+
+    def fake_run_ingest(**kwargs):
+        captured.update(kwargs)
+        return IngestReport()
+
+    monkeypatch.setattr(main_mod, "run_ingest", fake_run_ingest)
+    env = {
+        **REQUIRED_ENV,
+        "MAX_ZIPS_PER_RUN": "4",
+        "STATE_PATH": str(tmp_path / "s.json"),
+        "WORKDIR": str(tmp_path / "w"),
+    }
+
+    run(load_config(env), source_builder=lambda c: None, publisher_builder=lambda c: None)
+
+    assert captured["max_zips"] == 4

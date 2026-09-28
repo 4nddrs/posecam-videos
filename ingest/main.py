@@ -53,6 +53,7 @@ class Config:
     manifest_path: Path
     state_path: Path
     workdir: Path
+    max_zips_per_run: int = 10
 
 
 def load_config(env: Mapping[str, str]) -> Config:
@@ -85,6 +86,7 @@ def load_config(env: Mapping[str, str]) -> Config:
         manifest_path=Path(env.get("MANIFEST_PATH", _DEFAULT_MANIFEST_PATH)),
         state_path=Path(env.get("STATE_PATH", _DEFAULT_STATE_PATH)),
         workdir=Path(workdir) if workdir else Path(tempfile.mkdtemp(prefix="ingest-")),
+        max_zips_per_run=int(env.get("MAX_ZIPS_PER_RUN") or 10),
     )
 
 
@@ -152,6 +154,7 @@ def run(
         state=state,
         manifest_path=config.manifest_path,
         workdir=config.workdir,
+        max_zips=config.max_zips_per_run,
     )
 
 
@@ -166,7 +169,16 @@ def main() -> None:
         raise SystemExit(1) from exc
 
     report = run(config)
-    print(json.dumps({"processed": report.processed, "skipped": report.skipped, "failed": report.failed}))
+    print(
+        json.dumps(
+            {
+                "processed": report.processed,
+                "skipped": report.skipped,
+                "failed": report.failed,
+                "deferred": report.deferred,
+            }
+        )
+    )
 
     if report.failed:
         raise SystemExit(1)
