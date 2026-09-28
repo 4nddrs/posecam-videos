@@ -45,3 +45,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 - 2026-09-28: T3 site written (delegated writer, TDD, 6 node tests; `node --test <dir>` fails on Node 26.6, use explicit file path).
 - 2026-09-28: T3 committed 552bf6c. RDD on range 4ea2e99..552bf6c (T2+T3): medium, 643 lines, consent granted, reliability lens approved, acknowledged (lineage review-31ee0be15315decb). Reviewed boundary = 552bf6c.
 - 2026-09-28: T5 written (delegated writer, TDD, 23 tests total). `.env.example` left uncommitted pending user inspection (writer reported sandbox denied normal writes to `.env*` and used shell redirects).
+- 2026-09-28: T5 committed e650138. RDD on range 552bf6c..e650138: medium, 432 lines, consent granted, reliability lens approved, acknowledged (lineage review-b983c03072bb48ef, untracked .env.example excluded). Reviewed boundary = e650138.
