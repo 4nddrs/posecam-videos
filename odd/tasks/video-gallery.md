@@ -41,3 +41,4 @@ Sorabh uploads zipped recordings to Drive folder `1z6UQzg5l7xgxqf3HTB5Ys2SJnrcU6
 ## Progress
 - 2026-09-28: repo initialized, branch `feat/video-gallery`, scaffold commit 01fc934.
 - 2026-09-28: T1 committed 4ea2e99 (delegated writer, TDD RED→GREEN, 10 tests). RDD: medium, consent granted, reliability lens approved, acknowledged (lineage review-b647c221b480fc7c). Reviewed boundary = 4ea2e99.
+- 2026-09-28: T2 committed 4a87d40 (delegated writer, TDD, 13 tests). RDD assess: medium, 228 lines, under_budget, pending in slice (base 4ea2e99).
