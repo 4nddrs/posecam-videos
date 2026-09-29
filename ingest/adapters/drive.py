@@ -8,6 +8,7 @@ libraries so tests never need them installed.
 from __future__ import annotations
 
 import io
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -39,7 +40,7 @@ class DriveZipSource:
             entries.extend(
                 self._list_zips_in(folder["id"], day=_parse_day(folder["name"]))
             )
-        return entries
+        return _dedupe_entries(entries)
 
     def _list_subfolders(self) -> list[dict]:
         query = (
@@ -66,7 +67,7 @@ class DriveZipSource:
                     id=file_info["id"],
                     name=name,
                     uploaded_at=_parse_created_time(file_info["createdTime"]),
-                    day=day,
+                    day=day_from_zip_name(name) or day,
                 )
             )
         return entries
@@ -107,6 +108,40 @@ def _parse_day(folder_name: str) -> Optional[str]:
         return datetime.strptime(folder_name.strip(), "%d-%m-%Y").date().isoformat()
     except ValueError:
         return None
+
+
+_CAPTURE_RE = re.compile(r"^capture-(\d{8})T\d{6}")
+_COPY_SUFFIX_RE = re.compile(r" \(\d+\)(?=\.zip$)", re.IGNORECASE)
+
+
+def day_from_zip_name(name: str) -> Optional[str]:
+    """Parse `capture-YYYYMMDDTHHMMSS...` into ISO `YYYY-MM-DD`, or None."""
+    match = _CAPTURE_RE.match(name)
+    if not match:
+        return None
+    try:
+        return datetime.strptime(match.group(1), "%Y%m%d").date().isoformat()
+    except ValueError:
+        return None
+
+
+def normalize_zip_name(name: str) -> str:
+    """Strip a trailing ` (N)` copy counter before `.zip`."""
+    return _COPY_SUFFIX_RE.sub("", name)
+
+
+def _dedupe_entries(entries: list[ZipEntry]) -> list[ZipEntry]:
+    """Keep one entry per normalized name, preferring the un-numbered original."""
+    chosen: dict[str, int] = {}
+    result: list[ZipEntry] = []
+    for entry in entries:
+        key = normalize_zip_name(entry.name)
+        if key not in chosen:
+            chosen[key] = len(result)
+            result.append(entry)
+        elif entry.name == key and result[chosen[key]].name != key:
+            result[chosen[key]] = entry
+    return result
 
 
 def _parse_created_time(created_time: str) -> datetime:

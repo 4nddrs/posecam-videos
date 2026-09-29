@@ -210,3 +210,84 @@ def test_download_accepts_file_destination(tmp_path):
 
     assert source.download(entry, target) == target
     assert target.read_bytes() == b"hello world"
+
+
+def test_day_from_zip_name_valid_invalid_and_missing():
+    from ingest.adapters.drive import day_from_zip_name
+
+    assert day_from_zip_name("capture-20260927T161649-e649a8-pipeline.zip") == "2026-09-27"
+    assert day_from_zip_name("capture-20260928T194548-7484e9.zip") == "2026-09-28"
+    assert day_from_zip_name("capture-20261340T161649-abc.zip") is None
+    assert day_from_zip_name("day1.zip") is None
+    assert day_from_zip_name("") is None
+
+
+def test_normalize_zip_name_strips_trailing_counter():
+    from ingest.adapters.drive import normalize_zip_name
+
+    assert normalize_zip_name("foo (1).zip") == "foo.zip"
+    assert normalize_zip_name("foo (12).ZIP") == "foo.ZIP"
+    assert normalize_zip_name("foo.zip") == "foo.zip"
+    assert normalize_zip_name("foo (a).zip") == "foo (a).zip"
+
+
+def test_list_zips_uses_capture_name_day_inside_undated_folder():
+    folders = {"folder-123": [{"id": "f1", "name": "Remaining Videos"}]}
+    pages = {
+        "folder-123": [{"files": []}],
+        "f1": [
+            {
+                "files": [
+                    {
+                        "id": "a",
+                        "name": "capture-20260927T161649-e649a8-pipeline.zip",
+                        "createdTime": "2026-09-29T01:00:00Z",
+                    }
+                ]
+            }
+        ],
+    }
+    source = DriveZipSource(FakeService(pages, folders), folder_id="folder-123")
+
+    entries = source.list_zips()
+
+    assert [e.day for e in entries] == ["2026-09-27"]
+
+
+def test_list_zips_capture_name_day_beats_dated_folder_and_folder_used_otherwise():
+    folders = {"folder-123": [{"id": "f1", "name": "26-09-2026"}]}
+    pages = {
+        "folder-123": [{"files": []}],
+        "f1": [
+            {
+                "files": [
+                    {"id": "a", "name": "capture-20260928T194548-7484e9.zip", "createdTime": "2026-09-29T01:00:00Z"},
+                    {"id": "b", "name": "plain.zip", "createdTime": "2026-09-29T02:00:00Z"},
+                ]
+            }
+        ],
+    }
+    source = DriveZipSource(FakeService(pages, folders), folder_id="folder-123")
+
+    by_id = {e.id: e for e in source.list_zips()}
+
+    assert by_id["a"].day == "2026-09-28"
+    assert by_id["b"].day == "2026-09-26"
+
+
+def test_list_zips_drops_numbered_duplicates_in_favour_of_original():
+    pages = [
+        {
+            "files": [
+                {"id": "dup", "name": "capture-20260928T195259-1d7ba8-pipeline (1).zip", "createdTime": "2026-09-29T01:00:00Z"},
+                {"id": "orig", "name": "capture-20260928T195259-1d7ba8-pipeline.zip", "createdTime": "2026-09-29T02:00:00Z"},
+                {"id": "x1", "name": "solo (1).zip", "createdTime": "2026-09-29T03:00:00Z"},
+                {"id": "x2", "name": "solo (2).zip", "createdTime": "2026-09-29T04:00:00Z"},
+            ]
+        }
+    ]
+    source = DriveZipSource(FakeService(pages), folder_id="folder-123")
+
+    ids = [e.id for e in source.list_zips()]
+
+    assert ids == ["orig", "x1"]
