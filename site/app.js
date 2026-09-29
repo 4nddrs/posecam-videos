@@ -448,6 +448,8 @@ function initToolbar(days, sections) {
   const lo = document.getElementById("filter-min");
   const hi = document.getElementById("filter-max");
   const readout = document.getElementById("filter-readout");
+  const minValue = document.getElementById("filter-min-value");
+  const maxValue = document.getElementById("filter-max-value");
   const reset = document.getElementById("filter-reset");
   for (const input of [lo, hi]) {
     input.min = "0";
@@ -469,6 +471,8 @@ function initToolbar(days, sections) {
     filters.maxSec = b === top ? null : b * 60;
     const any = filters.minSec === null && filters.maxSec === null;
     readout.textContent = any ? "Any duration" : `${a} min – ${b === top ? `${top}+ min` : `${b} min`}`;
+    minValue.textContent = a === 0 ? "0 min" : `${a} min`;
+    maxValue.textContent = b === top ? "Any" : `${b} min`;
     reset.disabled = any;
     const q = filterQuery(filters);
     try {
@@ -601,7 +605,9 @@ async function main() {
 
     const sections = new Map();
     days.forEach((day, i) => {
-      const section = renderDay(day, i === 0, (d, n, t) => navCounts(d, n, t));
+      // Every day starts collapsed so the list of available days is visible
+      // at a glance; a deep link still expands its own day.
+      const section = renderDay(day, false, (d, n, t) => navCounts(d, n, t));
       sections.set(day.day, section);
       app.appendChild(section);
     });

@@ -43,8 +43,16 @@
     <div class="wrap filter-inner">
       <span class="filter-title">Duration filter</span>
       <div class="range-pair">
-        <input type="range" id="filter-min" aria-label="Minimum duration in minutes" value="0" />
-        <input type="range" id="filter-max" aria-label="Maximum duration in minutes" value="0" />
+        <label class="range-field" for="filter-min">
+          <span class="range-label">Min</span>
+          <input type="range" id="filter-min" aria-label="Minimum duration in minutes" value="0" />
+          <output id="filter-min-value" class="range-value" for="filter-min">0 min</output>
+        </label>
+        <label class="range-field" for="filter-max">
+          <span class="range-label">Max</span>
+          <input type="range" id="filter-max" aria-label="Maximum duration in minutes" value="0" />
+          <output id="filter-max-value" class="range-value" for="filter-max">Any</output>
+        </label>
       </div>
       <output id="filter-readout" class="filter-readout" for="filter-min filter-max">Any duration</output>
       <button type="button" id="filter-reset" class="action" disabled>Any</button>

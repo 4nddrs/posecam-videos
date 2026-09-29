@@ -106,8 +106,11 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .filter-bar { background: var(--surface); border-bottom: 1px solid var(--border); }
 .filter-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding-top: 10px; padding-bottom: 10px; }
 .filter-title { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
-.range-pair { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; max-width: 420px; }
-.range-pair input[type="range"] { flex: 1 1 0; min-width: 0; accent-color: var(--accent); }
+.range-pair { display: flex; align-items: center; gap: 16px; flex: 1 1 320px; min-width: 0; max-width: 560px; }
+.range-field { display: flex; align-items: center; gap: 8px; flex: 1 1 0; min-width: 0; }
+.range-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.range-field input[type="range"] { flex: 1 1 0; min-width: 0; accent-color: var(--accent); }
+.range-value { font-variant-numeric: tabular-nums; font-size: 0.8rem; min-width: 4.5em; color: var(--fg); }
 .filter-readout { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 0.875rem; min-width: 8.5em; }
 .action:disabled { opacity: 0.5; cursor: default; }
 .action:disabled:hover { border-color: var(--border); color: var(--fg); }
