@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-29T13:37:09.319486+00:00",
+  "generated_at": "2026-09-29T13:39:09.766155+00:00",
   "days": [
     {
       "day": "2026-09-28",
@@ -85,6 +85,14 @@
           "source_zip": "capture-20260928T171950-e9f387-pipeline.zip"
         },
         {
+          "id": "2026-09-28/RGB_2026-09-28-11_51_55-c20670-s1.mp4",
+          "name": "RGB_2026-09-28-11_51_55-c20670-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-11_51_55-c20670-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-11_51_55-c20670-s1.jpg",
+          "duration": 66.5,
+          "source_zip": "capture-20260928T172155-c20670-pipeline.zip"
+        },
+        {
           "duration": 14.666667,
           "id": "2026-09-28/RGB_2026-09-28-11_57_46-18df8c-s1.mp4",
           "name": "RGB_2026-09-28-11_57_46-18df8c-s1.mp4",
@@ -101,19 +109,19 @@
           "source_zip": "capture-20260928T172746-18df8c-pipeline.zip"
         },
         {
+          "duration": 12.5,
           "id": "2026-09-28/RGB_2026-09-28-12_01_32-0eea2c-s1.mp4",
           "name": "RGB_2026-09-28-12_01_32-0eea2c-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-12_01_32-0eea2c-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-12_01_32-0eea2c-s1.jpg",
-          "duration": 12.5,
           "source_zip": "capture-20260928T173132-0eea2c-pipeline.zip"
         },
         {
+          "duration": 49.333333,
           "id": "2026-09-28/RGB_2026-09-28-12_01_45-0eea2c-s2.mp4",
           "name": "RGB_2026-09-28-12_01_45-0eea2c-s2.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-12_01_45-0eea2c-s2.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-09-28/RGB_2026-09-28-12_01_45-0eea2c-s2.jpg",
-          "duration": 49.333333,
           "source_zip": "capture-20260928T173132-0eea2c-pipeline.zip"
         },
         {
