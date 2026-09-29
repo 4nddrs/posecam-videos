@@ -80,3 +80,4 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - 2026-09-28: Phase 3 merged 95621ac. Duration backfill complete: 50/50 videos with poster and duration. Live at https://4nddrs.github.io/posecam-videos/.
 - 2026-09-29: 2d53038 all days collapsed by default; Min/Max labels and per-slider values on the duration filter. RDD: medium (under budget, preflight offered anyway), granted, reliability approved, acknowledged (lineage review-e1c2a4721be5fc72).
 - 2026-09-29: Drive reorganized into "Remaining Videos" (undated). Day now parsed from the capture timestamp in the zip name; " (N)" duplicates dropped. Real listing: 122 new zips (27-09: 68, 28-09: 48, 26-09: 6). Cron disabled during the fix.
+- 2026-09-29: 8a0ab45 reviewed (medium, granted, reliability approved, lineage review-55accbb7458c70ec). Merged; cron re-enabled; MAX_ZIPS_PER_RUN=20 for the 122-zip backfill.
