@@ -26,10 +26,6 @@
           <p class="subtitle">Today's recordings, grouped by day, newest first.</p>
         </div>
         <div class="header-tools">
-          <div class="density-group" role="group" aria-label="Video layout">
-            <button type="button" class="density-btn" data-mode="cards" aria-pressed="true">Cards</button>
-            <button type="button" class="density-btn" data-mode="list" aria-pressed="false">List</button>
-          </div>
           <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch to light theme"></button>
         </div>
       </div>
@@ -41,9 +37,17 @@
     </div>
   </header>
 
-  <nav class="day-nav" id="day-nav" aria-label="Jump to day" hidden>
-    <div class="wrap"><ul id="day-nav-list"></ul></div>
-  </nav>
+  <div class="sticky-bar">
+    <div class="wrap sticky-inner">
+      <nav class="day-nav" id="day-nav" aria-label="Jump to day" hidden>
+        <ul id="day-nav-list"></ul>
+      </nav>
+      <div class="density-group" role="group" aria-label="Video layout">
+        <button type="button" class="density-btn" data-mode="cards" aria-pressed="true">Cards</button>
+        <button type="button" class="density-btn" data-mode="list" aria-pressed="false">List</button>
+      </div>
+    </div>
+  </div>
 
   <div class="filter-bar" id="filter-bar" role="search" aria-label="Filter recordings" hidden>
     <div class="wrap filter-inner">

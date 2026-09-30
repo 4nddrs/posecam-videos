@@ -81,13 +81,17 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .stat #stat-updated { font-size: 0.95rem; font-weight: 600; }
 .stat-sub { font-size: 0.8rem !important; font-weight: 500 !important; color: var(--accent); }
 
-/* Day nav */
-.day-nav {
+/* Sticky bar: day nav + layout toggle stay visible while scrolling */
+.sticky-bar {
   position: sticky; top: 0; z-index: 10;
   background: color-mix(in srgb, var(--bg) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
+.sticky-inner { display: flex; align-items: center; gap: 12px; }
+.day-nav { flex: 1 1 auto; min-width: 0; }
+.sticky-inner .density-group { flex: none; margin-left: auto; }
+.sticky-inner .density-btn { height: 32px; }
 .day-nav ul {
   list-style: none; margin: 0; padding: 10px 0; display: flex; gap: 8px;
   overflow-x: auto; scrollbar-width: thin;
