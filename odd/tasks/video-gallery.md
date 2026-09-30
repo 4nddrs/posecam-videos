@@ -107,3 +107,4 @@ The "Remaining" videos contain both black and white pipes, so the user renamed t
 Branch `feat/mix-category` from main.
 - [x] T16 Rename "Remaining" → "Mix" in the ingest defaults (manifest DEFAULT_CATEGORY, the legacy DRIVE_FOLDER_ID label, uploaders), the site DEFAULT_CATEGORY, README, and tests. Rewrite the existing manifest entries from "Remaining" to "Mix". A stale stored tab ("Remaining") falls back to the default. Fixed tab order in the site (`CATEGORY_ORDER`). (delegated, writer trigger)
 - Pending (user): change the repo variable DRIVE_SOURCES label `=Remaining` → `=Mix`.
+- Progress: T16 done (commits 615d50a site tab order, 3a290e6 rename). RED: pytest 9 failed, node import failed (no CATEGORY_ORDER). GREEN: pytest 96 passed, node 41 passed, node --check ok, manifest 199 Mix / 11 Black / 10 White / 220, 0 Remaining.
