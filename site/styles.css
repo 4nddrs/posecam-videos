@@ -276,6 +276,7 @@ kbd { font: inherit; font-size: 0.8em; padding: 1px 6px; border: 1px solid var(-
 
 /* Category tabs (one category at a time): large pills so the switcher stands out */
 .category-row { display: flex; align-items: center; gap: 12px; padding-top: 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.category-row[hidden] { display: none; }
 .category-label { flex: none; color: var(--muted); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
 .category-tabs { display: flex; gap: 8px; min-width: 0; overflow-x: auto; scrollbar-width: thin; padding: 2px; }
 .category-tab {
@@ -294,6 +295,7 @@ kbd { font: inherit; font-size: 0.8em; padding: 1px 6px; border: 1px solid var(-
 .category-tab[aria-selected="true"] .count { background: color-mix(in srgb, var(--accent-fg) 18%, transparent); color: var(--accent-fg); }
 .category-tab:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 600px) {
+  html { scroll-padding-top: 220px; }
   .category-row { flex-direction: column; align-items: stretch; gap: 6px; }
   .category-tabs { flex-wrap: wrap; overflow-x: visible; }
   .category-tab { min-height: 40px; padding: 0 14px; font-size: 0.95rem; }
