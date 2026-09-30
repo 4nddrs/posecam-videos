@@ -93,13 +93,13 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .sticky-inner .density-group { flex: none; margin-left: auto; }
 .sticky-inner .density-btn { height: 32px; }
 .day-nav ul {
-  list-style: none; margin: 0; padding: 10px 0; display: flex; gap: 8px;
+  list-style: none; margin: 0; padding: 8px 0; display: flex; gap: 6px;
   overflow-x: auto; scrollbar-width: thin;
 }
 .chip-btn {
-  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
-  padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--fg); font: inherit; font-size: 0.875rem; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+  padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--fg); font: inherit; font-size: 0.8rem; cursor: pointer;
 }
 .chip-btn:hover { border-color: var(--accent); }
 .chip-btn .count { color: var(--muted); font-variant-numeric: tabular-nums; }
