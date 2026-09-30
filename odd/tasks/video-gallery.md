@@ -82,3 +82,7 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - 2026-09-29: Drive reorganized into "Remaining Videos" (undated). Day now parsed from the capture timestamp in the zip name; " (N)" duplicates dropped. Real listing: 122 new zips (27-09: 68, 28-09: 48, 26-09: 6). Cron disabled during the fix.
 - 2026-09-29: 8a0ab45 reviewed (medium, granted, reliability approved, lineage review-55accbb7458c70ec). Merged; cron re-enabled; MAX_ZIPS_PER_RUN=20 for the 122-zip backfill.
 - 2026-09-29: Backfill of "Remaining Videos" complete: 122 zips, 149 new videos, 0 failures. Live: 28-09 57, 27-09 92, 26-09 17, 25-09 30, 24-09 3 (199 total, all with poster+duration). The six 26-09 evening zips were re-uploaded copies; idempotent R2 keys and manifest dedupe kept the count at 17. MAX_ZIPS_PER_RUN left at 20.
+
+## Phase 4: density toggle (2026-09-30, user request)
+- [x] T12 Site: header toggle between the current card grid ("Cards") and a compact list ("List": one row per video with time, file name, duration, play and copy-link; no poster). Choice persisted in localStorage (try/catch), default Cards. Filters, histogram, playlist, keyboard shortcuts and deep links keep working in both modes. Tests in `site/tests/app.test.mjs`. (delegated, writer trigger: index.html + app.js + styles.css + tests)
+- 2026-09-30: 054f54b density toggle (delegated writer, TDD, 31 node tests).
