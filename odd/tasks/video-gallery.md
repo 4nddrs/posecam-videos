@@ -114,3 +114,5 @@ Branch `feat/mix-category` from main.
 The user wants the per-day bar chart to show video durations instead of start hours, and each day to show the summary details (the per-category table, but per day). Current data: durations are 4 s–334 s, median ~59 s.
 Branch `feat/day-duration-summary` from main.
 - [x] T17 Replace the per-day hour histogram with a duration histogram: 30 s buckets from 0 to 5 min plus a final "≥ 5 min" bucket, axis labels at 0, 1m, 2m, 3m, 4m, 5m+, and an accessible label/tooltip per bar ("1:00–1:30 · 12 videos"). Clicking a bar filters that day's videos to the bucket (this replaces the hour filter; any `hour` URL/query state migrates or is dropped cleanly). Add a per-day summary under the day heading, for the active category: videos, total duration, average, shortest–longest, and uploaders with counts. Pure logic in lib.js with tests; remove dead hour-histogram code. (delegated, writer trigger)
+
+- Progress: T17 done in 53a950f (47/47 node tests, 96 pytest passed). Duration bar filter ANDs with the min/max slider; bars and summary cover all of the active category's videos for the day; old ?hour= is ignored.
