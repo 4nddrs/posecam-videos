@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ingest.ports import PublishedVideo
 
-DEFAULT_CATEGORY = "Remaining"
+DEFAULT_CATEGORY = "Mix"
 
 
 class Manifest:

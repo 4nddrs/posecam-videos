@@ -20,7 +20,7 @@ def test_load_config_builds_config_with_defaults():
     config = load_config(REQUIRED_ENV)
 
     assert isinstance(config, Config)
-    assert config.drive_sources == (DriveSource("folder-123", "Remaining"),)
+    assert config.drive_sources == (DriveSource("folder-123", "Mix"),)
     assert config.google_api_key == "api-key-1"
     assert config.google_service_account_file is None
     assert config.r2_account_id == "account-1"
@@ -208,7 +208,7 @@ def test_run_uses_api_key_builder_when_key_set(monkeypatch, tmp_path):
 
     calls = _run_with_patched_builders(monkeypatch, env)
 
-    assert calls == [("key", "folder-123", "api-key-1", "Remaining")]
+    assert calls == [("key", "folder-123", "api-key-1", "Mix")]
 
 
 def test_run_uses_service_account_builder_when_no_key(monkeypatch, tmp_path):
@@ -219,7 +219,7 @@ def test_run_uses_service_account_builder_when_no_key(monkeypatch, tmp_path):
 
     calls = _run_with_patched_builders(monkeypatch, env)
 
-    assert calls == [("sa", "folder-123", Path("/creds/sa.json"), "Remaining")]
+    assert calls == [("sa", "folder-123", Path("/creds/sa.json"), "Mix")]
 
 
 def test_load_config_max_zips_per_run_defaults_to_10():
@@ -263,11 +263,11 @@ def test_parse_drive_sources_reads_ids_with_optional_labels():
 
 
 def test_load_config_prefers_drive_sources_over_legacy_folder_id():
-    env = {**REQUIRED_ENV, "DRIVE_SOURCES": "root-new,old=Remaining"}
+    env = {**REQUIRED_ENV, "DRIVE_SOURCES": "root-new,old=Mix"}
 
     config = load_config(env)
 
-    assert config.drive_sources == (DriveSource("root-new", None), DriveSource("old", "Remaining"))
+    assert config.drive_sources == (DriveSource("root-new", None), DriveSource("old", "Mix"))
 
 
 def test_load_config_accepts_drive_sources_without_legacy_folder_id():
@@ -312,7 +312,7 @@ def test_run_combines_every_drive_source_and_routes_downloads(monkeypatch, tmp_p
         lambda folder_id, api_key, category=None: built[folder_id],
     )
     combined = main_mod.DEFAULT_SOURCE_BUILDER(
-        load_config({**REQUIRED_ENV, "DRIVE_SOURCES": "old=Remaining,new"})
+        load_config({**REQUIRED_ENV, "DRIVE_SOURCES": "old=Mix,new"})
     )
 
     entries = combined.list_zips()

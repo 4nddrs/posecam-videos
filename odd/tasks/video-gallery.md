@@ -105,5 +105,5 @@ Branch `feat/categories`, stacked on `feat/density-toggle` (unmerged).
 ## Phase 6: Mix category and fixed tab order (2026-09-30, user request)
 The "Remaining" videos contain both black and white pipes, so the user renamed the category to "Mix". Tab order is fixed: Mix, Black pipes, White pipes, then any other category, newest first. The default tab is the first one.
 Branch `feat/mix-category` from main.
-- [ ] T16 Rename "Remaining" → "Mix" in the ingest defaults (manifest DEFAULT_CATEGORY, the legacy DRIVE_FOLDER_ID label, uploaders), the site DEFAULT_CATEGORY, README, and tests. Rewrite the existing manifest entries from "Remaining" to "Mix". A stale stored tab ("Remaining") falls back to the default. Fixed tab order in the site (`CATEGORY_ORDER`). (delegated, writer trigger)
+- [x] T16 Rename "Remaining" → "Mix" in the ingest defaults (manifest DEFAULT_CATEGORY, the legacy DRIVE_FOLDER_ID label, uploaders), the site DEFAULT_CATEGORY, README, and tests. Rewrite the existing manifest entries from "Remaining" to "Mix". A stale stored tab ("Remaining") falls back to the default. Fixed tab order in the site (`CATEGORY_ORDER`). (delegated, writer trigger)
 - Pending (user): change the repo variable DRIVE_SOURCES label `=Remaining` → `=Mix`.

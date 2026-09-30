@@ -8,7 +8,7 @@ from ingest.uploaders import backfill_uploaders
 def _drive(files):
     folders = {"root": [{"id": "f1", "name": "Remaining Videos"}]}
     pages = {"root": [{"files": []}], "f1": [{"files": files}]}
-    return DriveZipSource(FakeService(pages, folders), "root", category="Remaining")
+    return DriveZipSource(FakeService(pages, folders), "root", category="Mix")
 
 
 def _file(fid, name, owner):
@@ -62,7 +62,7 @@ def test_backfill_sets_missing_category_keeps_existing_and_never_writes_emails(t
 
     text = path.read_text()
     videos = {v["id"]: v for v in json.loads(text)["days"][0]["videos"]}
-    assert videos["a"]["category"] == "Remaining"
+    assert videos["a"]["category"] == "Mix"
     assert videos["b"]["category"] == "White pipes"
     assert videos["b"]["uploader"] == "Kept"
     assert "@" not in text
