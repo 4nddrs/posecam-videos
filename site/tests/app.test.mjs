@@ -10,8 +10,11 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
-  hourOf,
-  histogram,
+  durationBucket,
+  durationHistogram,
+  daySummary,
+  formatTotalDuration,
+  BUCKET_COUNT,
   matchesFilters,
   formatDuration,
   parseFilterQuery,
@@ -155,20 +158,75 @@ const rec = (h, m, duration) => ({
   duration,
 });
 
-test("hourOf returns the start hour or null", () => {
-  assert.equal(hourOf(rec(8, "35")), 8);
-  assert.equal(hourOf(rec(23, "01")), 23);
-  assert.equal(hourOf({ name: "clip.mp4" }), null);
-  assert.equal(hourOf(undefined), null);
+test("durationBucket maps seconds to 30 s buckets with a final 5 min+ bucket", () => {
+  assert.equal(BUCKET_COUNT, 11);
+  assert.equal(durationBucket(0), 0);
+  assert.equal(durationBucket(29.9), 0);
+  assert.equal(durationBucket(30), 1);
+  assert.equal(durationBucket(60), 2);
+  assert.equal(durationBucket(299), 9);
+  assert.equal(durationBucket(300), 10);
+  assert.equal(durationBucket(9999), 10);
+  assert.equal(durationBucket(null), null);
+  assert.equal(durationBucket(undefined), null);
+  assert.equal(durationBucket(-3), null);
+  assert.equal(durationBucket(NaN), null);
 });
 
-test("histogram returns 24 counts by start hour", () => {
-  const h = histogram([rec(0, "01"), rec(14, "05"), rec(14, "40"), { name: "x" }]);
-  assert.equal(h.length, 24);
-  assert.equal(h[0], 1);
-  assert.equal(h[14], 2);
-  assert.equal(h.reduce((a, b) => a + b, 0), 3);
-  assert.deepEqual(histogram(undefined), new Array(24).fill(0));
+test("durationHistogram counts per bucket and reports unknown durations", () => {
+  const h = durationHistogram([rec(1, "00", 4), rec(1, "01", 20), rec(1, "02", 70), rec(1, "03", 334), rec(1, "04", null), { name: "x" }]);
+  assert.equal(h.buckets.length, 11);
+  assert.equal(h.buckets[0].count, 2);
+  assert.equal(h.buckets[2].count, 1);
+  assert.equal(h.buckets[10].count, 1);
+  assert.equal(h.unknown, 2);
+  assert.deepEqual([h.buckets[2].startSec, h.buckets[2].endSec], [60, 90]);
+  assert.deepEqual([h.buckets[10].startSec, h.buckets[10].endSec], [300, null]);
+  const empty = durationHistogram(undefined);
+  assert.equal(empty.buckets.length, 11);
+  assert.equal(empty.buckets.reduce((a, b) => a + b.count, 0), 0);
+  assert.equal(empty.unknown, 0);
+});
+
+test("formatTotalDuration renders seconds, minutes and hours", () => {
+  assert.equal(formatTotalDuration(45), "45 s");
+  assert.equal(formatTotalDuration(0), "0 s");
+  assert.equal(formatTotalDuration(23 * 60 + 10), "23 min");
+  assert.equal(formatTotalDuration(3599), "1 h 0 min");
+  assert.equal(formatTotalDuration(72 * 60), "1 h 12 min");
+  assert.equal(formatTotalDuration(2 * 3600), "2 h 0 min");
+  assert.equal(formatTotalDuration(null), "");
+  assert.equal(formatTotalDuration(-1), "");
+});
+
+test("daySummary aggregates count, total, average, range and uploaders", () => {
+  const vids = [
+    { duration: 60, uploader: "Ann" },
+    { duration: 120, uploader: "Bob" },
+    { duration: 30, uploader: "Ann" },
+    { duration: null, uploader: "" },
+  ];
+  const s = daySummary(vids);
+  assert.equal(s.count, 4);
+  assert.equal(s.unknown, 1);
+  assert.equal(s.totalSec, 210);
+  assert.equal(s.avgSec, 70);
+  assert.equal(s.minSec, 30);
+  assert.equal(s.maxSec, 120);
+  assert.deepEqual(s.uploaders, [{ name: "Ann", count: 2 }, { name: "Bob", count: 1 }]);
+});
+
+test("daySummary tolerates empty and duration-less input", () => {
+  const e = daySummary(undefined);
+  assert.equal(e.count, 0);
+  assert.equal(e.avgSec, null);
+  assert.equal(e.minSec, null);
+  assert.deepEqual(e.uploaders, []);
+  const s = daySummary([{ name: "a" }]);
+  assert.equal(s.count, 1);
+  assert.equal(s.unknown, 1);
+  assert.equal(s.totalSec, 0);
+  assert.equal(s.avgSec, null);
 });
 
 test("matchesFilters applies duration range inclusively", () => {
@@ -187,12 +245,21 @@ test("matchesFilters treats null duration as matching only when unfiltered", () 
   assert.equal(matchesFilters({ name: v.name }, { minSec: null, maxSec: null }), true);
 });
 
-test("matchesFilters composes hour with duration", () => {
-  const v = rec(14, "10", 300);
-  assert.equal(matchesFilters(v, { minSec: null, maxSec: null, hour: 14 }), true);
-  assert.equal(matchesFilters(v, { minSec: null, maxSec: null, hour: 13 }), false);
-  assert.equal(matchesFilters(v, { minSec: 600, maxSec: null, hour: 14 }), false);
+test("matchesFilters composes the duration bucket with the range (AND)", () => {
+  const v = rec(14, "10", 70);
+  assert.equal(matchesFilters(v, { bucket: 2 }), true);
+  assert.equal(matchesFilters(v, { bucket: 3 }), false);
+  assert.equal(matchesFilters(v, { minSec: 100, bucket: 2 }), false);
+  assert.equal(matchesFilters(v, { minSec: 60, maxSec: 90, bucket: 2 }), true);
+  assert.equal(matchesFilters(rec(14, "10", null), { bucket: 0 }), false);
+  assert.equal(matchesFilters(rec(14, "10", 400), { bucket: 10 }), true);
+  assert.equal(matchesFilters(v, { bucket: null }), true);
   assert.equal(matchesFilters(v, {}), true);
+});
+
+test("parseFilterQuery ignores the retired hour key", () => {
+  assert.deepEqual(parseFilterQuery("?hour=14&min=1"), { minSec: 60, maxSec: null });
+  assert.equal(filterQuery({ minSec: null, maxSec: null, hour: 14 }), "");
 });
 
 test("formatDuration renders m:ss and h:mm:ss", () => {

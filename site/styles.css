@@ -119,24 +119,28 @@ h1 { margin: 0 0 4px; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: -0.02
 .action:disabled { opacity: 0.5; cursor: default; }
 .action:disabled:hover { border-color: var(--border); color: var(--fg); }
 
-/* Hour histogram */
-.hour-hist { display: flex; align-items: flex-end; gap: 2px; height: 44px; margin: -4px 0 14px; position: relative; max-width: 520px; }
-.hour-bar {
+/* Duration histogram */
+.dur-hist { display: flex; align-items: flex-end; gap: 3px; height: 58px; padding-bottom: 14px; margin: 0 0 14px; position: relative; max-width: 520px; }
+.dur-bar {
   flex: 1 1 0; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent;
   display: flex; flex-direction: column; justify-content: flex-end; align-items: stretch; cursor: pointer; position: relative;
 }
-.hour-bar:disabled { cursor: default; }
-.hour-fill { display: block; background: var(--accent); opacity: 0.55; border-radius: 2px 2px 0 0; min-height: 2px; }
-.hour-bar:disabled .hour-fill { background: var(--border); opacity: 1; }
-.hour-bar:not(:disabled):hover .hour-fill { opacity: 1; }
-.hour-bar[aria-pressed="true"] .hour-fill { opacity: 1; outline: 2px solid var(--fg); outline-offset: 1px; }
-.hour-label { position: absolute; bottom: -14px; left: 0; font-size: 0.6rem; color: var(--muted); pointer-events: none; }
-.hour-hist { padding-bottom: 14px; height: 58px; }
-.hour-clear {
+.dur-bar:disabled { cursor: default; }
+.dur-fill { display: block; background: var(--accent); opacity: 0.55; border-radius: 2px 2px 0 0; min-height: 2px; }
+.dur-bar:disabled .dur-fill { background: var(--border); opacity: 1; }
+.dur-bar:not(:disabled):hover .dur-fill { opacity: 1; }
+.dur-bar[aria-pressed="true"] .dur-fill { opacity: 1; outline: 2px solid var(--fg); outline-offset: 1px; }
+.dur-label { position: absolute; bottom: -14px; left: 0; font-size: 0.6rem; color: var(--muted); pointer-events: none; white-space: nowrap; }
+.dur-clear {
   position: absolute; right: -28px; top: 0; width: 24px; height: 24px; border-radius: 50%; padding: 0; line-height: 1;
   border: 1px solid var(--border); background: var(--surface); color: var(--fg); cursor: pointer;
 }
-.hour-clear:hover { border-color: var(--accent); }
+.dur-clear:hover { border-color: var(--accent); }
+.day-summary { margin: -6px 0 10px; font-size: 0.8rem; color: var(--muted); display: grid; gap: 2px; }
+.sum-row { display: flex; flex-wrap: wrap; gap: 2px 14px; font-variant-numeric: tabular-nums; }
+.sum-item { white-space: nowrap; color: var(--fg); }
+.sum-label { color: var(--muted); }
+.uploaders { overflow-wrap: anywhere; }
 .filter-empty { grid-column: 1 / -1; padding: 24px 20px; }
 .filter-empty[hidden] { display: none; }
 .chip.duration { font-variant-numeric: tabular-nums; }

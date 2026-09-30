@@ -121,49 +121,101 @@ export function posterUrl(video) {
   return typeof poster === "string" && poster !== "" ? poster : null;
 }
 
-/**
- * Start hour (0-23) of a recording, parsed from its file name; null if unknown.
- * @param {{name?: string}|undefined|null} video
- * @returns {number|null}
- */
-export function hourOf(video) {
-  const parsed = parseRecordingName(video && video.name);
-  return parsed ? Number(parsed.time.slice(0, 2)) : null;
-}
-
-/**
- * Count recordings per start hour.
- * @param {any[]|undefined} videos
- * @returns {number[]} 24 counts, index = hour
- */
-export function histogram(videos) {
-  const counts = new Array(24).fill(0);
-  if (!Array.isArray(videos)) return counts;
-  for (const v of videos) {
-    const h = hourOf(v);
-    if (h !== null && h >= 0 && h < 24) counts[h] += 1;
-  }
-  return counts;
-}
+export const BUCKET_SEC = 30;
+/** Ten 30 s buckets (0-5 min) plus a final open-ended "5 min+" bucket. */
+export const BUCKET_COUNT = 11;
 
 const isNum = (n) => typeof n === "number" && Number.isFinite(n);
 
 /**
- * Duration + hour filter. A video with unknown duration only matches when no
- * duration bound is set.
- * @param {{name?: string, duration?: number|null}} video
- * @param {{minSec?: number|null, maxSec?: number|null, hour?: number|null}} filters
+ * Duration range AND duration bucket filter. A video with unknown duration
+ * only matches when neither a bound nor a bucket is set.
+ * @param {{duration?: number|null}} video
+ * @param {{minSec?: number|null, maxSec?: number|null, bucket?: number|null}} filters
  * @returns {boolean}
  */
 export function matchesFilters(video, filters = {}) {
-  const { minSec = null, maxSec = null, hour = null } = filters || {};
-  if (isNum(hour) && hourOf(video) !== hour) return false;
-  if (minSec === null && maxSec === null) return true;
+  const { minSec = null, maxSec = null, bucket = null } = filters || {};
   const d = video && video.duration;
+  if (isNum(bucket) && durationBucket(d) !== bucket) return false;
+  if (minSec === null && maxSec === null) return true;
   if (!isNum(d)) return false;
   if (isNum(minSec) && d < minSec) return false;
   if (isNum(maxSec) && d > maxSec) return false;
   return true;
+}
+
+/**
+ * Bucket index for a duration: 0-9 are 30 s wide, 10 is "5 min+". Null when unknown.
+ * @param {number|null|undefined} seconds
+ * @returns {number|null}
+ */
+export function durationBucket(seconds) {
+  if (!isNum(seconds) || seconds < 0) return null;
+  return Math.min(BUCKET_COUNT - 1, Math.floor(seconds / BUCKET_SEC));
+}
+
+/**
+ * Count videos per duration bucket; videos without a duration are tallied in `unknown`.
+ * @param {{duration?: number|null}[]|undefined} videos
+ * @returns {{buckets: {index: number, startSec: number, endSec: number|null, count: number}[], unknown: number}}
+ */
+export function durationHistogram(videos) {
+  const buckets = Array.from({ length: BUCKET_COUNT }, (_, index) => ({
+    index,
+    startSec: index * BUCKET_SEC,
+    endSec: index === BUCKET_COUNT - 1 ? null : (index + 1) * BUCKET_SEC,
+    count: 0,
+  }));
+  let unknown = 0;
+  for (const v of Array.isArray(videos) ? videos : []) {
+    const b = durationBucket(v && v.duration);
+    if (b === null) unknown += 1;
+    else buckets[b].count += 1;
+  }
+  return { buckets, unknown };
+}
+
+/**
+ * Compact total such as "45 s", "23 min" or "1 h 12 min"; "" for invalid input.
+ * @param {number|null|undefined} seconds
+ * @returns {string}
+ */
+export function formatTotalDuration(seconds) {
+  if (!isNum(seconds) || seconds < 0) return "";
+  const total = Math.round(seconds);
+  if (total < 60) return `${total} s`;
+  const mins = Math.round(total / 60);
+  return mins < 60 ? `${mins} min` : `${Math.floor(mins / 60)} h ${mins % 60} min`;
+}
+
+/**
+ * Per-day stats over a list of videos (callers pass one category's videos).
+ * Aggregates ignore videos without a duration; uploaders sort by count then name.
+ * @param {{duration?: number|null, uploader?: unknown}[]|undefined} videos
+ * @returns {{count: number, unknown: number, totalSec: number, avgSec: number|null,
+ *   minSec: number|null, maxSec: number|null, uploaders: {name: string, count: number}[]}}
+ */
+export function daySummary(videos) {
+  const list = Array.isArray(videos) ? videos : [];
+  const durations = list.map((v) => v && v.duration).filter(isNum);
+  const totalSec = durations.reduce((a, b) => a + b, 0);
+  const counts = new Map();
+  for (const v of list) {
+    const name = uploaderOf(v);
+    if (name) counts.set(name, (counts.get(name) || 0) + 1);
+  }
+  return {
+    count: list.length,
+    unknown: list.length - durations.length,
+    totalSec,
+    avgSec: durations.length ? totalSec / durations.length : null,
+    minSec: durations.length ? Math.min(...durations) : null,
+    maxSec: durations.length ? Math.max(...durations) : null,
+    uploaders: [...counts.entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0)),
+  };
 }
 
 /**

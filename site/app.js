@@ -7,7 +7,9 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
-  histogram,
+  durationHistogram,
+  daySummary,
+  formatTotalDuration,
   matchesFilters,
   formatDuration,
   parseFilterQuery,
@@ -423,51 +425,82 @@ const view = { mode: readDensity(storage) };
 /* ---------- Days ---------- */
 const filters = { minSec: null, maxSec: null };
 
+const clock = (sec) => formatDuration(sec);
+
+function bucketRange(b) {
+  return b.endSec === null ? `≥ ${clock(b.startSec)}` : `${clock(b.startSec)}–${clock(b.endSec)}`;
+}
+
 function renderHistogram(videos, state, onChange) {
-  const counts = histogram(videos);
-  const peak = Math.max(1, ...counts);
-  const wrap = el("div", { className: "hour-hist", role: "group", "aria-label": "Recordings by start hour" });
-  const bars = counts.map((n, h) => {
-    const hh = String(h).padStart(2, "0");
-    const next = String((h + 1) % 24).padStart(2, "0");
+  const { buckets } = durationHistogram(videos);
+  const peak = Math.max(1, ...buckets.map((b) => b.count));
+  const wrap = el("div", { className: "dur-hist", role: "group", "aria-label": "Videos by duration; select a bar to filter" });
+  const bars = buckets.map((b) => {
+    const range = bucketRange(b);
     const btn = el("button", {
       type: "button",
-      className: "hour-bar",
-      title: `${hh}:00–${next}:00, ${plural(n, "recording")}`,
-      "aria-label": `${hh}:00, ${plural(n, "recording")}`,
-      disabled: n === 0,
+      className: "dur-bar",
+      title: `${range} · ${plural(b.count, "video")}`,
+      "aria-label": `${range}, ${plural(b.count, "video")}`,
+      disabled: b.count === 0,
     });
     btn.setAttribute("aria-pressed", "false");
-    btn.appendChild(el("span", { className: "hour-fill" }));
-    btn.firstChild.style.height = n ? `${Math.max(12, Math.round((n / peak) * 100))}%` : "2px";
-    btn.appendChild(el("span", { className: "hour-label", text: h % 6 === 0 ? hh : "" }));
+    btn.appendChild(el("span", { className: "dur-fill" }));
+    btn.firstChild.style.height = b.count ? `${Math.max(12, Math.round((b.count / peak) * 100))}%` : "2px";
+    if (b.index % 2 === 0) {
+      const mins = b.startSec / 60;
+      btn.appendChild(el("span", { className: "dur-label", text: b.endSec === null ? `${mins}m+` : `${mins}m` }));
+    }
     btn.addEventListener("click", () => {
-      state.hour = state.hour === h ? null : h;
+      state.bucket = state.bucket === b.index ? null : b.index;
       onChange();
     });
     return btn;
   });
-  const clear = el("button", { type: "button", className: "hour-clear", text: "×", title: "Clear hour filter", hidden: true });
-  clear.setAttribute("aria-label", "Clear hour filter");
+  const clear = el("button", { type: "button", className: "dur-clear", text: "×", title: "Clear duration filter", hidden: true });
+  clear.setAttribute("aria-label", "Clear duration filter");
   clear.addEventListener("click", () => {
-    state.hour = null;
+    state.bucket = null;
     onChange();
   });
   wrap.append(...bars, clear);
   wrap.sync = () => {
-    bars.forEach((b, h) => b.setAttribute("aria-pressed", String(state.hour === h)));
-    clear.hidden = state.hour === null;
+    bars.forEach((btn, i) => btn.setAttribute("aria-pressed", String(state.bucket === i)));
+    clear.hidden = state.bucket === null;
   };
+  return wrap;
+}
+
+function renderSummary(videos) {
+  const s = daySummary(videos);
+  const stat = (label, value) =>
+    el("span", { className: "sum-item" }, [el("span", { className: "sum-label", text: label }), document.createTextNode(` ${value}`)]);
+  const wrap = el("div", { className: "day-summary" });
+  const stats = [stat("Videos", String(s.count))];
+  if (s.avgSec !== null) {
+    stats.push(
+      stat("Total", formatTotalDuration(s.totalSec)),
+      stat("Avg", clock(s.avgSec)),
+      stat("Range", `${clock(s.minSec)}–${clock(s.maxSec)}`)
+    );
+  }
+  if (s.unknown > 0) stats.push(stat("No duration", String(s.unknown)));
+  wrap.appendChild(el("div", { className: "sum-row" }, stats));
+  if (s.uploaders.length) {
+    wrap.appendChild(
+      el("div", { className: "sum-row uploaders", text: s.uploaders.map((u) => `${u.name} ×${u.count}`).join(" · ") })
+    );
+  }
   return wrap;
 }
 
 function renderDay(dayGroup, expanded, onCount) {
   const videos = dayGroup.videos || [];
-  const state = { hour: null };
+  const state = { bucket: null };
   const grid = el("div", { className: "video-grid", id: `grid-${dayGroup.day}` });
   const empty = el("div", { className: "empty-state filter-empty", hidden: true }, [
     el("span", { className: "state-title", text: "No recordings match" }),
-    el("span", { text: "Try widening the duration range or clearing the hour filter." }),
+    el("span", { text: "Try widening the duration range or clearing the duration bar filter." }),
   ]);
   let rendered = false;
   let visible = videos;
@@ -492,7 +525,7 @@ function renderDay(dayGroup, expanded, onCount) {
   const hist = renderHistogram(videos, state, () => section.refresh());
 
   section.refresh = () => {
-    visible = videos.filter((v) => matchesFilters(v, { ...filters, hour: state.hour }));
+    visible = videos.filter((v) => matchesFilters(v, { ...filters, bucket: state.bucket }));
     const text =
       visible.length === videos.length ? plural(videos.length, "video") : `${visible.length} of ${videos.length}`;
     badge.textContent = text;
@@ -523,6 +556,7 @@ function renderDay(dayGroup, expanded, onCount) {
       badge,
       toggle,
     ]),
+    renderSummary(videos),
     hist,
     grid,
     empty
