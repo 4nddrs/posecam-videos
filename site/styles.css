@@ -220,7 +220,8 @@ main { padding-top: 24px; padding-bottom: 40px; min-height: 50vh; }
   padding: 4px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; line-height: 1.3;
   background: var(--surface-2); color: var(--fg); border: 1px solid var(--border);
 }
-.chip.chip-time { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; background: var(--accent-soft); border-color: var(--accent); }
+.chip.chip-time { font-variant-numeric: tabular-nums; }
+.chip.duration { font-size: 1rem; font-weight: 700; background: var(--accent-soft); border-color: var(--accent); }
 .chip.pipeline { color: var(--success); border-color: var(--success); background: transparent; font-weight: 600; }
 .hash { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.75rem; color: var(--muted); }
 .video-source { color: var(--muted); font-size: 0.78rem; word-break: break-all; margin: 4px 0 0; }

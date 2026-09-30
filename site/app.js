@@ -315,13 +315,14 @@ export function renderVideo(video) {
   }
 
   const chips = el("div", { className: "chips" });
-  if (parsed) {
-    chips.appendChild(el("span", { className: "chip chip-time", text: parsed.time }));
-    chips.appendChild(el("span", { className: "chip chip-session", text: parsed.session }));
-  }
+  // Duration is the highlighted chip; the recording time is secondary.
   const durationText = formatDuration(video.duration);
   if (durationText) {
     chips.appendChild(el("span", { className: "chip duration", title: "Duration", text: `⏱ ${durationText}` }));
+  }
+  if (parsed) {
+    chips.appendChild(el("span", { className: "chip chip-time", title: "Recorded at", text: parsed.time }));
+    chips.appendChild(el("span", { className: "chip chip-session", text: parsed.session }));
   }
   const uploader = uploaderOf(video);
   if (uploader) {
