@@ -23,7 +23,7 @@
       <div class="title-row">
         <div>
           <h1>PoseCam Daily Videos</h1>
-          <p class="subtitle">Today's recordings, grouped by day, newest first.</p>
+          <p class="subtitle">Recordings by category, grouped by day, newest first.</p>
         </div>
         <div class="header-tools">
           <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch to light theme"></button>
@@ -38,6 +38,9 @@
   </header>
 
   <div class="sticky-bar">
+    <div class="wrap category-row" id="category-row" hidden>
+      <div class="category-tabs" id="category-tabs" role="tablist" aria-label="Video category"></div>
+    </div>
     <div class="wrap sticky-inner">
       <nav class="day-nav" id="day-nav" aria-label="Jump to day" hidden>
         <ul id="day-nav-list"></ul>
@@ -84,7 +87,7 @@
     <div class="shortcuts-head"><strong>Keyboard shortcuts</strong><button type="button" id="shortcuts-close" class="action" aria-label="Close shortcuts">×</button></div>
     <dl>
       <dt><kbd>Space</kbd></dt><dd>Play / pause active video</dd>
-      <dt><kbd>→</kbd> <kbd>←</kbd></dt><dd>Next / previous video in the day</dd>
+      <dt><kbd>→</kbd> <kbd>←</kbd></dt><dd>Next / previous video in the day (category tabs: switch category)</dd>
       <dt><kbd>f</kbd></dt><dd>Fullscreen active video</dd>
       <dt><kbd>?</kbd></dt><dd>Show / hide this help</dd>
     </dl>

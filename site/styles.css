@@ -36,7 +36,7 @@
 
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html { scroll-behavior: smooth; scroll-padding-top: 124px; }
 
 body {
   margin: 0;
@@ -273,3 +273,18 @@ kbd { font: inherit; font-size: 0.8em; padding: 1px 6px; border: 1px solid var(-
   .title-row { flex-wrap: wrap; }
   .density-btn { padding: 0 10px; }
 }
+
+/* Category tabs (one category at a time) */
+.category-row { padding-top: 8px; }
+.category-tabs { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: thin; border-bottom: 1px solid var(--border); }
+.category-tab {
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; flex: none;
+  padding: 6px 14px; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  background: transparent; color: var(--muted); font: inherit; font-size: 0.9rem; cursor: pointer;
+}
+.category-tab:hover { color: var(--fg); }
+.category-tab .count { font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.category-tab[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.category-tab:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 6px; }
+.chip.uploader { color: var(--muted); }
+.row-uploader { flex: none; color: var(--muted); font-size: 0.8rem; }

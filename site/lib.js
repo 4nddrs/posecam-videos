@@ -317,5 +317,125 @@ export function rowData(video) {
     name: v.name || "Untitled video",
     duration: formatDuration(v.duration),
     playable: !extractDriveId(v.url),
+    uploader: uploaderOf(v),
   };
+}
+
+export const DEFAULT_CATEGORY = "Remaining";
+export const CATEGORY_KEY = "category";
+
+/**
+ * Category of a video; entries without one belong to "Remaining".
+ * @param {{category?: unknown}|null|undefined} video
+ * @returns {string}
+ */
+export function categoryOf(video) {
+  const c = video && typeof video.category === "string" ? video.category.trim() : "";
+  return c || DEFAULT_CATEGORY;
+}
+
+/**
+ * Uploader display name, or "" when unknown (callers omit the label).
+ * @param {{uploader?: unknown}|null|undefined} video
+ * @returns {string}
+ */
+export function uploaderOf(video) {
+  return video && typeof video.uploader === "string" ? video.uploader.trim() : "";
+}
+
+/**
+ * Categories with video counts, ordered by their newest video (day, then
+ * name, both descending) so the first entry is the default tab; ties by name.
+ * @param {{day: string, videos?: any[]}[]|undefined} days
+ * @returns {{name: string, count: number}[]}
+ */
+export function listCategories(days) {
+  if (!Array.isArray(days)) return [];
+  const found = new Map();
+  for (const d of days) {
+    for (const v of d.videos || []) {
+      const name = categoryOf(v);
+      const key = `${d.day}\u0000${v.name || ""}`;
+      const entry = found.get(name) || { name, count: 0, newest: "" };
+      entry.count += 1;
+      if (key > entry.newest) entry.newest = key;
+      found.set(name, entry);
+    }
+  }
+  return [...found.values()]
+    .sort((a, b) => (a.newest < b.newest ? 1 : a.newest > b.newest ? -1 : a.name < b.name ? -1 : 1))
+    .map(({ name, count }) => ({ name, count }));
+}
+
+/**
+ * Day groups restricted to one category; days left empty are dropped.
+ * Does not mutate the input.
+ * @param {{day: string, videos?: any[]}[]|undefined} days
+ * @param {string} category
+ * @returns {{day: string, videos: any[]}[]}
+ */
+export function daysForCategory(days, category) {
+  if (!Array.isArray(days)) return [];
+  return days
+    .map((d) => ({ ...d, videos: (d.videos || []).filter((v) => categoryOf(v) === category) }))
+    .filter((d) => d.videos.length > 0);
+}
+
+/**
+ * Category of the video whose anchor id (`v-...`) matches, or null.
+ * @param {{videos?: any[]}[]|undefined} days
+ * @param {string} anchorId
+ * @returns {string|null}
+ */
+export function categoryOfVideoId(days, anchorId) {
+  if (!anchorId || !Array.isArray(days)) return null;
+  for (const d of days) {
+    for (const v of d.videos || []) {
+      if (videoAnchorId(v) === anchorId) return categoryOf(v);
+    }
+  }
+  return null;
+}
+
+/**
+ * Pick the active category: deep-linked video's category, else a stored
+ * choice that still exists, else the first (newest) category.
+ * @param {{name: string}[]} categories
+ * @param {{linked?: string|null, stored?: string|null}} [hints]
+ * @returns {string|null}
+ */
+export function chooseCategory(categories, hints = {}) {
+  const names = (categories || []).map((c) => c.name);
+  if (hints.linked && names.includes(hints.linked)) return hints.linked;
+  if (hints.stored && names.includes(hints.stored)) return hints.stored;
+  return names.length ? names[0] : null;
+}
+
+/**
+ * Read the persisted category choice. Never throws; null when unavailable.
+ * @param {{getItem: (key: string) => string|null}|undefined} storage
+ * @returns {string|null}
+ */
+export function readCategory(storage) {
+  try {
+    return storage.getItem(CATEGORY_KEY) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Persist the category choice. Returns false (never throws) when it cannot.
+ * @param {{setItem: (key: string, value: string) => void}|undefined} storage
+ * @param {string} name
+ * @returns {boolean}
+ */
+export function writeCategory(storage, name) {
+  if (typeof name !== "string" || !name) return false;
+  try {
+    storage.setItem(CATEGORY_KEY, name);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

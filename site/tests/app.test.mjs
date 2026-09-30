@@ -24,6 +24,16 @@ import {
   readDensity,
   writeDensity,
   rowData,
+  DEFAULT_CATEGORY,
+  categoryOf,
+  uploaderOf,
+  listCategories,
+  daysForCategory,
+  categoryOfVideoId,
+  chooseCategory,
+  readCategory,
+  writeCategory,
+  CATEGORY_KEY,
 } from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
@@ -283,6 +293,7 @@ test("rowData exposes the time, name and duration shown in list rows", () => {
     name: "RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
     duration: "4:53",
     playable: true,
+    uploader: "",
   });
 });
 
@@ -292,9 +303,104 @@ test("rowData tolerates unparsed names, missing duration and Drive-only urls", (
     name: "clip.mp4",
     duration: "",
     playable: true,
+    uploader: "",
   });
   const drive = rowData({ url: "https://drive.google.com/file/d/abc123/view" });
   assert.equal(drive.name, "Untitled video");
   assert.equal(drive.playable, false);
   assert.equal(rowData(null).name, "Untitled video");
+});
+
+const catManifest = () => ({
+  days: [
+    {
+      day: "2026-09-30",
+      videos: [
+        { id: "d30/a", name: "b-1.mp4", category: "White pipes", uploader: "Ann" },
+        { id: "d30/b", name: "b-2.mp4", category: "Black pipes" },
+      ],
+    },
+    {
+      day: "2026-09-28",
+      videos: [
+        { id: "d28/a", name: "r-1.mp4", category: "Remaining", uploader: "Zed" },
+        { id: "d28/b", name: "r-2.mp4" },
+      ],
+    },
+  ],
+});
+
+test("categoryOf falls back to Remaining and uploaderOf omits blanks", () => {
+  assert.equal(DEFAULT_CATEGORY, "Remaining");
+  assert.equal(categoryOf({ category: "White pipes" }), "White pipes");
+  assert.equal(categoryOf({}), "Remaining");
+  assert.equal(categoryOf({ category: "  " }), "Remaining");
+  assert.equal(categoryOf(null), "Remaining");
+  assert.equal(uploaderOf({ uploader: " Ann " }), "Ann");
+  assert.equal(uploaderOf({ uploader: null }), "");
+  assert.equal(uploaderOf({}), "");
+  assert.equal(uploaderOf(undefined), "");
+});
+
+test("listCategories counts videos, newest category first, uncategorized counts as Remaining", () => {
+  assert.deepEqual(listCategories(catManifest().days), [
+    { name: "Black pipes", count: 1 },
+    { name: "White pipes", count: 1 },
+    { name: "Remaining", count: 2 },
+  ]);
+  assert.deepEqual(listCategories(undefined), []);
+});
+
+test("listCategories ties on newest video break by name and recency uses day then name", () => {
+  const days = [
+    { day: "2026-09-30", videos: [{ name: "a", category: "B" }, { name: "z", category: "A" }] },
+    { day: "2026-09-29", videos: [{ name: "q", category: "C" }] },
+  ];
+  assert.deepEqual(listCategories(days).map((c) => c.name), ["A", "B", "C"]);
+});
+
+test("daysForCategory keeps only that category's videos and drops empty days", () => {
+  const days = catManifest().days;
+  const remaining = daysForCategory(days, "Remaining");
+  assert.deepEqual(remaining.map((d) => d.day), ["2026-09-28"]);
+  assert.deepEqual(remaining[0].videos.map((v) => v.id), ["d28/a", "d28/b"]);
+  const white = daysForCategory(days, "White pipes");
+  assert.deepEqual(white.map((d) => [d.day, d.videos.length]), [["2026-09-30", 1]]);
+  assert.deepEqual(daysForCategory(days, "Nope"), []);
+  assert.equal(days[0].videos.length, 2);
+});
+
+test("categoryOfVideoId maps a v- anchor to its category", () => {
+  const days = catManifest().days;
+  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d30/b" })), "Black pipes");
+  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d28/b" })), "Remaining");
+  assert.equal(categoryOfVideoId(days, "v-missing"), null);
+  assert.equal(categoryOfVideoId(days, ""), null);
+});
+
+test("chooseCategory prefers a deep link, then a stored known choice, then the first category", () => {
+  const cats = [{ name: "White pipes" }, { name: "Remaining" }];
+  assert.equal(chooseCategory(cats, { linked: "Remaining", stored: "White pipes" }), "Remaining");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Remaining" }), "Remaining");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Gone" }), "White pipes");
+  assert.equal(chooseCategory(cats, {}), "White pipes");
+  assert.equal(chooseCategory([], {}), null);
+});
+
+test("readCategory and writeCategory never throw", () => {
+  assert.equal(readCategory({ getItem: (k) => (k === CATEGORY_KEY ? "White pipes" : null) }), "White pipes");
+  assert.equal(readCategory({ getItem: () => null }), null);
+  assert.equal(readCategory({ getItem: () => { throw new Error("denied"); } }), null);
+  assert.equal(readCategory(undefined), null);
+  const data = {};
+  assert.equal(writeCategory({ setItem: (k, v) => { data[k] = v; } }, "Black pipes"), true);
+  assert.equal(data[CATEGORY_KEY], "Black pipes");
+  assert.equal(writeCategory({ setItem: () => { throw new Error("full"); } }, "x"), false);
+  assert.equal(writeCategory(undefined, "x"), false);
+  assert.equal(writeCategory({ setItem: () => {} }, ""), false);
+});
+
+test("rowData includes the uploader, empty when unknown", () => {
+  assert.equal(rowData({ name: "x.mp4", url: "https://cdn.example/x.mp4", uploader: "Ann" }).uploader, "Ann");
+  assert.equal(rowData({ name: "x.mp4", url: "https://cdn.example/x.mp4" }).uploader, "");
 });

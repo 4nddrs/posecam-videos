@@ -20,6 +20,13 @@ import {
   readDensity,
   writeDensity,
   rowData,
+  uploaderOf,
+  listCategories,
+  daysForCategory,
+  categoryOfVideoId,
+  chooseCategory,
+  readCategory,
+  writeCategory,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -203,7 +210,7 @@ function initPlayback() {
       }
       case "ArrowRight":
       case "ArrowLeft": {
-        if (t instanceof Element && t.closest("video")) return; // native seeking
+        if (t instanceof Element && t.closest("video, [role='tab']")) return; // native seeking / tab keys
         e.preventDefault();
         const dir = e.key === "ArrowRight" ? 1 : -1;
         if (card) stepFrom(card, dir);
@@ -312,6 +319,10 @@ export function renderVideo(video) {
   if (durationText) {
     chips.appendChild(el("span", { className: "chip duration", title: "Duration", text: `⏱ ${durationText}` }));
   }
+  const uploader = uploaderOf(video);
+  if (uploader) {
+    chips.appendChild(el("span", { className: "chip uploader", title: "Uploaded by", text: `by ${uploader}` }));
+  }
   if (isPipelineZip(video.source_zip)) {
     chips.appendChild(el("span", { className: "chip pipeline", text: "pipeline" }));
   }
@@ -394,6 +405,7 @@ export function renderRow(video) {
     el("div", { className: "row-head" }, [
       el("span", { className: "row-time", text: data.time || "—" }),
       el("span", { className: "row-name", text: data.name }),
+      data.uploader ? el("span", { className: "row-uploader", title: "Uploaded by", text: data.uploader }) : null,
       el("span", { className: "row-duration", title: "Duration", text: data.duration }),
       playBtn,
       copyLinkButton(video, "action row-copy"),
@@ -521,28 +533,22 @@ function renderDay(dayGroup, expanded, onCount) {
 }
 
 /* ---------- Duration filter toolbar ---------- */
-function initToolbar(days, sections) {
+const scope = { sections: new Map(), top: 1 };
+let applyFilters = () => {};
+
+/** Bind the filter controls once; `configureToolbar` rescopes them per category. */
+function initToolbar() {
   const bar = document.getElementById("filter-bar");
   if (!bar) return;
-  const maxDur = Math.max(0, ...days.flatMap((d) => (d.videos || []).map((v) => (Number.isFinite(v.duration) ? v.duration : 0))));
-  const top = Math.max(1, Math.ceil(maxDur / 60));
   const lo = document.getElementById("filter-min");
   const hi = document.getElementById("filter-max");
   const readout = document.getElementById("filter-readout");
   const minValue = document.getElementById("filter-min-value");
   const maxValue = document.getElementById("filter-max-value");
   const reset = document.getElementById("filter-reset");
-  for (const input of [lo, hi]) {
-    input.min = "0";
-    input.max = String(top);
-    input.step = "1";
-  }
-  const clamp = (n) => Math.min(top, Math.max(0, Math.round(n)));
-  const initial = parseFilterQuery(location.search);
-  lo.value = String(initial.minSec === null ? 0 : clamp(initial.minSec / 60));
-  hi.value = String(initial.maxSec === null ? top : clamp(initial.maxSec / 60));
 
   const apply = (changed) => {
+    const top = scope.top;
     let a = Number(lo.value);
     let b = Number(hi.value);
     if (a > b) {
@@ -561,20 +567,46 @@ function initToolbar(days, sections) {
     } catch (e) {
       /* history unavailable: filter still applies */
     }
-    for (const section of sections.values()) section.refresh();
+    for (const section of scope.sections.values()) section.refresh();
   };
   lo.addEventListener("input", () => apply(lo));
   hi.addEventListener("input", () => apply(hi));
   reset.addEventListener("click", () => {
     lo.value = "0";
-    hi.value = String(top);
+    hi.value = String(scope.top);
     apply(null);
   });
-  bar.hidden = false;
-  apply(null);
+  applyFilters = apply;
 }
 
-function initDensity(sections) {
+/**
+ * Point the filter controls at one category's days. The slider range follows
+ * that category's longest video; `fromQuery` restores `?min=&max=` on load,
+ * later switches start unfiltered.
+ */
+function configureToolbar(days, sections, fromQuery) {
+  const bar = document.getElementById("filter-bar");
+  if (!bar) return;
+  const lo = document.getElementById("filter-min");
+  const hi = document.getElementById("filter-max");
+  const maxDur = Math.max(0, ...days.flatMap((d) => (d.videos || []).map((v) => (Number.isFinite(v.duration) ? v.duration : 0))));
+  const top = Math.max(1, Math.ceil(maxDur / 60));
+  scope.top = top;
+  scope.sections = sections;
+  for (const input of [lo, hi]) {
+    input.min = "0";
+    input.max = String(top);
+    input.step = "1";
+  }
+  const clamp = (n) => Math.min(top, Math.max(0, Math.round(n)));
+  const initial = fromQuery ? parseFilterQuery(location.search) : { minSec: null, maxSec: null };
+  lo.value = String(initial.minSec === null ? 0 : clamp(initial.minSec / 60));
+  hi.value = String(initial.maxSec === null ? top : clamp(initial.maxSec / 60));
+  bar.hidden = false;
+  applyFilters(null);
+}
+
+function initDensity(getSections) {
   const buttons = [...document.querySelectorAll(".density-btn")];
   const paint = () => {
     for (const btn of buttons) btn.setAttribute("aria-pressed", String(btn.dataset.mode === view.mode));
@@ -587,13 +619,14 @@ function initDensity(sections) {
       paint();
       setActive(null);
       // refresh() repaints expanded days and marks collapsed ones stale.
-      for (const section of sections.values()) section.refresh();
+      for (const section of getSections().values()) section.refresh();
     });
   }
   paint();
 }
 
 let navCounts = () => {};
+let navObserver = null;
 
 function renderNav(days, sections) {
   const counts = new Map();
@@ -601,6 +634,8 @@ function renderNav(days, sections) {
   const list = document.getElementById("day-nav-list");
   if (!nav || !list) return;
   const buttons = new Map();
+  list.replaceChildren();
+  if (navObserver) navObserver.disconnect();
 
   for (const d of days) {
     const btn = el("button", { type: "button", className: "chip-btn" }, [
@@ -637,14 +672,14 @@ function renderNav(days, sections) {
   for (const [day, section] of sections) section.refresh();
 
   if ("IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(
+    navObserver = new IntersectionObserver(
       (entries) => {
         const visible = entries.filter((e) => e.isIntersecting);
         if (visible.length) setCurrent(visible[0].target.dataset.day);
       },
       { rootMargin: "-90px 0px -60% 0px" }
     );
-    for (const section of sections.values()) observer.observe(section);
+    for (const section of sections.values()) navObserver.observe(section);
   }
 }
 
@@ -686,6 +721,98 @@ async function loadManifest() {
   return response.json();
 }
 
+/* ---------- Categories ---------- */
+const ui = { manifest: null, allDays: [], category: null, days: [], sections: new Map(), toolbarSeen: false };
+
+const currentHashId = () => decodeURIComponent(location.hash.replace(/^#/, ""));
+
+/** Rebuild stats, day sections, nav and filters for one category only. */
+function showCategory(name) {
+  const app = document.getElementById("app");
+  ui.days = daysForCategory(ui.allDays, name);
+  setActive(null);
+  app.replaceChildren();
+  renderStats(ui.manifest, ui.days);
+  app.setAttribute("role", "tabpanel");
+  const tab = document.querySelector("#category-tabs [aria-selected='true']");
+  if (tab) app.setAttribute("aria-labelledby", tab.id);
+
+  const sections = new Map();
+  for (const day of ui.days) {
+    // Every day starts collapsed so the list of available days is visible
+    // at a glance; a deep link still expands its own day.
+    const section = renderDay(day, false, (d, n, t) => navCounts(d, n, t));
+    sections.set(day.day, section);
+    app.appendChild(section);
+  }
+  ui.sections = sections;
+  renderNav(ui.days, sections);
+  configureToolbar(ui.days, sections, !ui.toolbarSeen);
+  ui.toolbarSeen = true;
+}
+
+function initCategoryTabs(categories) {
+  const tablist = document.getElementById("category-tabs");
+  const row = document.getElementById("category-row");
+  if (!tablist || !row) return;
+  const tabs = categories.map((c, i) => {
+    const tab = el("button", { type: "button", className: "category-tab", id: `category-tab-${i}` }, [
+      el("span", { text: c.name }),
+      el("span", { className: "count", text: String(c.count) }),
+    ]);
+    tab.setAttribute("role", "tab");
+    tab.dataset.category = c.name;
+    tab.addEventListener("click", () => selectCategory(c.name, { clearHash: true }));
+    tab.addEventListener("keydown", (e) => {
+      const keys = { ArrowRight: 1, ArrowLeft: -1 };
+      let next = -1;
+      if (e.key in keys) next = (i + keys[e.key] + tabs.length) % tabs.length;
+      else if (e.key === "Home") next = 0;
+      else if (e.key === "End") next = tabs.length - 1;
+      if (next === -1) return;
+      e.preventDefault();
+      tabs[next].focus();
+      selectCategory(categories[next].name, { clearHash: true });
+    });
+    return tab;
+  });
+  tablist.replaceChildren(...tabs);
+  // A single category needs no switcher.
+  row.hidden = categories.length < 2;
+}
+
+function paintCategoryTabs() {
+  for (const tab of document.querySelectorAll("#category-tabs .category-tab")) {
+    const on = tab.dataset.category === ui.category;
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+  }
+}
+
+function selectCategory(name, { persist = true, clearHash = false } = {}) {
+  if (name === ui.category) return;
+  if (persist) writeCategory(storage, name);
+  if (clearHash) {
+    try {
+      // The filter query is rewritten by the toolbar reset that follows.
+      history.replaceState(null, "", `${location.pathname}${location.search}`);
+    } catch (e) {
+      /* history unavailable: stale hash is harmless */
+    }
+  }
+  ui.category = name;
+  paintCategoryTabs();
+  showCategory(name);
+}
+
+/** Switch to the linked video's category if needed, then open and focus it. */
+function followHash() {
+  const category = categoryOfVideoId(ui.allDays, currentHashId());
+  if (!category) return;
+  selectCategory(category);
+  openDeepLink(ui.days, ui.sections);
+}
+
 async function main() {
   initTheme();
   initPlayback();
@@ -696,26 +823,27 @@ async function main() {
     const manifest = await loadManifest();
     const days = groupByDay(manifest);
     app.replaceChildren();
-    renderStats(manifest, days);
+    ui.manifest = manifest;
+    ui.allDays = days;
 
     if (days.length === 0) {
+      renderStats(manifest, days);
       app.appendChild(renderEmpty());
       return;
     }
 
-    const sections = new Map();
-    days.forEach((day, i) => {
-      // Every day starts collapsed so the list of available days is visible
-      // at a glance; a deep link still expands its own day.
-      const section = renderDay(day, false, (d, n, t) => navCounts(d, n, t));
-      sections.set(day.day, section);
-      app.appendChild(section);
+    const categories = listCategories(days);
+    initCategoryTabs(categories);
+    initToolbar();
+    const start = chooseCategory(categories, {
+      linked: categoryOfVideoId(days, currentHashId()),
+      stored: readCategory(storage),
     });
-    renderNav(days, sections);
-    initToolbar(days, sections);
-    initDensity(sections);
-    openDeepLink(days, sections);
-    window.addEventListener("hashchange", () => openDeepLink(days, sections));
+    initDensity(() => ui.sections);
+    // The default is not persisted: only an explicit choice sticks.
+    selectCategory(start, { persist: false });
+    openDeepLink(ui.days, ui.sections);
+    window.addEventListener("hashchange", followHash);
   } catch (error) {
     app.replaceChildren();
     app.appendChild(renderError(error instanceof Error ? error.message : String(error)));
