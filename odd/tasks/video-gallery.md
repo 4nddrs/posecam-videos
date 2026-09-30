@@ -88,3 +88,4 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 - 2026-09-30: 054f54b density toggle (delegated writer, TDD, 31 node tests).
 - 2026-09-30: T12 reviewed (medium, 288 lines, granted, reliability approved, acknowledged lineage review-006cb6071f1151a8). Advisory only: list-mode DOM paths untested (WARNING); arrow/auto-advance leaves earlier rows open; switch-while-collapsed staleness note. Browser check at 1280/390 px still pending.
 - 2026-09-30: 6af7352 layout toggle moved into a sticky bar with the day nav. Reviewed (medium, granted, reliability approved, acknowledged lineage review-14199f00c6b572eb); advisory: list DOM untested, stepping leaves rows open.
+- 2026-09-30: videos within each day now newest first (site-side sort in groupByDay; manifest order unchanged). TDD RED 1 fail → GREEN 32 pass. Auto-play/ArrowRight follow display order, so they now step to older recordings.

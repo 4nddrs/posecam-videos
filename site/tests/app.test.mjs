@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   extractDriveId,
   sortDaysDesc,
+  groupByDay,
   parseRecordingName,
   formatDayLabel,
   relativeTime,
@@ -63,6 +64,31 @@ test("sortDaysDesc does not mutate the input array", () => {
 test("sortDaysDesc handles an empty or missing list", () => {
   assert.deepEqual(sortDaysDesc([]), []);
   assert.deepEqual(sortDaysDesc(undefined), []);
+});
+
+test("groupByDay orders videos within each day newest first", () => {
+  const manifest = {
+    days: [
+      {
+        day: "2026-09-27",
+        videos: [
+          { name: "RGB_2026-09-27-10_43_11-aaaaaa-s1.mp4" },
+          { name: "RGB_2026-09-27-14_47_45-bbbbbb-s2.mp4" },
+          { name: "RGB_2026-09-27-12_00_00-cccccc-s1.mp4" },
+        ],
+      },
+    ],
+  };
+  const [day] = groupByDay(manifest);
+  assert.deepEqual(
+    day.videos.map((v) => v.name),
+    [
+      "RGB_2026-09-27-14_47_45-bbbbbb-s2.mp4",
+      "RGB_2026-09-27-12_00_00-cccccc-s1.mp4",
+      "RGB_2026-09-27-10_43_11-aaaaaa-s1.mp4",
+    ]
+  );
+  assert.equal(manifest.days[0].videos[0].name, "RGB_2026-09-27-10_43_11-aaaaaa-s1.mp4");
 });
 
 test("parseRecordingName parses a valid recording filename", () => {

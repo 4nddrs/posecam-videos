@@ -30,13 +30,20 @@ export function sortDaysDesc(days) {
 
 /**
  * Group (already-grouped) manifest data by day, defensively re-sorted
- * newest day first.
+ * newest day first, with each day's videos newest first. Recording names
+ * start with their capture timestamp, so name order is time order.
+ * Does not mutate the manifest.
  * @param {{generated_at?: string, days?: {day: string, videos: any[]}[]}} manifest
  * @returns {{day: string, videos: any[]}[]}
  */
 export function groupByDay(manifest) {
   if (!manifest || typeof manifest !== "object") return [];
-  return sortDaysDesc(manifest.days);
+  return sortDaysDesc(manifest.days).map((day) => ({
+    ...day,
+    videos: [...(day.videos || [])].sort((a, b) =>
+      a.name < b.name ? 1 : a.name > b.name ? -1 : 0
+    ),
+  }));
 }
 
 /**
