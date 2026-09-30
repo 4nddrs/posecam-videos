@@ -510,9 +510,30 @@ function renderDay(dayGroup, expanded, onCount) {
   const section = el("section", { className: "day-section", id: `day-${dayGroup.day}` });
   section.dataset.day = dayGroup.day;
 
-  const toggle = el("button", { type: "button", className: "toggle-btn" });
+  const toggle = el("button", { type: "button", className: "day-toggle" });
   toggle.setAttribute("aria-controls", grid.id);
   const badge = el("span", { className: "badge" });
+
+  // Collapsed: a wide call-to-action with a peek of the first posters.
+  // Expanded: a quieter "Hide videos" bar.
+  const paintToggle = (collapsed) => {
+    toggle.classList.toggle("is-open", !collapsed);
+    if (!collapsed) {
+      toggle.replaceChildren(el("span", { className: "day-toggle-text", text: "Hide videos" }), el("span", { className: "day-toggle-chevron", text: "▲" }));
+      return;
+    }
+    const posters = visible.filter((v) => v.poster).slice(0, 4);
+    const peek = el(
+      "span",
+      { className: "day-toggle-peek", "aria-hidden": "true" },
+      posters.map((v) => el("img", { src: v.poster, alt: "", loading: "lazy", decoding: "async" }))
+    );
+    toggle.replaceChildren(
+      ...(posters.length ? [peek] : []),
+      el("span", { className: "day-toggle-text", text: visible.length ? `▶ Watch ${plural(visible.length, "video")}` : "No videos match" }),
+      el("span", { className: "day-toggle-chevron", text: "▼" })
+    );
+  };
 
   const paint = () => {
     const collapsed = section.dataset.collapsed === "true";
@@ -522,7 +543,7 @@ function renderDay(dayGroup, expanded, onCount) {
       rendered = true;
     }
     empty.hidden = collapsed || visible.length > 0;
-    toggle.textContent = collapsed ? `Show ${plural(visible.length, "video")}` : "Hide videos";
+    paintToggle(collapsed);
   };
 
   const hist = renderHistogram(videos, state, () => section.refresh());
@@ -538,7 +559,7 @@ function renderDay(dayGroup, expanded, onCount) {
     else {
       // The grid is stale until the next expand repaints it.
       rendered = false;
-      toggle.textContent = `Show ${plural(visible.length, "video")}`;
+      paintToggle(true);
     }
   };
 
@@ -547,7 +568,7 @@ function renderDay(dayGroup, expanded, onCount) {
     toggle.setAttribute("aria-expanded", String(!collapsed));
     if (!collapsed && rendered) {
       empty.hidden = visible.length > 0;
-      toggle.textContent = "Hide videos";
+      paintToggle(false);
     } else paint();
   };
   toggle.addEventListener("click", () => setCollapsed(section.dataset.collapsed !== "true"));
@@ -557,10 +578,10 @@ function renderDay(dayGroup, expanded, onCount) {
     el("div", { className: "day-head" }, [
       el("h2", { text: formatDayLabel(dayGroup.day) }),
       badge,
-      toggle,
     ]),
     renderSummary(videos),
     hist,
+    toggle,
     grid,
     empty
   );
