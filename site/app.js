@@ -17,6 +17,9 @@ import {
   nextVisibleIndex,
   clampSpeed,
   SPEEDS,
+  readDensity,
+  writeDensity,
+  rowData,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -105,15 +108,23 @@ function setSpeed(value) {
   paintSpeed();
 }
 
-/** Cards of the day grid that holds `card`, in display order. */
-const siblingCards = (card) => (card && card.parentElement ? [...card.parentElement.querySelectorAll(".video-card")] : []);
+/** Items (cards, or list rows) of the day grid that holds `card`, in display order. */
+const ITEM_SELECTOR = ":scope > .video-card, :scope > .video-row";
+const itemOf = (card) => (card ? card.closest(".video-row") || card : null);
+const siblingItems = (card) => {
+  const grid = card ? card.closest(".video-grid") : null;
+  return grid ? [...grid.querySelectorAll(ITEM_SELECTOR)] : [];
+};
+/** A list row mounts its card on demand; a card item is its own card. */
+const cardOf = (item) => (item && item.classList.contains("video-row") ? item.mount() : item);
+const isPlayable = (item) => (item.classList.contains("video-row") ? item.dataset.playable === "true" : Boolean(cardVideo(item)));
 
-/** Move to the next/previous playable card in the same day and start it. */
+/** Move to the next/previous playable item in the same day and start it. */
 function stepFrom(card, direction) {
-  const cards = siblingCards(card);
-  const idx = nextVisibleIndex(cards.map((c) => Boolean(cardVideo(c))), cards.indexOf(card), direction);
+  const items = siblingItems(card);
+  const idx = nextVisibleIndex(items.map(isPlayable), items.indexOf(itemOf(card)), direction);
   if (idx === -1) return false;
-  playCard(cards[idx]);
+  playCard(cardOf(items[idx]));
   return true;
 }
 
@@ -197,8 +208,8 @@ function initPlayback() {
         const dir = e.key === "ArrowRight" ? 1 : -1;
         if (card) stepFrom(card, dir);
         else {
-          const first = document.querySelector(".video-card");
-          if (first && dir === 1) playCard(first);
+          const first = document.querySelector(".video-grid > .video-card, .video-grid > .video-row[data-playable='true']");
+          if (first && dir === 1) playCard(cardOf(first));
         }
         break;
       }
@@ -230,8 +241,9 @@ function openDeepLink(days, sections) {
   if (!day) return;
   const section = sections.get(day.day);
   if (section) section.expand();
-  const card = document.getElementById(id);
-  if (!card) return;
+  const target = document.getElementById(id);
+  if (!target) return;
+  const card = cardOf(target);
   setActive(card);
   card.scrollIntoView({ block: "center" });
   card.focus({ preventScroll: true });
@@ -245,6 +257,16 @@ async function copyText(text) {
   } catch (e) {
     return false;
   }
+}
+
+function copyLinkButton(video, className) {
+  const btn = el("button", { type: "button", className, text: "Copy link" });
+  btn.addEventListener("click", async () => {
+    const ok = await copyText(deepLink(location.origin + location.pathname + location.search, video));
+    btn.textContent = ok ? "Copied" : "Copy failed";
+    setTimeout(() => (btn.textContent = "Copy link"), 1800);
+  });
+  return btn;
 }
 
 /**
@@ -294,12 +316,7 @@ export function renderVideo(video) {
     chips.appendChild(el("span", { className: "chip pipeline", text: "pipeline" }));
   }
 
-  const copyBtn = el("button", { type: "button", className: "action", text: "Copy link" });
-  copyBtn.addEventListener("click", async () => {
-    const ok = await copyText(deepLink(location.origin + location.pathname + location.search, video));
-    copyBtn.textContent = ok ? "Copied" : "Copy failed";
-    setTimeout(() => (copyBtn.textContent = "Copy link"), 1800);
-  });
+  const copyBtn = copyLinkButton(video, "action");
 
   const speedGroup = el("div", { className: "speed-group", role: "group", "aria-label": "Playback speed" });
   for (const value of driveId ? [] : SPEEDS) {
@@ -326,6 +343,69 @@ export function renderVideo(video) {
     ]),
   ]);
 }
+
+/**
+ * Render one video entry as a compact list row. The full player card is
+ * mounted under the row on demand and reuses `renderVideo`.
+ * @param {object} video
+ * @returns {HTMLElement}
+ */
+export function renderRow(video) {
+  const data = rowData(video);
+  const anchor = videoAnchorId(video);
+  const row = el("article", { className: "video-row", id: anchor });
+  row.dataset.playable = String(data.playable);
+  const slot = el("div", { className: "row-player", hidden: true });
+  let card = null;
+
+  const playBtn = el("button", { type: "button", className: "action row-play", text: "▶ Play" });
+  playBtn.setAttribute("aria-expanded", "false");
+  playBtn.setAttribute("aria-label", `${data.playable ? "Play" : "Open"} ${data.name}`);
+  const paint = () => {
+    const open = !slot.hidden;
+    playBtn.setAttribute("aria-expanded", String(open));
+    playBtn.textContent = open ? "✕ Close" : data.playable ? "▶ Play" : "▶ Open";
+  };
+
+  row.mount = () => {
+    if (!card) {
+      card = renderVideo(video);
+      card.removeAttribute("id"); // the row owns the deep-link anchor
+      slot.appendChild(card);
+    }
+    slot.hidden = false;
+    paint();
+    return card;
+  };
+  const close = () => {
+    const v = cardVideo(card);
+    if (v) v.pause();
+    if (playback.active === card) setActive(null);
+    slot.hidden = true;
+    paint();
+  };
+  playBtn.addEventListener("click", () => {
+    if (!slot.hidden) return close();
+    const mounted = row.mount();
+    if (data.playable) playCard(mounted);
+  });
+
+  row.append(
+    el("div", { className: "row-head" }, [
+      el("span", { className: "row-time", text: data.time || "—" }),
+      el("span", { className: "row-name", text: data.name }),
+      el("span", { className: "row-duration", title: "Duration", text: data.duration }),
+      playBtn,
+      copyLinkButton(video, "action row-copy"),
+    ]),
+    slot
+  );
+  return row;
+}
+
+/* ---------- Layout density ---------- */
+const storage = { getItem: (k) => store.get(k), setItem: (k, v) => store.set(k, v) };
+const view = { mode: readDensity(storage) };
 
 /* ---------- Days ---------- */
 const filters = { minSec: null, maxSec: null };
@@ -388,7 +468,8 @@ function renderDay(dayGroup, expanded, onCount) {
   const paint = () => {
     const collapsed = section.dataset.collapsed === "true";
     if (!collapsed) {
-      grid.replaceChildren(...visible.map(renderVideo));
+      grid.classList.toggle("is-list", view.mode === "list");
+      grid.replaceChildren(...visible.map(view.mode === "list" ? renderRow : renderVideo));
       rendered = true;
     }
     empty.hidden = collapsed || visible.length > 0;
@@ -491,6 +572,25 @@ function initToolbar(days, sections) {
   });
   bar.hidden = false;
   apply(null);
+}
+
+function initDensity(sections) {
+  const buttons = [...document.querySelectorAll(".density-btn")];
+  const paint = () => {
+    for (const btn of buttons) btn.setAttribute("aria-pressed", String(btn.dataset.mode === view.mode));
+  };
+  for (const btn of buttons) {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.mode === view.mode) return;
+      view.mode = btn.dataset.mode;
+      writeDensity(storage, view.mode);
+      paint();
+      setActive(null);
+      // refresh() repaints expanded days and marks collapsed ones stale.
+      for (const section of sections.values()) section.refresh();
+    });
+  }
+  paint();
 }
 
 let navCounts = () => {};
@@ -613,6 +713,7 @@ async function main() {
     });
     renderNav(days, sections);
     initToolbar(days, sections);
+    initDensity(sections);
     openDeepLink(days, sections);
     window.addEventListener("hashchange", () => openDeepLink(days, sections));
   } catch (error) {

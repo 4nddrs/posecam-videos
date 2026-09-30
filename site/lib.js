@@ -256,3 +256,59 @@ export function clampSpeed(value) {
   const n = typeof value === "string" && value.trim() !== "" ? Number(value) : value;
   return SPEEDS.includes(n) ? n : 1;
 }
+
+export const DENSITY_KEY = "density";
+
+/**
+ * Normalize a stored layout mode: "list" or "cards" (default).
+ * @param {unknown} value
+ * @returns {"cards"|"list"}
+ */
+export function parseDensity(value) {
+  return value === "list" ? "list" : "cards";
+}
+
+/**
+ * Read the persisted layout mode. Never throws; unavailable storage yields "cards".
+ * @param {{getItem: (key: string) => string|null}|undefined} storage
+ * @returns {"cards"|"list"}
+ */
+export function readDensity(storage) {
+  try {
+    return parseDensity(storage.getItem(DENSITY_KEY));
+  } catch (e) {
+    return "cards";
+  }
+}
+
+/**
+ * Persist the layout mode. Returns false (never throws) for an invalid mode or unavailable storage.
+ * @param {{setItem: (key: string, value: string) => void}|undefined} storage
+ * @param {string} mode
+ * @returns {boolean}
+ */
+export function writeDensity(storage, mode) {
+  if (mode !== "cards" && mode !== "list") return false;
+  try {
+    storage.setItem(DENSITY_KEY, mode);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Display fields for a compact list row. `time` matches the card's time chip.
+ * @param {{name?: string, url?: string, duration?: number|null}|null|undefined} video
+ * @returns {{time: string, name: string, duration: string, playable: boolean}}
+ */
+export function rowData(video) {
+  const v = video || {};
+  const parsed = parseRecordingName(v.name);
+  return {
+    time: parsed ? parsed.time : "",
+    name: v.name || "Untitled video",
+    duration: formatDuration(v.duration),
+    playable: !extractDriveId(v.url),
+  };
+}

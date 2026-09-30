@@ -25,7 +25,13 @@
           <h1>PoseCam Daily Videos</h1>
           <p class="subtitle">Today's recordings, grouped by day, newest first.</p>
         </div>
-        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch to light theme"></button>
+        <div class="header-tools">
+          <div class="density-group" role="group" aria-label="Video layout">
+            <button type="button" class="density-btn" data-mode="cards" aria-pressed="true">Cards</button>
+            <button type="button" class="density-btn" data-mode="list" aria-pressed="false">List</button>
+          </div>
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Switch to light theme"></button>
+        </div>
       </div>
       <dl class="stats" id="stats">
         <div class="stat"><dt>Days</dt><dd id="stat-days">-</dd></div>

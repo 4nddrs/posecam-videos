@@ -18,6 +18,11 @@ import {
   deepLink,
   nextVisibleIndex,
   clampSpeed,
+  DENSITY_KEY,
+  parseDensity,
+  readDensity,
+  writeDensity,
+  rowData,
 } from "../lib.js";
 
 test("extractDriveId extracts id from /d/<id> form", () => {
@@ -213,4 +218,57 @@ test("clampSpeed accepts only the allowed set, default 1", () => {
   assert.equal(clampSpeed(3), 1);
   assert.equal(clampSpeed(null), 1);
   assert.equal(clampSpeed("abc"), 1);
+});
+
+test("parseDensity accepts only cards or list, default cards", () => {
+  assert.equal(parseDensity("list"), "list");
+  assert.equal(parseDensity("cards"), "cards");
+  assert.equal(parseDensity("grid"), "cards");
+  assert.equal(parseDensity(null), "cards");
+  assert.equal(parseDensity(undefined), "cards");
+});
+
+test("readDensity reads the stored mode and falls back to cards", () => {
+  assert.equal(readDensity({ getItem: (k) => (k === DENSITY_KEY ? "list" : null) }), "list");
+  assert.equal(readDensity({ getItem: () => null }), "cards");
+  assert.equal(readDensity({ getItem: () => "bogus" }), "cards");
+  assert.equal(readDensity(undefined), "cards");
+});
+
+test("readDensity survives a storage that throws", () => {
+  assert.equal(readDensity({ getItem: () => { throw new Error("denied"); } }), "cards");
+});
+
+test("writeDensity stores a valid mode and reports failure without throwing", () => {
+  const data = {};
+  const ok = { setItem: (k, v) => { data[k] = v; } };
+  assert.equal(writeDensity(ok, "list"), true);
+  assert.equal(data[DENSITY_KEY], "list");
+  assert.equal(writeDensity(ok, "bogus"), false);
+  assert.equal(data[DENSITY_KEY], "list");
+  assert.equal(writeDensity({ setItem: () => { throw new Error("full"); } }, "list"), false);
+  assert.equal(writeDensity(undefined, "list"), false);
+});
+
+test("rowData exposes the time, name and duration shown in list rows", () => {
+  const v = { id: "d/x.mp4", name: "RGB_2026-09-25-08_35_52-f74bef-s1.mp4", url: "https://cdn.example/x.mp4", duration: 293 };
+  assert.deepEqual(rowData(v), {
+    time: "08:35:52",
+    name: "RGB_2026-09-25-08_35_52-f74bef-s1.mp4",
+    duration: "4:53",
+    playable: true,
+  });
+});
+
+test("rowData tolerates unparsed names, missing duration and Drive-only urls", () => {
+  assert.deepEqual(rowData({ name: "clip.mp4", url: "https://cdn.example/clip.mp4" }), {
+    time: "",
+    name: "clip.mp4",
+    duration: "",
+    playable: true,
+  });
+  const drive = rowData({ url: "https://drive.google.com/file/d/abc123/view" });
+  assert.equal(drive.name, "Untitled video");
+  assert.equal(drive.playable, false);
+  assert.equal(rowData(null).name, "Untitled video");
 });

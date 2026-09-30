@@ -242,3 +242,30 @@ kbd { font: inherit; font-size: 0.8em; padding: 1px 6px; border: 1px solid var(-
 .shortcuts-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 8px; }
 .shortcuts dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; font-size: 0.85rem; }
 .shortcuts dd { margin: 0; color: var(--muted); }
+
+/* Density toggle + list view */
+.header-tools { display: flex; align-items: center; gap: 8px; flex: none; }
+.density-group { display: inline-flex; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.density-btn { font: inherit; font-size: 0.85rem; padding: 0 12px; height: 40px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.density-btn + .density-btn { border-left: 1px solid var(--border); }
+.density-btn:hover { color: var(--fg); }
+.density-btn[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.video-grid.is-list { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.video-row + .video-row { border-top: 1px solid var(--border); }
+.row-head { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; padding: 6px 12px; }
+.row-head:hover { background: var(--surface-2); }
+.row-time { flex: none; min-width: 5.5em; font-variant-numeric: tabular-nums; font-weight: 600; }
+.row-name { flex: 1 1 12rem; min-width: 0; overflow-wrap: anywhere; font-size: 0.875rem; }
+.row-duration { flex: none; min-width: 3.5em; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.85rem; }
+.row-play { min-width: 5.5em; }
+.row-play[aria-expanded="true"] { border-color: var(--accent); color: var(--accent); }
+.row-player { padding: 0 12px 12px; }
+.row-player[hidden] { display: none; }
+.row-player .video-card { max-width: 640px; box-shadow: none; }
+.video-row:target, .video-row:has(.video-card.is-active) { background: var(--accent-soft); }
+
+@media (max-width: 560px) {
+  .title-row { flex-wrap: wrap; }
+  .density-btn { padding: 0 10px; }
+}
