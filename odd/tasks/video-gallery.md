@@ -109,3 +109,8 @@ Branch `feat/mix-category` from main.
 - Pending (user): change the repo variable DRIVE_SOURCES label `=Remaining` → `=Mix`.
 - Progress: T16 done (commits 615d50a site tab order, 3a290e6 rename). RED: pytest 9 failed, node import failed (no CATEGORY_ORDER). GREEN: pytest 96 passed, node 41 passed, node --check ok, manifest 199 Mix / 11 Black / 10 White / 220, 0 Remaining.
 - 2026-09-30: category "Mix" renamed to "Black/White pipes" (user request); first tab and default. TDD RED 7 py + 5 node fails → GREEN 96 + 43. A stale stored "Mix" falls back to the default. Repo variable label must become `=Black/White pipes`.
+
+## Phase 7: per-day duration chart and summary (2026-09-30, user request)
+The user wants the per-day bar chart to show video durations instead of start hours, and each day to show the summary details (the per-category table, but per day). Current data: durations are 4 s–334 s, median ~59 s.
+Branch `feat/day-duration-summary` from main.
+- [ ] T17 Replace the per-day hour histogram with a duration histogram: 30 s buckets from 0 to 5 min plus a final "≥ 5 min" bucket, axis labels at 0, 1m, 2m, 3m, 4m, 5m+, and an accessible label/tooltip per bar ("1:00–1:30 · 12 videos"). Clicking a bar filters that day's videos to the bucket (this replaces the hour filter; any `hour` URL/query state migrates or is dropped cleanly). Add a per-day summary under the day heading, for the active category: videos, total duration, average, shortest–longest, and uploaders with counts. Pure logic in lib.js with tests; remove dead hour-histogram code. (delegated, writer trigger)
