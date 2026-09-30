@@ -86,3 +86,4 @@ User wants per-video thumbnails that work in Firefox-based browsers. Camera MP4s
 ## Phase 4: density toggle (2026-09-30, user request)
 - [x] T12 Site: header toggle between the current card grid ("Cards") and a compact list ("List": one row per video with time, file name, duration, play and copy-link; no poster). Choice persisted in localStorage (try/catch), default Cards. Filters, histogram, playlist, keyboard shortcuts and deep links keep working in both modes. Tests in `site/tests/app.test.mjs`. (delegated, writer trigger: index.html + app.js + styles.css + tests)
 - 2026-09-30: 054f54b density toggle (delegated writer, TDD, 31 node tests).
+- 2026-09-30: T12 reviewed (medium, 288 lines, granted, reliability approved, acknowledged lineage review-006cb6071f1151a8). Advisory only: list-mode DOM paths untested (WARNING); arrow/auto-advance leaves earlier rows open; switch-while-collapsed staleness note. Browser check at 1280/390 px still pending.
