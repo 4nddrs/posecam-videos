@@ -27,6 +27,7 @@ import {
   chooseCategory,
   readCategory,
   writeCategory,
+  chipScrollLeft,
 } from "./lib.js";
 
 const MANIFEST_URL = "./manifest.json";
@@ -658,7 +659,9 @@ function renderNav(days, sections) {
     for (const [key, btn] of buttons) {
       if (key === day) {
         btn.setAttribute("aria-current", "true");
-        btn.scrollIntoView({ block: "nearest", inline: "nearest" });
+        // Scroll only the chip bar; scrollIntoView would also move the page mid-scroll.
+        const left = chipScrollLeft(list.getBoundingClientRect(), btn.getBoundingClientRect(), list.scrollLeft);
+        if (left !== null) list.scrollTo({ left, behavior: "smooth" });
       } else {
         btn.removeAttribute("aria-current");
       }

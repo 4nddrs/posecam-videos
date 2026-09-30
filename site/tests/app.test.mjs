@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   extractDriveId,
   sortDaysDesc,
+  chipScrollLeft,
   groupByDay,
   parseRecordingName,
   formatDayLabel,
@@ -416,4 +417,17 @@ test("readCategory and writeCategory never throw", () => {
 test("rowData includes the uploader, empty when unknown", () => {
   assert.equal(rowData({ name: "x.mp4", url: "https://cdn.example/x.mp4", uploader: "Ann" }).uploader, "Ann");
   assert.equal(rowData({ name: "x.mp4", url: "https://cdn.example/x.mp4" }).uploader, "");
+});
+
+test("chipScrollLeft keeps the chip bar still when the chip is fully visible", () => {
+  const bar = { left: 0, right: 300, width: 300 };
+  assert.equal(chipScrollLeft(bar, { left: 100, right: 160, width: 60 }, 40), null);
+});
+
+test("chipScrollLeft centres a chip that is cut off on either side", () => {
+  const bar = { left: 0, right: 300, width: 300 };
+  // Chip past the right edge: move it to the centre (left at 120).
+  assert.equal(chipScrollLeft(bar, { left: 280, right: 340, width: 60 }, 40), 200);
+  // Chip before the left edge, never scrolls below 0.
+  assert.equal(chipScrollLeft(bar, { left: -30, right: 30, width: 60 }, 20), 0);
 });

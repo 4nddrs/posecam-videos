@@ -449,3 +449,18 @@ export function writeCategory(storage, name) {
     return false;
   }
 }
+
+/**
+ * New horizontal scroll offset for a chip bar so the given chip is visible,
+ * or null when it already is. Only the bar scrolls; the page never moves
+ * (Element.scrollIntoView would also scroll the page and fight the user).
+ * @param {{left: number, right: number, width: number}} bar  bar client rect
+ * @param {{left: number, right: number, width: number}} chip chip client rect
+ * @param {number} scrollLeft current scrollLeft of the bar
+ * @returns {number|null}
+ */
+export function chipScrollLeft(bar, chip, scrollLeft) {
+  if (chip.left >= bar.left && chip.right <= bar.right) return null;
+  const centred = chip.left - bar.left - (bar.width - chip.width) / 2;
+  return Math.max(0, scrollLeft + centred);
+}
