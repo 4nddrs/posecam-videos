@@ -80,6 +80,7 @@ Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 - `ingest/state.json` tracks which zip ids have already been processed, so running the ingest twice on the same zips processes them once (idempotency).
 - The Drive folder holds `DD-MM-YYYY` date subfolders containing the zips; the subfolder name sets the video's day. Each run processes at most `MAX_ZIPS_PER_RUN` new zips (oldest first), so the initial backfill happens over several runs; the remaining zips appear as `deferred` in the printed report. Each zip's download and extracted files are deleted after it is processed.
 - Zips are detected by extension or by the `application/zip` mime type, so uploads that lost the `.zip` extension still work. The day comes from the `capture-YYYYMMDD` timestamp in the zip name. Each video records its `category` and the Drive owner display name as `uploader` (emails are never stored; the manifest is public).
+- `python -m ingest.uploaders` backfills `uploader` (and a missing `category`) for videos already in the manifest by matching `source_zip` against the Drive listing; it only reads Drive metadata (no downloads, no R2).
 - To reprocess a zip, remove its id from `ingest/state.json` and re-run the ingest; the zip will be downloaded and published again.
 
 ## Posters and faststart
