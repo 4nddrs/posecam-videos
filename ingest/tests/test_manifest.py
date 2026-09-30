@@ -37,7 +37,7 @@ def test_manifest_groups_sorts_and_serializes():
         "source_zip": "zip-a.zip",
         "poster": None,
         "duration": None,
-        "category": "Mix",
+        "category": "Black/White pipes",
         "uploader": None,
     }
 
@@ -126,11 +126,11 @@ def test_manifest_records_category_and_uploader(tmp_path):
     videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
     assert videos["a"]["category"] == "White pipes"
     assert videos["a"]["uploader"] == "jayjagani19"
-    assert videos["b"]["category"] == "Mix"
+    assert videos["b"]["category"] == "Black/White pipes"
     assert videos["b"]["uploader"] is None
 
 
 def test_from_dict_defaults_missing_category_to_remaining():
     data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}
     video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
-    assert video["category"] == "Mix"
+    assert video["category"] == "Black/White pipes"

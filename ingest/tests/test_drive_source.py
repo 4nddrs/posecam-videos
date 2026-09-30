@@ -358,9 +358,9 @@ def test_category_is_source_label_when_given():
         "root": [{"files": [_zip_file("r", "root.zip")]}],
         "f1": [{"files": [_zip_file("a", "a.zip")]}],
     }
-    source = DriveZipSource(FakeService(pages, folders), "root", category="Mix")
+    source = DriveZipSource(FakeService(pages, folders), "root", category="Black/White pipes")
 
-    assert {e.id: e.category for e in source.list_zips()} == {"r": "Mix", "a": "Mix"}
+    assert {e.id: e.category for e in source.list_zips()} == {"r": "Black/White pipes", "a": "Black/White pipes"}
 
 
 def test_category_is_subfolder_name_without_label_and_skips_dated_folders():

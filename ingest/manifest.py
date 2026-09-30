@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ingest.ports import PublishedVideo
 
-DEFAULT_CATEGORY = "Mix"
+DEFAULT_CATEGORY = "Black/White pipes"
 
 
 class Manifest:

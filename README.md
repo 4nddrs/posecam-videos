@@ -49,8 +49,8 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 
 | Name | Required | Meaning |
 |------|----------|---------|
-| `DRIVE_SOURCES` | yes, unless `DRIVE_FOLDER_ID` is set | Comma-separated list of `folderId[=Category]`. Each folder is scanned for zips (root and one level of subfolders). The category is the label after `=`, or else the zip's immediate subfolder name (e.g. `White pipes`); videos never mix categories in the site. Example: `1w_VFQ...=,1z6UQ...=Mix` (an empty label means "use subfolder names"). |
-| `DRIVE_FOLDER_ID` | legacy | Single Drive folder id, used only when `DRIVE_SOURCES` is empty. Its videos get the category `Mix`. |
+| `DRIVE_SOURCES` | yes, unless `DRIVE_FOLDER_ID` is set | Comma-separated list of `folderId[=Category]`. Each folder is scanned for zips (root and one level of subfolders). The category is the label after `=`, or else the zip's immediate subfolder name (e.g. `White pipes`); videos never mix categories in the site. Example: `1w_VFQ...=,1z6UQ...=Black/White pipes` (an empty label means "use subfolder names"). |
+| `DRIVE_FOLDER_ID` | legacy | Single Drive folder id, used only when `DRIVE_SOURCES` is empty. Its videos get the category `Black/White pipes`. |
 | `GOOGLE_API_KEY` | yes, unless `GOOGLE_SERVICE_ACCOUNT_FILE` is set | Google API key used to read the Drive folder. The folder must be shared as "anyone with the link". |
 | `GOOGLE_SERVICE_ACCOUNT_FILE` | no | Alternative to `GOOGLE_API_KEY`: path to a Google service account JSON key file (used only when no API key is set). |
 | `R2_ACCOUNT_ID` | yes | Cloudflare account id that owns the R2 bucket. |

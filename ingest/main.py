@@ -102,8 +102,8 @@ def load_config(env: Mapping[str, str]) -> Config:
     missing = [name for name in _REQUIRED_VARS if not env.get(name)]
     drive_sources = parse_drive_sources(env.get("DRIVE_SOURCES"))
     if not drive_sources and env.get("DRIVE_FOLDER_ID"):
-        # Legacy single-folder setup: its videos are the "Mix" category.
-        drive_sources = (DriveSource(env["DRIVE_FOLDER_ID"], "Mix"),)
+        # Legacy single-folder setup: its videos are the "Black/White pipes" category.
+        drive_sources = (DriveSource(env["DRIVE_FOLDER_ID"], "Black/White pipes"),)
     if not drive_sources:
         missing.insert(0, "DRIVE_SOURCES")
     api_key = env.get("GOOGLE_API_KEY") or None

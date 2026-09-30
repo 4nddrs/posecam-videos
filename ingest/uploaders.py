@@ -5,7 +5,7 @@ Usage: python -m ingest.uploaders
 Lists the configured Drive sources (read-only), matches every manifest
 video's `source_zip` to a Drive file (a trailing " (N)" copy counter is
 ignored) and stores the Drive owner display name as `uploader`. Videos
-without a category get "Mix". Only display names are stored; the
+without a category get "Black/White pipes". Only display names are stored; the
 manifest is public. Nothing is uploaded and no video is downloaded.
 """
 from __future__ import annotations
