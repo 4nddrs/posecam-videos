@@ -12,6 +12,7 @@ import {
   posterUrl,
   durationBucket,
   durationHistogram,
+  bucketAxisLabel,
   daySummary,
   formatTotalDuration,
   BUCKET_COUNT,
@@ -498,4 +499,18 @@ test("chipScrollLeft centres a chip that is cut off on either side", () => {
   assert.equal(chipScrollLeft(bar, { left: 280, right: 340, width: 60 }, 40), 200);
   // Chip before the left edge, never scrolls below 0.
   assert.equal(chipScrollLeft(bar, { left: -30, right: 30, width: 60 }, 20), 0);
+});
+
+test("bucketAxisLabel gives a short label for every bucket", () => {
+  const labels = durationHistogram([]).buckets.map(bucketAxisLabel);
+  assert.equal(labels.length, BUCKET_COUNT);
+  assert.deepEqual(labels.slice(0, 3), ["0:00", "0:30", "1:00"]);
+  assert.equal(labels[BUCKET_COUNT - 1], "5:00+");
+});
+
+test("bucketAxisLabel gives a short label for every bucket", () => {
+  const labels = durationHistogram([]).buckets.map(bucketAxisLabel);
+  assert.equal(labels.length, BUCKET_COUNT);
+  assert.deepEqual(labels.slice(0, 3), ["0:00", "0:30", "1:00"]);
+  assert.equal(labels[BUCKET_COUNT - 1], "5:00+");
 });

@@ -177,6 +177,16 @@ export function durationHistogram(videos) {
 }
 
 /**
+ * Short axis label for a duration bucket: "0:30", "1:00" ... "5:00+" (open-ended).
+ * @param {{startSec: number, endSec: number|null}} bucket
+ * @returns {string}
+ */
+export function bucketAxisLabel(bucket) {
+  const label = formatDuration(bucket.startSec);
+  return bucket.endSec === null ? `${label}+` : label;
+}
+
+/**
  * Compact total such as "45 s", "23 min" or "1 h 12 min"; "" for invalid input.
  * @param {number|null|undefined} seconds
  * @returns {string}

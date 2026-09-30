@@ -8,6 +8,7 @@ import {
   isPipelineZip,
   posterUrl,
   durationHistogram,
+  bucketAxisLabel,
   daySummary,
   formatTotalDuration,
   matchesFilters,
@@ -315,8 +316,8 @@ export function renderVideo(video) {
 
   const chips = el("div", { className: "chips" });
   if (parsed) {
-    chips.appendChild(el("span", { className: "chip", text: parsed.time }));
-    chips.appendChild(el("span", { className: "chip", text: parsed.session }));
+    chips.appendChild(el("span", { className: "chip chip-time", text: parsed.time }));
+    chips.appendChild(el("span", { className: "chip chip-session", text: parsed.session }));
   }
   const durationText = formatDuration(video.duration);
   if (durationText) {
@@ -342,10 +343,9 @@ export function renderVideo(video) {
   }
   if (!driveId) player.playbackRate = playback.speed;
 
-  return el("article", { className: "video-card", id: videoAnchorId(video), tabIndex: -1 }, [
+  return el("article", { className: "video-card", id: videoAnchorId(video), tabIndex: -1, "aria-label": title }, [
     el("div", { className: "player" }, playOverlay ? [player, playOverlay] : [player]),
     el("div", { className: "video-meta" }, [
-      el("h3", { className: "video-name", text: title }),
       chips,
       parsed ? el("span", { className: "hash", text: parsed.hash }) : null,
       el("p", { className: "video-source", text: `Source: ${video.source_zip || "unknown"}` }),
@@ -446,11 +446,9 @@ function renderHistogram(videos, state, onChange) {
     });
     btn.setAttribute("aria-pressed", "false");
     btn.appendChild(el("span", { className: "dur-fill" }));
-    btn.firstChild.style.height = b.count ? `${Math.max(12, Math.round((b.count / peak) * 100))}%` : "2px";
-    if (b.index % 2 === 0) {
-      const mins = b.startSec / 60;
-      btn.appendChild(el("span", { className: "dur-label", text: b.endSec === null ? `${mins}m+` : `${mins}m` }));
-    }
+    btn.firstChild.style.height = b.count ? `calc(var(--bar-max) * ${Math.max(0.06, b.count / peak).toFixed(3)})` : "";
+    btn.insertBefore(el("span", { className: "dur-count", text: b.count ? String(b.count) : "" }), btn.firstChild);
+    btn.appendChild(el("span", { className: "dur-label", text: bucketAxisLabel(b) }));
     btn.addEventListener("click", () => {
       state.bucket = state.bucket === b.index ? null : b.index;
       onChange();
@@ -474,7 +472,7 @@ function renderHistogram(videos, state, onChange) {
 function renderSummary(videos) {
   const s = daySummary(videos);
   const stat = (label, value) =>
-    el("span", { className: "sum-item" }, [el("span", { className: "sum-label", text: label }), document.createTextNode(` ${value}`)]);
+    el("div", { className: "sum-item" }, [el("span", { className: "sum-label", text: label }), el("span", { className: "sum-value", text: value })]);
   const wrap = el("div", { className: "day-summary" });
   const stats = [stat("Videos", String(s.count))];
   if (s.avgSec !== null) {
@@ -488,7 +486,11 @@ function renderSummary(videos) {
   wrap.appendChild(el("div", { className: "sum-row" }, stats));
   if (s.uploaders.length) {
     wrap.appendChild(
-      el("div", { className: "sum-row uploaders", text: s.uploaders.map((u) => `${u.name} ×${u.count}`).join(" · ") })
+      el(
+        "div",
+        { className: "sum-row uploaders", role: "list", "aria-label": "Uploaders" },
+        s.uploaders.map((u) => el("span", { className: "uploader-pill", role: "listitem", text: `${u.name} ×${u.count}` }))
+      )
     );
   }
   return wrap;
