@@ -321,11 +321,13 @@ export function rowData(video) {
   };
 }
 
-export const DEFAULT_CATEGORY = "Remaining";
+export const DEFAULT_CATEGORY = "Mix";
 export const CATEGORY_KEY = "category";
+/** Fixed leading tab order; any other category follows, newest first. */
+export const CATEGORY_ORDER = ["Mix", "Black pipes", "White pipes"];
 
 /**
- * Category of a video; entries without one belong to "Remaining".
+ * Category of a video; entries without one belong to "Mix".
  * @param {{category?: unknown}|null|undefined} video
  * @returns {string}
  */
@@ -344,8 +346,9 @@ export function uploaderOf(video) {
 }
 
 /**
- * Categories with video counts, ordered by their newest video (day, then
- * name, both descending) so the first entry is the default tab; ties by name.
+ * Categories with video counts: those in CATEGORY_ORDER first, in that order,
+ * then the rest by their newest video (day, then name, both descending; ties
+ * by name). The first entry is the default tab.
  * @param {{day: string, videos?: any[]}[]|undefined} days
  * @returns {{name: string, count: number}[]}
  */
@@ -362,8 +365,15 @@ export function listCategories(days) {
       found.set(name, entry);
     }
   }
+  const rank = (name) => {
+    const i = CATEGORY_ORDER.indexOf(name);
+    return i < 0 ? CATEGORY_ORDER.length : i;
+  };
   return [...found.values()]
-    .sort((a, b) => (a.newest < b.newest ? 1 : a.newest > b.newest ? -1 : a.name < b.name ? -1 : 1))
+    .sort((a, b) => {
+      if (rank(a.name) !== rank(b.name)) return rank(a.name) - rank(b.name);
+      return a.newest < b.newest ? 1 : a.newest > b.newest ? -1 : a.name < b.name ? -1 : 1;
+    })
     .map(({ name, count }) => ({ name, count }));
 }
 
@@ -399,7 +409,7 @@ export function categoryOfVideoId(days, anchorId) {
 
 /**
  * Pick the active category: deep-linked video's category, else a stored
- * choice that still exists, else the first (newest) category.
+ * choice that still exists, else the first category (the default tab).
  * @param {{name: string}[]} categories
  * @param {{linked?: string|null, stored?: string|null}} [hints]
  * @returns {string|null}
