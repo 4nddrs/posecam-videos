@@ -49,6 +49,7 @@ jobs:
 
       - name: Run ingest
         env:
+          DRIVE_SOURCES: ${{ vars.DRIVE_SOURCES }}
           DRIVE_FOLDER_ID: ${{ vars.DRIVE_FOLDER_ID }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}

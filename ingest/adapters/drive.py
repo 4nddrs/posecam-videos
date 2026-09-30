@@ -15,6 +15,7 @@ from typing import Any, Callable, Optional
 
 from ingest.ports import ZipEntry
 
+_ZIP_MIMES = ("application/zip", "application/x-zip-compressed")
 _FOLDER_MIME = "application/vnd.google-apps.folder"
 _DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly"
 
@@ -29,16 +30,21 @@ class DriveZipSource:
         service: Any,
         folder_id: str,
         downloader_factory: Optional[DownloaderFactory] = None,
+        category: Optional[str] = None,
     ) -> None:
         self._service = service
         self._folder_id = folder_id
+        self._category = category
         self._downloader_factory = downloader_factory
 
     def list_zips(self) -> list[ZipEntry]:
-        entries = self._list_zips_in(self._folder_id, day=None)
+        entries = self._list_zips_in(self._folder_id, day=None, category=self._category)
         for folder in self._list_subfolders():
+            folder_day = _parse_day(folder["name"])
+            # A dated folder names a day, never a category.
+            category = self._category or (None if folder_day else folder["name"].strip())
             entries.extend(
-                self._list_zips_in(folder["id"], day=_parse_day(folder["name"]))
+                self._list_zips_in(folder["id"], day=folder_day, category=category)
             )
         return _dedupe_entries(entries)
 
@@ -49,7 +55,9 @@ class DriveZipSource:
         )
         return list(self._paginate(query, "nextPageToken, files(id, name)"))
 
-    def _list_zips_in(self, parent_id: str, day: Optional[str]) -> list[ZipEntry]:
+    def _list_zips_in(
+        self, parent_id: str, day: Optional[str], category: Optional[str]
+    ) -> list[ZipEntry]:
         query = (
             f"'{parent_id}' in parents and trashed = false and "
             "(mimeType = 'application/zip' or "
@@ -57,10 +65,14 @@ class DriveZipSource:
         )
         entries: list[ZipEntry] = []
         for file_info in self._paginate(
-            query, "nextPageToken, files(id, name, createdTime)"
+            query, "nextPageToken, files(id, name, createdTime, mimeType, owners(displayName))"
         ):
             name = file_info["name"]
-            if not name.lower().endswith(".zip"):
+            # Some uploads lose the extension but keep the zip mime type.
+            if not (
+                name.lower().endswith(".zip")
+                or file_info.get("mimeType") in _ZIP_MIMES
+            ):
                 continue
             entries.append(
                 ZipEntry(
@@ -68,6 +80,8 @@ class DriveZipSource:
                     name=name,
                     uploaded_at=_parse_created_time(file_info["createdTime"]),
                     day=day_from_zip_name(name) or day,
+                    category=category,
+                    uploader=_owner_name(file_info),
                 )
             )
         return entries
@@ -110,13 +124,13 @@ def _parse_day(folder_name: str) -> Optional[str]:
         return None
 
 
-_CAPTURE_RE = re.compile(r"^capture-(\d{8})T\d{6}")
-_COPY_SUFFIX_RE = re.compile(r" \(\d+\)(?=\.zip$)", re.IGNORECASE)
+_CAPTURE_RE = re.compile(r"capture-(\d{8})T\d{6}")
+_COPY_SUFFIX_RE = re.compile(r" \(\d+\)(?=\.zip$|$)", re.IGNORECASE)
 
 
 def day_from_zip_name(name: str) -> Optional[str]:
     """Parse `capture-YYYYMMDDTHHMMSS...` into ISO `YYYY-MM-DD`, or None."""
-    match = _CAPTURE_RE.match(name)
+    match = _CAPTURE_RE.search(name)
     if not match:
         return None
     try:
@@ -126,20 +140,31 @@ def day_from_zip_name(name: str) -> Optional[str]:
 
 
 def normalize_zip_name(name: str) -> str:
-    """Strip a trailing ` (N)` copy counter before `.zip`."""
+    """Strip a trailing ` (N)` copy counter (before `.zip`, or at the end)."""
     return _COPY_SUFFIX_RE.sub("", name)
 
 
+def _owner_name(file_info: dict) -> Optional[str]:
+    """Display name of the first owner. Emails are never read or stored."""
+    for owner in file_info.get("owners") or []:
+        name = (owner.get("displayName") or "").strip()
+        if name:
+            return name
+    return None
+
+
 def _dedupe_entries(entries: list[ZipEntry]) -> list[ZipEntry]:
-    """Keep one entry per normalized name, preferring the un-numbered original."""
-    chosen: dict[str, int] = {}
+    """Keep one entry per category and normalized name, preferring the
+    un-numbered original."""
+    chosen: dict[tuple[Optional[str], str], int] = {}
     result: list[ZipEntry] = []
     for entry in entries:
-        key = normalize_zip_name(entry.name)
+        normalized = normalize_zip_name(entry.name)
+        key = (entry.category, normalized)
         if key not in chosen:
             chosen[key] = len(result)
             result.append(entry)
-        elif entry.name == key and result[chosen[key]].name != key:
+        elif entry.name == normalized and result[chosen[key]].name != normalized:
             result[chosen[key]] = entry
     return result
 
@@ -148,7 +173,9 @@ def _parse_created_time(created_time: str) -> datetime:
     return datetime.fromisoformat(created_time.replace("Z", "+00:00"))
 
 
-def build_drive_source(folder_id: str, service_account_file: Path) -> DriveZipSource:
+def build_drive_source(
+    folder_id: str, service_account_file: Path, category: Optional[str] = None
+) -> DriveZipSource:
     """Build a DriveZipSource backed by a real Drive v3 service.
 
     Imports google client libraries lazily so callers that only need
@@ -161,12 +188,14 @@ def build_drive_source(folder_id: str, service_account_file: Path) -> DriveZipSo
         str(service_account_file), scopes=[_DRIVE_READONLY_SCOPE]
     )
     service = build("drive", "v3", credentials=credentials)
-    return DriveZipSource(service, folder_id=folder_id)
+    return DriveZipSource(service, folder_id=folder_id, category=category)
 
 
-def build_drive_source_with_api_key(folder_id: str, api_key: str) -> DriveZipSource:
+def build_drive_source_with_api_key(
+    folder_id: str, api_key: str, category: Optional[str] = None
+) -> DriveZipSource:
     """Build a DriveZipSource using a Google API key (public folders only)."""
     from googleapiclient.discovery import build
 
     service = build("drive", "v3", developerKey=api_key, cache_discovery=False)
-    return DriveZipSource(service, folder_id=folder_id)
+    return DriveZipSource(service, folder_id=folder_id, category=category)

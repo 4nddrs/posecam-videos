@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ingest.main import Config, load_config, parse_dotenv, run
+from ingest.main import Config, DriveSource, load_config, parse_dotenv, parse_drive_sources, run
 from ingest.use_case import IngestReport
 
 REQUIRED_ENV = {
@@ -20,7 +20,7 @@ def test_load_config_builds_config_with_defaults():
     config = load_config(REQUIRED_ENV)
 
     assert isinstance(config, Config)
-    assert config.drive_folder_id == "folder-123"
+    assert config.drive_sources == (DriveSource("folder-123", "Remaining"),)
     assert config.google_api_key == "api-key-1"
     assert config.google_service_account_file is None
     assert config.r2_account_id == "account-1"
@@ -186,11 +186,11 @@ def _run_with_patched_builders(monkeypatch, env):
     calls = []
     monkeypatch.setattr(
         main_mod, "build_drive_source_with_api_key",
-        lambda folder_id, api_key: calls.append(("key", folder_id, api_key)) or _EmptySource(),
+        lambda folder_id, api_key, category=None: calls.append(("key", folder_id, api_key, category)) or _EmptySource(),
     )
     monkeypatch.setattr(
         main_mod, "build_drive_source",
-        lambda folder_id, path: calls.append(("sa", folder_id, path)) or _EmptySource(),
+        lambda folder_id, path, category=None: calls.append(("sa", folder_id, path, category)) or _EmptySource(),
     )
     run(load_config(env), publisher_builder=lambda cfg: object())
     return calls
@@ -208,7 +208,7 @@ def test_run_uses_api_key_builder_when_key_set(monkeypatch, tmp_path):
 
     calls = _run_with_patched_builders(monkeypatch, env)
 
-    assert calls == [("key", "folder-123", "api-key-1")]
+    assert calls == [("key", "folder-123", "api-key-1", "Remaining")]
 
 
 def test_run_uses_service_account_builder_when_no_key(monkeypatch, tmp_path):
@@ -219,7 +219,7 @@ def test_run_uses_service_account_builder_when_no_key(monkeypatch, tmp_path):
 
     calls = _run_with_patched_builders(monkeypatch, env)
 
-    assert calls == [("sa", "folder-123", Path("/creds/sa.json"))]
+    assert calls == [("sa", "folder-123", Path("/creds/sa.json"), "Remaining")]
 
 
 def test_load_config_max_zips_per_run_defaults_to_10():
@@ -250,3 +250,74 @@ def test_run_passes_max_zips_to_use_case(monkeypatch, tmp_path):
     run(load_config(env), source_builder=lambda c: None, publisher_builder=lambda c: None)
 
     assert captured["max_zips"] == 4
+
+
+def test_parse_drive_sources_reads_ids_with_optional_labels():
+    assert parse_drive_sources(" a=White pipes , b ,, c=Black pipes ") == (
+        DriveSource("a", "White pipes"),
+        DriveSource("b", None),
+        DriveSource("c", "Black pipes"),
+    )
+    assert parse_drive_sources("") == ()
+    assert parse_drive_sources(None) == ()
+
+
+def test_load_config_prefers_drive_sources_over_legacy_folder_id():
+    env = {**REQUIRED_ENV, "DRIVE_SOURCES": "root-new,old=Remaining"}
+
+    config = load_config(env)
+
+    assert config.drive_sources == (DriveSource("root-new", None), DriveSource("old", "Remaining"))
+
+
+def test_load_config_accepts_drive_sources_without_legacy_folder_id():
+    env = {k: v for k, v in REQUIRED_ENV.items() if k != "DRIVE_FOLDER_ID"}
+    env["DRIVE_SOURCES"] = "root-new"
+
+    assert load_config(env).drive_sources == (DriveSource("root-new", None),)
+
+
+def test_load_config_without_any_drive_source_names_drive_sources():
+    env = {k: v for k, v in REQUIRED_ENV.items() if k != "DRIVE_FOLDER_ID"}
+
+    with pytest.raises(ValueError) as exc_info:
+        load_config(env)
+
+    assert "DRIVE_SOURCES" in str(exc_info.value)
+
+
+def test_run_combines_every_drive_source_and_routes_downloads(monkeypatch, tmp_path):
+    import ingest.main as main_mod
+    from datetime import datetime, timezone
+    from ingest.ports import ZipEntry
+
+    def entry(zid):
+        return ZipEntry(id=zid, name=zid, uploaded_at=datetime(2026, 9, 30, tzinfo=timezone.utc))
+
+    class Src:
+        def __init__(self, ids):
+            self.ids = ids
+            self.downloaded = []
+
+        def list_zips(self):
+            return [entry(i) for i in self.ids]
+
+        def download(self, e, dest):
+            self.downloaded.append(e.id)
+            return dest
+
+    built = {"old": Src(["o1"]), "new": Src(["n1", "n2"])}
+    monkeypatch.setattr(
+        main_mod, "build_drive_source_with_api_key",
+        lambda folder_id, api_key, category=None: built[folder_id],
+    )
+    combined = main_mod.DEFAULT_SOURCE_BUILDER(
+        load_config({**REQUIRED_ENV, "DRIVE_SOURCES": "old=Remaining,new"})
+    )
+
+    entries = combined.list_zips()
+    combined.download(entries[2], tmp_path)
+
+    assert [e.id for e in entries] == ["o1", "n1", "n2"]
+    assert built["new"].downloaded == ["n2"]
+    assert built["old"].downloaded == []

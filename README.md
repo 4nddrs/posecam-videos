@@ -49,7 +49,8 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 
 | Name | Required | Meaning |
 |------|----------|---------|
-| `DRIVE_FOLDER_ID` | yes | Google Drive folder id to watch for zip uploads. |
+| `DRIVE_SOURCES` | yes, unless `DRIVE_FOLDER_ID` is set | Comma-separated list of `folderId[=Category]`. Each folder is scanned for zips (root and one level of subfolders). The category is the label after `=`, or else the zip's immediate subfolder name (e.g. `White pipes`); videos never mix categories in the site. Example: `1w_VFQ...=,1z6UQ...=Remaining` (an empty label means "use subfolder names"). |
+| `DRIVE_FOLDER_ID` | legacy | Single Drive folder id, used only when `DRIVE_SOURCES` is empty. Its videos get the category `Remaining`. |
 | `GOOGLE_API_KEY` | yes, unless `GOOGLE_SERVICE_ACCOUNT_FILE` is set | Google API key used to read the Drive folder. The folder must be shared as "anyone with the link". |
 | `GOOGLE_SERVICE_ACCOUNT_FILE` | no | Alternative to `GOOGLE_API_KEY`: path to a Google service account JSON key file (used only when no API key is set). |
 | `R2_ACCOUNT_ID` | yes | Cloudflare account id that owns the R2 bucket. |
@@ -69,7 +70,7 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 
 - Create these repository secrets: `GOOGLE_API_KEY`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`.
-- Create these repository (or environment) variables: `DRIVE_FOLDER_ID`, `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`.
+- Create these repository (or environment) variables: `DRIVE_SOURCES` (or the legacy `DRIVE_FOLDER_ID`), `R2_BUCKET_NAME`, `R2_PUBLIC_BASE_URL`.
 - In repository Settings → Pages, set the source to "GitHub Actions".
 - The R2 bucket must be configured for public access; `R2_PUBLIC_BASE_URL` is its public domain.
 - The Drive folder must be shared as "anyone with the link" (viewer) so the API key can read it.
@@ -78,6 +79,7 @@ Configured via GitHub Actions (`.github/workflows/ingest.yml` and `ci.yml`):
 
 - `ingest/state.json` tracks which zip ids have already been processed, so running the ingest twice on the same zips processes them once (idempotency).
 - The Drive folder holds `DD-MM-YYYY` date subfolders containing the zips; the subfolder name sets the video's day. Each run processes at most `MAX_ZIPS_PER_RUN` new zips (oldest first), so the initial backfill happens over several runs; the remaining zips appear as `deferred` in the printed report. Each zip's download and extracted files are deleted after it is processed.
+- Zips are detected by extension or by the `application/zip` mime type, so uploads that lost the `.zip` extension still work. The day comes from the `capture-YYYYMMDD` timestamp in the zip name. Each video records its `category` and the Drive owner display name as `uploader` (emails are never stored; the manifest is public).
 - To reprocess a zip, remove its id from `ingest/state.json` and re-run the ingest; the zip will be downloaded and published again.
 
 ## Posters and faststart

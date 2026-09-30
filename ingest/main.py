@@ -24,12 +24,11 @@ from ingest.adapters.drive import (
 )
 from ingest.adapters.ffmpeg import build_processor
 from ingest.adapters.r2 import R2VideoPublisher, build_r2_publisher
-from ingest.ports import VideoPublisher, ZipSource
+from ingest.ports import VideoPublisher, ZipEntry, ZipSource
 from ingest.state import JsonStateStore
 from ingest.use_case import IngestReport, run_ingest
 
 _REQUIRED_VARS = (
-    "DRIVE_FOLDER_ID",
     "R2_ACCOUNT_ID",
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
@@ -41,8 +40,46 @@ _DEFAULT_STATE_PATH = "ingest/state.json"
 
 
 @dataclass(frozen=True)
+class DriveSource:
+    """One Drive folder to ingest; `category` is None to use subfolder names."""
+
+    folder_id: str
+    category: str | None = None
+
+
+def parse_drive_sources(raw: str | None) -> tuple[DriveSource, ...]:
+    """Parse `folderId[=Category],...` into DriveSource items."""
+    sources = []
+    for part in (raw or "").split(","):
+        folder_id, _, label = part.partition("=")
+        folder_id = folder_id.strip()
+        if folder_id:
+            sources.append(DriveSource(folder_id, label.strip() or None))
+    return tuple(sources)
+
+
+class MultiZipSource:
+    """ZipSource that concatenates several sources and routes downloads."""
+
+    def __init__(self, sources: list[ZipSource]) -> None:
+        self._sources = sources
+        self._owner: dict[str, ZipSource] = {}
+
+    def list_zips(self) -> list[ZipEntry]:
+        entries: list[ZipEntry] = []
+        for source in self._sources:
+            for entry in source.list_zips():
+                self._owner[entry.id] = source
+                entries.append(entry)
+        return entries
+
+    def download(self, entry: ZipEntry, dest: Path) -> Path:
+        return self._owner[entry.id].download(entry, dest)
+
+
+@dataclass(frozen=True)
 class Config:
-    drive_folder_id: str
+    drive_sources: tuple[DriveSource, ...]
     google_api_key: str | None
     google_service_account_file: Path | None
     r2_account_id: str
@@ -63,6 +100,12 @@ def load_config(env: Mapping[str, str]) -> Config:
     Raises ValueError listing every missing required variable name.
     """
     missing = [name for name in _REQUIRED_VARS if not env.get(name)]
+    drive_sources = parse_drive_sources(env.get("DRIVE_SOURCES"))
+    if not drive_sources and env.get("DRIVE_FOLDER_ID"):
+        # Legacy single-folder setup: its videos are the "Remaining" category.
+        drive_sources = (DriveSource(env["DRIVE_FOLDER_ID"], "Remaining"),)
+    if not drive_sources:
+        missing.insert(0, "DRIVE_SOURCES")
     api_key = env.get("GOOGLE_API_KEY") or None
     sa_file = env.get("GOOGLE_SERVICE_ACCOUNT_FILE") or None
     if not api_key and not sa_file:
@@ -75,7 +118,7 @@ def load_config(env: Mapping[str, str]) -> Config:
 
     workdir = env.get("WORKDIR")
     return Config(
-        drive_folder_id=env["DRIVE_FOLDER_ID"],
+        drive_sources=drive_sources,
         google_api_key=api_key,
         google_service_account_file=Path(sa_file) if sa_file else None,
         r2_account_id=env["R2_ACCOUNT_ID"],
@@ -123,10 +166,22 @@ def load_dotenv_file(path: Path, env: MutableMapping[str, str]) -> None:
 
 
 def _default_source_builder(cfg: Config) -> ZipSource:
-    if cfg.google_api_key:
-        return build_drive_source_with_api_key(cfg.drive_folder_id, cfg.google_api_key)
-    assert cfg.google_service_account_file is not None
-    return build_drive_source(cfg.drive_folder_id, cfg.google_service_account_file)
+    sources: list[ZipSource] = []
+    for item in cfg.drive_sources:
+        if cfg.google_api_key:
+            sources.append(
+                build_drive_source_with_api_key(
+                    item.folder_id, cfg.google_api_key, category=item.category
+                )
+            )
+        else:
+            assert cfg.google_service_account_file is not None
+            sources.append(
+                build_drive_source(
+                    item.folder_id, cfg.google_service_account_file, category=item.category
+                )
+            )
+    return MultiZipSource(sources)
 
 
 DEFAULT_SOURCE_BUILDER: Callable[[Config], ZipSource] = _default_source_builder

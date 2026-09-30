@@ -37,6 +37,8 @@ def test_manifest_groups_sorts_and_serializes():
         "source_zip": "zip-a.zip",
         "poster": None,
         "duration": None,
+        "category": "Remaining",
+        "uploader": None,
     }
 
 
@@ -113,3 +115,22 @@ def test_load_tolerates_entries_without_duration(tmp_path):
     path = tmp_path / "m.json"
     path.write_text(json.dumps({"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}))
     assert load(path).to_dict()["days"][0]["videos"][0]["id"] == "a"
+
+
+def test_manifest_records_category_and_uploader(tmp_path):
+    m = Manifest()
+    m.add("2026-09-30", "z", PublishedVideo(id="a", name="a.mp4", url="u"), category="White pipes", uploader="jayjagani19")
+    m.add("2026-09-30", "z", PublishedVideo(id="b", name="b.mp4", url="u2"))
+    path = tmp_path / "m.json"
+    save(m, path)
+    videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
+    assert videos["a"]["category"] == "White pipes"
+    assert videos["a"]["uploader"] == "jayjagani19"
+    assert videos["b"]["category"] == "Remaining"
+    assert videos["b"]["uploader"] is None
+
+
+def test_from_dict_defaults_missing_category_to_remaining():
+    data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}
+    video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
+    assert video["category"] == "Remaining"

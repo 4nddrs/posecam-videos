@@ -7,13 +7,22 @@ from pathlib import Path
 
 from ingest.ports import PublishedVideo
 
+DEFAULT_CATEGORY = "Remaining"
+
 
 class Manifest:
     def __init__(self) -> None:
         # day -> video id -> video record
         self._days: dict[str, dict[str, dict]] = {}
 
-    def add(self, day: str, source_zip: str, video: PublishedVideo) -> None:
+    def add(
+        self,
+        day: str,
+        source_zip: str,
+        video: PublishedVideo,
+        category: str | None = None,
+        uploader: str | None = None,
+    ) -> None:
         day_videos = self._days.setdefault(day, {})
         day_videos[video.id] = {
             "id": video.id,
@@ -22,6 +31,8 @@ class Manifest:
             "poster": video.poster_url,
             "duration": video.duration_seconds,
             "source_zip": source_zip,
+            "category": category or DEFAULT_CATEGORY,
+            "uploader": uploader,
         }
 
     def to_dict(self) -> dict:
@@ -41,7 +52,9 @@ class Manifest:
             day = day_entry["day"]
             for video in day_entry.get("videos", []):
                 day_videos = manifest._days.setdefault(day, {})
-                day_videos[video["id"]] = {"duration": None, **video}
+                record = {"duration": None, **video}
+                record["category"] = record.get("category") or DEFAULT_CATEGORY
+                day_videos[video["id"]] = record
         return manifest
 
 

@@ -258,3 +258,17 @@ def test_run_ingest_attaches_duration_to_manifest(tmp_path):
     run_ingest(source, FakePublisher(), FakeStateStore(), tmp_path / "m.json", tmp_path / "w", processor=Proc())
     videos = load(tmp_path / "m.json").to_dict()["days"][0]["videos"]
     assert videos[0]["duration"] == 42.5
+
+
+def test_run_ingest_records_category_and_uploader_in_manifest(tmp_path):
+    entry = ZipEntry(
+        id="z1", name="z1.zip", uploaded_at=datetime(2026, 9, 30, tzinfo=timezone.utc),
+        day="2026-09-30", category="Black pipes", uploader="Arshil Bhingradiya",
+    )
+    source = FakeZipSource([entry], {"z1": _make_zip_bytes(tmp_path, "z1.zip", ["a.mp4"])})
+
+    run_ingest(source, FakePublisher(), FakeStateStore(), tmp_path / "m.json", tmp_path / "w")
+
+    video = load(tmp_path / "m.json").to_dict()["days"][0]["videos"][0]
+    assert video["category"] == "Black pipes"
+    assert video["uploader"] == "Arshil Bhingradiya"

@@ -291,3 +291,104 @@ def test_list_zips_drops_numbered_duplicates_in_favour_of_original():
     ids = [e.id for e in source.list_zips()]
 
     assert ids == ["orig", "x1"]
+
+
+def _zip_file(fid, name, owner=None, mime="application/zip", created="2026-09-30T12:00:00Z"):
+    info = {"id": fid, "name": name, "createdTime": created, "mimeType": mime}
+    if owner is not None:
+        info["owners"] = [{"displayName": owner, "emailAddress": "hidden@example.com"}]
+    return info
+
+
+def test_list_zips_accepts_extensionless_zip_by_mime_type():
+    pages = [
+        {
+            "files": [
+                _zip_file("a", "PoseCam capture-20260930T165850-d63582-pipeline"),
+                _zip_file("b", "notes", mime="text/plain"),
+            ]
+        }
+    ]
+    source = DriveZipSource(FakeService(pages), folder_id="folder-123")
+
+    entries = source.list_zips()
+
+    assert [e.id for e in entries] == ["a"]
+    assert entries[0].day == "2026-09-30"
+
+
+def test_day_from_zip_name_finds_capture_anywhere_in_name():
+    from ingest.adapters.drive import day_from_zip_name
+
+    assert day_from_zip_name("PoseCam capture-20260930T165850-d63582-pipeline") == "2026-09-30"
+    assert day_from_zip_name("capture-20260930T171631-666aa4-pipeline.zip") == "2026-09-30"
+
+
+def test_list_zips_records_owner_display_name_only():
+    pages = [{"files": [_zip_file("a", "x.zip", owner="jayjagani19"), _zip_file("b", "y.zip")]}]
+    source = DriveZipSource(FakeService(pages), folder_id="folder-123")
+
+    by_id = {e.id: e for e in source.list_zips()}
+
+    assert by_id["a"].uploader == "jayjagani19"
+    assert by_id["b"].uploader is None
+    assert "emailAddress" not in repr(by_id["a"])
+
+
+def test_list_zips_requests_owner_display_names_without_emails():
+    service = FakeService([{"files": []}])
+    fields_seen = []
+    original = service.files().list
+
+    def spy(q, fields, pageSize, pageToken=None):
+        fields_seen.append(fields)
+        return original(q=q, fields=fields, pageSize=pageSize, pageToken=pageToken)
+
+    service.files().list = spy
+    DriveZipSource(service, folder_id="folder-123").list_zips()
+
+    zip_fields = [f for f in fields_seen if "createdTime" in f]
+    assert zip_fields and all("owners(displayName)" in f for f in zip_fields)
+    assert not any("emailAddress" in f for f in fields_seen)
+
+
+def test_category_is_source_label_when_given():
+    folders = {"root": [{"id": "f1", "name": "Remaining Videos"}]}
+    pages = {
+        "root": [{"files": [_zip_file("r", "root.zip")]}],
+        "f1": [{"files": [_zip_file("a", "a.zip")]}],
+    }
+    source = DriveZipSource(FakeService(pages, folders), "root", category="Remaining")
+
+    assert {e.id: e.category for e in source.list_zips()} == {"r": "Remaining", "a": "Remaining"}
+
+
+def test_category_is_subfolder_name_without_label_and_skips_dated_folders():
+    folders = {"root": [{"id": "f1", "name": "White pipes"}, {"id": "f2", "name": "26-09-2026"}]}
+    pages = {
+        "root": [{"files": [_zip_file("r", "root.zip")]}],
+        "f1": [{"files": [_zip_file("a", "a.zip")]}],
+        "f2": [{"files": [_zip_file("b", "b.zip")]}],
+    }
+    source = DriveZipSource(FakeService(pages, folders), "root")
+
+    assert {e.id: e.category for e in source.list_zips()} == {"r": None, "a": "White pipes", "b": None}
+
+
+def test_dedupe_is_scoped_per_category():
+    folders = {"root": [{"id": "w", "name": "White pipes"}, {"id": "k", "name": "Black pipes"}]}
+    same = "PoseCam capture-20260930T165850-d63582-pipeline"
+    pages = {
+        "root": [{"files": []}],
+        "w": [{"files": [_zip_file("w1", same), _zip_file("w2", same + " (1)")]}],
+        "k": [{"files": [_zip_file("k1", same)]}],
+    }
+    source = DriveZipSource(FakeService(pages, folders), "root")
+
+    assert sorted(e.id for e in source.list_zips()) == ["k1", "w1"]
+
+
+def test_normalize_zip_name_strips_counter_on_extensionless_names():
+    from ingest.adapters.drive import normalize_zip_name
+
+    assert normalize_zip_name("PoseCam capture-1-pipeline (2)") == "PoseCam capture-1-pipeline"

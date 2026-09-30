@@ -69,7 +69,10 @@ def run_ingest(
                     )
                 else:
                     published = publisher.publish(video_path, day)
-                manifest.add(day, entry.name, published)
+                manifest.add(
+                    day, entry.name, published,
+                    category=entry.category, uploader=entry.uploader,
+                )
 
             save(manifest, manifest_path)
         except Exception as exc:  # noqa: BLE001 - recorded per zip, not re-raised
