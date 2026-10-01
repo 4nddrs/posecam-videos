@@ -127,3 +127,5 @@ New Drive subfolders "Black pipes 1 Oct" and "White pipes 1 Oct" showed up as th
 - [x] T19 Strip a trailing date from category names (`normalize_category` in ingest/manifest.py, applied in `Manifest.add` and `Manifest.from_dict`, so new uploads and existing entries both land in the base category). Rewrite the 20 existing manifest entries. (inline: one understood module plus its test)
 
 - Progress: T19 TDD RED import error -> GREEN 99 pytest, 49 node. Manifest now: Black/White pipes 199, Black pipes 28, White pipes 12.
+- 2026-10-01: T19 committed 801ac27. RDD: medium, consent granted, reliability lens approved, acknowledged (lineage review-3b42914d6709d5bd). Reviewed boundary = 801ac27.
+- [x] T20 (review follow-up, user accepted) Match real month names only, range-check the day, and ignore non-text categories, so names like "Pipes Deck 1" or "Black pipes Mark 2" keep their own category. (inline) TDD RED 2 fails -> GREEN 102 pytest, 49 node.

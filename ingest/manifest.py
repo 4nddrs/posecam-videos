@@ -10,22 +10,28 @@ from ingest.ports import PublishedVideo
 
 DEFAULT_CATEGORY = "Black/White pipes"
 
-_MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*"
-_DAY = r"\d{1,2}(?:st|nd|rd|th)?"
+# Real month names only: "Deck 1" or "Mark 2" must not read as a date.
+_MONTH = (
+    r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|"
+    r"aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)"
+)
+_DAY = r"(?:0?[1-9]|[12]\d|3[01])(?:st|nd|rd|th)?"
 _TRAILING_DATE_RE = re.compile(
-    rf"[\s\-_,(]+(?:{_DAY}\s+{_MONTH}|{_MONTH}\s+{_DAY})(?:,?\s+\d{{4}})?\)?\s*$",
+    rf"[\s\-_,(]+(?:{_DAY}\s+{_MONTH}|{_MONTH}\s+{_DAY})\b(?:,?\s+\d{{4}})?\)?\s*$",
     re.IGNORECASE,
 )
 
 
-def normalize_category(name: str | None) -> str | None:
+def normalize_category(name: object) -> str | None:
     """Drop a trailing date from a category name, or None when it is empty.
 
     Uploaders create one Drive folder per batch ("Black pipes 1 Oct"); those
     videos belong to the base category ("Black pipes"), and the day comes from
     the recording itself.
     """
-    cleaned = (name or "").strip()
+    if not isinstance(name, str):
+        return None
+    cleaned = name.strip()
     return _TRAILING_DATE_RE.sub("", cleaned).strip() or cleaned or None
 
 

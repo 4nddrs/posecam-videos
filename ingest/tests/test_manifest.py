@@ -163,3 +163,25 @@ def test_dated_category_folders_merge_into_the_base_category(tmp_path):
     videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
     assert videos["old"]["category"] == "Black pipes"
     assert videos["new"]["category"] == "White pipes"
+
+
+def test_normalize_category_keeps_words_that_only_start_like_a_month():
+    assert normalize_category("Pipes Deck 1") == "Pipes Deck 1"
+    assert normalize_category("Black pipes Mark 2") == "Black pipes Mark 2"
+    assert normalize_category("Line 2 Marked") == "Line 2 Marked"
+    assert normalize_category("Team Junior 2") == "Team Junior 2"
+    assert normalize_category("Pipes 99 Oct") == "Pipes 99 Oct"
+
+
+def test_normalize_category_strips_full_and_short_month_names():
+    assert normalize_category("Black pipes 3 Sept") == "Black pipes"
+    assert normalize_category("Black pipes (31 December)") == "Black pipes"
+    assert normalize_category("White pipes March 2nd") == "White pipes"
+
+
+def test_normalize_category_ignores_blank_and_non_text_values():
+    assert normalize_category("   ") is None
+    assert normalize_category(7) is None
+    data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u", "category": 7}]}]}
+    video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
+    assert video["category"] == "Black/White pipes"
