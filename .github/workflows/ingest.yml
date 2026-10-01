@@ -42,10 +42,26 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Cache ffmpeg
+        uses: actions/cache@v4
+        with:
+          path: ~/ffmpeg-bin
+          key: ffmpeg-static-linux64-v1
+
       - name: Install ffmpeg
+        timeout-minutes: 5
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
-          ffmpeg -version | head -1
+          # Static build from GitHub releases: apt mirrors have hung this step.
+          if [ ! -x "$HOME/ffmpeg-bin/ffmpeg" ] || [ ! -x "$HOME/ffmpeg-bin/ffprobe" ]; then
+            mkdir -p "$HOME/ffmpeg-bin"
+            curl -fsSL --retry 3 --max-time 180 -o /tmp/ffmpeg.tar.xz \
+              https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+            tar -xJf /tmp/ffmpeg.tar.xz -C "$HOME/ffmpeg-bin" --strip-components=2 \
+              --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
+          fi
+          echo "$HOME/ffmpeg-bin" >> "$GITHUB_PATH"
+          "$HOME/ffmpeg-bin/ffmpeg" -version | head -1
+          "$HOME/ffmpeg-bin/ffprobe" -version | head -1
 
       - name: Run ingest
         env:
