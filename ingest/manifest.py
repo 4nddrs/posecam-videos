@@ -2,12 +2,31 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
 from ingest.ports import PublishedVideo
 
 DEFAULT_CATEGORY = "Black/White pipes"
+
+_MONTH = r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*"
+_DAY = r"\d{1,2}(?:st|nd|rd|th)?"
+_TRAILING_DATE_RE = re.compile(
+    rf"[\s\-_,(]+(?:{_DAY}\s+{_MONTH}|{_MONTH}\s+{_DAY})(?:,?\s+\d{{4}})?\)?\s*$",
+    re.IGNORECASE,
+)
+
+
+def normalize_category(name: str | None) -> str | None:
+    """Drop a trailing date from a category name, or None when it is empty.
+
+    Uploaders create one Drive folder per batch ("Black pipes 1 Oct"); those
+    videos belong to the base category ("Black pipes"), and the day comes from
+    the recording itself.
+    """
+    cleaned = (name or "").strip()
+    return _TRAILING_DATE_RE.sub("", cleaned).strip() or cleaned or None
 
 
 class Manifest:
@@ -31,7 +50,7 @@ class Manifest:
             "poster": video.poster_url,
             "duration": video.duration_seconds,
             "source_zip": source_zip,
-            "category": category or DEFAULT_CATEGORY,
+            "category": normalize_category(category) or DEFAULT_CATEGORY,
             "uploader": uploader,
         }
 
@@ -53,7 +72,7 @@ class Manifest:
             for video in day_entry.get("videos", []):
                 day_videos = manifest._days.setdefault(day, {})
                 record = {"duration": None, **video}
-                record["category"] = record.get("category") or DEFAULT_CATEGORY
+                record["category"] = normalize_category(record.get("category")) or DEFAULT_CATEGORY
                 day_videos[video["id"]] = record
         return manifest
 

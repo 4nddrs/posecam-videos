@@ -1,6 +1,6 @@
 import json
 
-from ingest.manifest import Manifest, load, save
+from ingest.manifest import Manifest, load, normalize_category, save
 from ingest.ports import PublishedVideo
 
 
@@ -134,3 +134,32 @@ def test_from_dict_defaults_missing_category_to_remaining():
     data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}
     video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
     assert video["category"] == "Black/White pipes"
+
+
+def test_normalize_category_strips_trailing_date():
+    assert normalize_category("Black pipes 1 Oct") == "Black pipes"
+    assert normalize_category("White pipes 1 OCt") == "White pipes"
+    assert normalize_category("Black pipes - 12 October 2026") == "Black pipes"
+    assert normalize_category("White pipes Oct 1") == "White pipes"
+    assert normalize_category("  Black pipes  ") == "Black pipes"
+
+
+def test_normalize_category_keeps_names_without_a_date():
+    assert normalize_category("Black/White pipes") == "Black/White pipes"
+    assert normalize_category("Pipes batch 2") == "Pipes batch 2"
+    assert normalize_category("1 Oct") == "1 Oct"
+    assert normalize_category(None) is None
+    assert normalize_category("") is None
+
+
+def test_dated_category_folders_merge_into_the_base_category(tmp_path):
+    path = tmp_path / "m.json"
+    path.write_text(json.dumps({"days": [{"day": "2026-10-01", "videos": [
+        {"id": "old", "name": "old.mp4", "url": "u", "category": "Black pipes 1 Oct"},
+    ]}]}))
+    m = Manifest()
+    m.add("2026-10-01", "z", PublishedVideo(id="new", name="new.mp4", url="u2"), category="White pipes 1 Oct")
+    save(m, path)
+    videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
+    assert videos["old"]["category"] == "Black pipes"
+    assert videos["new"]["category"] == "White pipes"

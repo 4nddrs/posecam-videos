@@ -119,3 +119,11 @@ Branch `feat/day-duration-summary` from main.
 - [x] T18 (user feedback on T17) Make the per-day summary larger and more prominent (stat chips, not small inline text). Make the duration chart clearer: per-bar count labels, bucket axis labels, taller bars, visible empty buckets, stronger contrast in both themes. Remove the "Recording HH:MM:SS" title from each video card; the card keeps an accessible name via aria-label. Use the freed space for larger chips (time, session, duration, uploader, pipeline). (delegated, writer trigger)
 
 - Progress: T18 done in 4a0902c (bucketAxisLabel in lib.js, TDD RED import fail -> GREEN 49/49 node; stat cards, uploader pills, taller labelled bars with visible empty slots, card h3 removed with aria-label, larger chips).
+
+## Phase 8: dated category folders (2026-10-01, user request)
+
+New Drive subfolders "Black pipes 1 Oct" and "White pipes 1 Oct" showed up as their own tabs, because the subfolder name is used verbatim as the category. Those videos belong to "Black pipes" and "White pipes"; the day already comes from the recording name.
+
+- [x] T19 Strip a trailing date from category names (`normalize_category` in ingest/manifest.py, applied in `Manifest.add` and `Manifest.from_dict`, so new uploads and existing entries both land in the base category). Rewrite the 20 existing manifest entries. (inline: one understood module plus its test)
+
+- Progress: T19 TDD RED import error -> GREEN 99 pytest, 49 node. Manifest now: Black/White pipes 199, Black pipes 28, White pipes 12.
