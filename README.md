@@ -62,6 +62,7 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | `MANIFEST_PATH` | no | Output path for the manifest (default `site/manifest.json`). |
 | `STATE_PATH` | no | Path to the idempotency state file (default `ingest/state.json`). |
 | `MAX_ZIPS_PER_RUN` | no | Maximum number of new zips processed per run, oldest first (default `10`; also the max videos per `ingest.posters` run). The rest are reported as `deferred` and picked up by later runs. |
+| `MAX_FRAME_VIDEOS_PER_RUN` | no | Maximum number of pending videos processed per `ingest.frames` run (default: no limit; `--limit` overrides it). The rest are picked up by later runs. |
 | `FFMPEG_BIN` | no | ffmpeg binary (default `ffmpeg`). If missing, posters and faststart are skipped. |
 | `WORKDIR` | no | Working directory for downloads/extraction (default a fresh temp directory). |
 
@@ -96,3 +97,24 @@ python -m ingest.posters
 It downloads each video without a `poster` from R2, remuxes it, uploads the video back to the same key plus the poster, and updates `site/manifest.json` after each video. At most `MAX_ZIPS_PER_RUN` videos are handled per run; the printed JSON report `{"updated": [...], "failed": {...}, "remaining": n}` shows what is left. It exits 1 only if nothing could be processed and there were failures.
 
 In GitHub Actions, run the workflow manually (workflow_dispatch) with `mode` set to `posters`; the default `ingest` mode is the normal ingest.
+
+## Frames
+
+```bash
+python -m ingest.frames
+```
+
+Extracts frames from every `.mp4` in the R2 bucket (outside `frames/`) and uploads them back; it needs ffmpeg and ffprobe (`FFMPEG_BIN` / `FFPROBE_BIN`) and only the R2 variables, not the Drive ones. Each video is downloaded, sampled at a fixed rate (default 5 fps) and stored as:
+
+- `frames/<video key without extension>/frame_000001.jpg`, `frame_000002.jpg`, ... (`image/jpeg`);
+- `frames/<video key without extension>/index.json` (`application/json`): `video_key`, `fps`, `frame_count`, `duration`, `start_time` and `frames` (`key` and `timestamp` per frame).
+
+`index.json` is uploaded last and is the completion marker: a video that has it is skipped, so runs are idempotent and resumable. A video that fails stays pending (no `index.json`) and is retried by the next run; the step exits 1 if any video failed.
+
+| Flag | Meaning |
+|------|---------|
+| `--limit N` | Process at most N pending videos (default: `MAX_FRAME_VIDEOS_PER_RUN`, or no limit). |
+| `--dry-run` | List what would be processed without downloading or uploading. |
+| `--workers N` | Concurrent uploads (default 24). |
+| `--fps N` | Frames per second (default 5). |
+| `--tmp-dir DIR` | Parent directory for temporary files (default `WORKDIR`, or the system temp directory). |
