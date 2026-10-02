@@ -57,7 +57,18 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
 - The `frames` workflow job has not run in GitHub Actions (nothing pushed).
 
 ## Review
-- RDD on (global). Assess on 006b41e..4eb0967: high (`process_boundary`, `ingest/adapters/frames.py`), `review_due` true (`high_risk`). Outcome: candidate consent pending with the user.
+- RDD on (global). Assess on 006b41e..2549041: high (`process_boundary` in `ingest/adapters/frames.py`, shell in the workflow), `review_due` true (`high_risk`).
+- Outcome: consent granted by the user (2026-10-01). Four lenses, approved with no correction, acknowledged; authority burned (lineage `review-b3751940b8e1fef8`). Reviewed boundary = 2549041.
+- Advisory findings (non-blocking, not accepted into scope; candidates for later work):
+  - a video that fails on every run keeps a slot of the per-run limit; enough of them sorted early starve the backlog (`ingest/frames.py`);
+  - ffmpeg/ffprobe run without a per-video timeout, so a stalled video is only bounded by the 25-minute job timeout and blocks the queue (`ingest/adapters/frames.py`);
+  - a failed frame upload does not cancel the remaining uploads of that video (`ingest/frames.py`);
+  - `--limit`, `--workers`, `--fps` and `MAX_FRAME_VIDEOS_PER_RUN` are not range-checked;
+  - ffprobe path is derived by replacing every `ffmpeg` substring in `FFMPEG_BIN` (same as the existing processor adapter);
+  - the bucket name is redacted from logs as if it were a secret;
+  - README says the limit default is "no limit" without mentioning the CI default of 10;
+  - the `frames` job also runs when `ingest` failed (intended: published videos still get frames; the comment does not say so);
+  - the ffmpeg static build is an unpinned rolling release without checksum (pre-existing in the `ingest` job, duplicated in `frames`).
 
 ## Next step
-User decisions: candidate review consent; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
+User decisions: which advisory findings to fix; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
