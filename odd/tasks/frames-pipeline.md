@@ -30,6 +30,7 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
 ## Tasks
 - [x] T1 `ingest/frames.py` use case + CLI, `FrameExtractor` port, ffmpeg frame adapter, tests, README section. Route: delegated writer (writer trigger: 4+ non-trivial files).
 - [x] T2 `.github/workflows/ingest.yml`: `frames` job after `ingest`, parallel to `deploy`, bounded per run. Route: inline (one already-understood file).
+- [x] T3 Robustness fixes accepted from the review (user, 2026-10-01): limit counts successes only, per-video ffprobe/ffmpeg timeout (`--timeout`, default 600s), failed upload cancels the rest. Route: delegated writer (5 files).
 
 ## Acceptance
 - `python -m ingest.frames` produces the same R2 keys and the same `index.json` as `extract_frames.py` for the same video.
@@ -50,6 +51,8 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
 - 2026-10-01: T1 committed a7754dc (delegated writer, TDD: RED observed as import-level collection errors per test file, then GREEN; 142 passed, +40). Parent spot check: pytest re-run 142 passed, plus a differential run of `extract_frames.py` against `ingest.frames` with a fake ffmpeg and a fake S3 client: identical ffprobe/ffmpeg argv, frame keys, bytes, ExtraArgs, `index.json` key/body/content type, index uploaded last, with and without the timestamp fallback.
 - 2026-10-01: T2 committed 4eb0967 (inline). Workflow YAML parses; jobs `ingest`, `frames`, `deploy`; `deploy` still needs only `ingest`. `frames` limited to `MAX_FRAME_VIDEOS_PER_RUN` (default 10) and 25 minutes.
 - 2026-10-01: authored lines 1028 for T1 (556 of them tests) and 54 for T2, above the ~450 forecast because of test volume.
+- 2026-10-01: T3 committed 8540bd4 (delegated writer, TDD: 11 new tests RED on assertions/TypeError, then GREEN; 153 passed). Parent spot check: pytest re-run 153 passed; differential run against `extract_frames.py` still identical (argv, keys, bytes, `index.json`); only the runner `timeout=` keyword differs.
+- 2026-10-01: user stated the pipeline will not run in GitHub Actions, so the CI-only findings stay open on purpose.
 
 ## Verification gaps
 - No real ffmpeg run: ffmpeg/ffprobe are not installed on the development machine, so the adapter was verified against the original script with a fake runner only.
@@ -71,4 +74,4 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
   - the ffmpeg static build is an unpinned rolling release without checksum (pre-existing in the `ingest` job, duplicated in `frames`).
 
 ## Next step
-User decisions: which advisory findings to fix; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
+User decisions: review consent for 8540bd4; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
