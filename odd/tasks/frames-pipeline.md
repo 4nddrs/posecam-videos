@@ -62,16 +62,19 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
 ## Review
 - RDD on (global). Assess on 006b41e..2549041: high (`process_boundary` in `ingest/adapters/frames.py`, shell in the workflow), `review_due` true (`high_risk`).
 - Outcome: consent granted by the user (2026-10-01). Four lenses, approved with no correction, acknowledged; authority burned (lineage `review-b3751940b8e1fef8`). Reviewed boundary = 2549041.
-- Advisory findings (non-blocking, not accepted into scope; candidates for later work):
-  - a video that fails on every run keeps a slot of the per-run limit; enough of them sorted early starve the backlog (`ingest/frames.py`);
-  - ffmpeg/ffprobe run without a per-video timeout, so a stalled video is only bounded by the 25-minute job timeout and blocks the queue (`ingest/adapters/frames.py`);
-  - a failed frame upload does not cancel the remaining uploads of that video (`ingest/frames.py`);
-  - `--limit`, `--workers`, `--fps` and `MAX_FRAME_VIDEOS_PER_RUN` are not range-checked;
+- Second slice 2549041..3d5c8f5 (T3): high (`process_boundary`), 195 lines. Consent granted by the user (2026-10-01). Four lenses, approved with no correction, acknowledged; authority burned (lineage `review-2a4206dc19c3c338`). Reviewed boundary = 3d5c8f5.
+- Resolved by T3 (8540bd4): limit starvation by failing videos, missing ffmpeg/ffprobe timeout, failed upload not cancelling the rest.
+- Open advisory findings (non-blocking, not accepted into scope):
+  - since T3 the limit bounds successes only, so a systemic failure (ffmpeg missing, R2 outage, every video timing out) makes one run attempt the whole pending backlog; no cap on failures per run;
+  - a video that legitimately needs more than the timeout fails on every run until the operator raises `--timeout`;
+  - `--timeout` is applied per ffprobe/ffmpeg call, not per video, and the help text and README say "per-video";
+  - `--limit`, `--workers`, `--fps`, `--timeout` and `MAX_FRAME_VIDEOS_PER_RUN` are not range-checked (a negative timeout fails every video);
+  - the 600-second default is defined twice (adapter signature and CLI constant);
+  - `shutdown(wait=False, ...)` inside the `with` block still waits for in-flight uploads; only `cancel_futures` has an effect;
+  - the upload-cancel test bounds attempts to two by thread scheduling, not by a guarantee;
   - ffprobe path is derived by replacing every `ffmpeg` substring in `FFMPEG_BIN` (same as the existing processor adapter);
   - the bucket name is redacted from logs as if it were a secret;
-  - README says the limit default is "no limit" without mentioning the CI default of 10;
-  - the `frames` job also runs when `ingest` failed (intended: published videos still get frames; the comment does not say so);
-  - the ffmpeg static build is an unpinned rolling release without checksum (pre-existing in the `ingest` job, duplicated in `frames`).
+  - CI only, left open on purpose (user: the pipeline will not run in GitHub Actions): README omits the CI default of 10, the `frames` job runs when `ingest` failed, the ffmpeg static build is an unpinned rolling release without checksum.
 
 ## Next step
-User decisions: review consent for 8540bd4; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
+User decisions: whether to cap failures per run; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
