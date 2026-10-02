@@ -62,7 +62,7 @@ Environment variables, loaded from `.env` at the repository root if present (exi
 | `MANIFEST_PATH` | no | Output path for the manifest (default `site/manifest.json`). |
 | `STATE_PATH` | no | Path to the idempotency state file (default `ingest/state.json`). |
 | `MAX_ZIPS_PER_RUN` | no | Maximum number of new zips processed per run, oldest first (default `10`; also the max videos per `ingest.posters` run). The rest are reported as `deferred` and picked up by later runs. |
-| `MAX_FRAME_VIDEOS_PER_RUN` | no | Maximum number of pending videos processed per `ingest.frames` run (default: no limit; `--limit` overrides it). The rest are picked up by later runs. |
+| `MAX_FRAME_VIDEOS_PER_RUN` | no | Maximum number of videos successfully processed per `ingest.frames` run (default: no limit; `--limit` overrides it). Failed videos do not consume the limit: the run moves on to the next pending video. The rest are picked up by later runs. |
 | `FFMPEG_BIN` | no | ffmpeg binary (default `ffmpeg`). If missing, posters and faststart are skipped. |
 | `WORKDIR` | no | Working directory for downloads/extraction (default a fresh temp directory). |
 
@@ -109,12 +109,13 @@ Extracts frames from every `.mp4` in the R2 bucket (outside `frames/`) and uploa
 - `frames/<video key without extension>/frame_000001.jpg`, `frame_000002.jpg`, ... (`image/jpeg`);
 - `frames/<video key without extension>/index.json` (`application/json`): `video_key`, `fps`, `frame_count`, `duration`, `start_time` and `frames` (`key` and `timestamp` per frame).
 
-`index.json` is uploaded last and is the completion marker: a video that has it is skipped, so runs are idempotent and resumable. A video that fails stays pending (no `index.json`) and is retried by the next run; the step exits 1 if any video failed.
+`index.json` is uploaded last and is the completion marker: a video that has it is skipped, so runs are idempotent and resumable. A video that fails stays pending (no `index.json`) and is retried by the next run; the step exits 1 if any video failed. A failed video does not count toward the per-run limit, so videos that always fail never starve the rest of the queue. ffprobe and ffmpeg run with a per-video timeout (default 600 s); a timeout fails that video like any other error.
 
 | Flag | Meaning |
 |------|---------|
-| `--limit N` | Process at most N pending videos (default: `MAX_FRAME_VIDEOS_PER_RUN`, or no limit). |
+| `--limit N` | Stop after N videos were processed successfully; failed videos do not count (default: `MAX_FRAME_VIDEOS_PER_RUN`, or no limit). |
 | `--dry-run` | List what would be processed without downloading or uploading. |
 | `--workers N` | Concurrent uploads (default 24). |
 | `--fps N` | Frames per second (default 5). |
 | `--tmp-dir DIR` | Parent directory for temporary files (default `WORKDIR`, or the system temp directory). |
+| `--timeout SECONDS` | Per-video timeout for each ffprobe and ffmpeg call (default 600, `0` disables it). |

@@ -25,6 +25,7 @@ class FfmpegFrameExtractor:
         ffmpeg_bin: str | None = None,
         ffprobe_bin: str | None = None,
         runner: Callable[..., Any] = subprocess.run,
+        timeout: float | None = 600,
     ) -> None:
         self._bin = ffmpeg_bin or os.environ.get("FFMPEG_BIN") or "ffmpeg"
         self._probe_bin = (
@@ -33,9 +34,18 @@ class FfmpegFrameExtractor:
             or self._bin.replace("ffmpeg", "ffprobe")
         )
         self._runner = runner
+        self._timeout = timeout
+
+    def _run(self, argv: list[str], **kwargs: Any) -> Any:
+        try:
+            return self._runner(argv, timeout=self._timeout, **kwargs)
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(
+                f"{Path(argv[0]).name} timed out after {self._timeout:g}s"
+            ) from exc
 
     def _probe(self, path: Path) -> dict:
-        result = self._runner(
+        result = self._run(
             [
                 self._probe_bin, "-v", "error",
                 "-select_streams", "v:0",
@@ -53,7 +63,7 @@ class FfmpegFrameExtractor:
         ``showinfo`` after ``fps`` logs the pts_time of each output frame, and
         ``-vsync passthrough`` keeps a 1:1 mapping between those frames and files.
         """
-        result = self._runner(
+        result = self._run(
             [
                 self._bin, "-hide_banner", "-nostdin", "-loglevel", "info",
                 "-i", str(video_path),

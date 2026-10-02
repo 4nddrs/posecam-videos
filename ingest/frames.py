@@ -1,7 +1,7 @@
 """Extract frames from the MP4 videos stored in R2 and upload them back.
 
 Usage: python -m ingest.frames [--limit N] [--dry-run] [--workers N]
-                               [--fps N] [--tmp-dir DIR]
+                               [--fps N] [--tmp-dir DIR] [--timeout SECONDS]
 
 For every ``<day>/<name>.mp4`` in the bucket (ignoring ``frames/``), it
 downloads the video, extracts frames at a fixed rate, uploads them to
@@ -9,7 +9,8 @@ downloads the video, extracts frames at a fixed rate, uploads them to
 ``frames/<day>/<name>/index.json``. The index is written last, only after
 every frame was uploaded: its presence marks the video as done, which makes
 the step idempotent and resumable. MAX_FRAME_VIDEOS_PER_RUN caps the videos
-handled per run (``--limit`` overrides it).
+successfully processed per run (``--limit`` overrides it); failed videos do not
+count toward it.
 """
 from __future__ import annotations
 
@@ -33,6 +34,7 @@ from ingest.ports import FrameExtractor
 FRAMES_ROOT = "frames/"
 DEFAULT_FPS = 5
 DEFAULT_WORKERS = 24
+DEFAULT_TIMEOUT = 600
 MISSING_CODES = ("404", "NoSuchKey", "NotFound")
 R2_REQUIRED = ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY")
 SECRET_ENV = R2_REQUIRED + ("R2_BUCKET_NAME", "R2_PUBLIC_BASE_URL", "R2_ENDPOINT")
@@ -119,8 +121,12 @@ def _upload_frames(
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = [pool.submit(upload, frame) for frame in frames]
-        for future in as_completed(futures):
-            future.result()
+        try:
+            for future in as_completed(futures):
+                future.result()
+        except BaseException:
+            pool.shutdown(wait=False, cancel_futures=True)
+            raise
 
 
 def _process_video(
@@ -212,18 +218,25 @@ def run_frames(
     )
     pending = [v for v, is_done in zip(videos, done) if not is_done]
     log(f"{len(report.skipped)} video(s) already done (index.json present), skipping")
-    if max_videos is not None:
-        report.deferred = [v.key for v in pending[max_videos:]]
-        pending = pending[:max_videos]
-    log(f"{len(pending)} video(s) to process")
+    if max_videos is None:
+        log(f"{len(pending)} video(s) to process")
+    else:
+        log(f"{len(pending)} video(s) pending, processing up to {max_videos}")
 
     if dry_run:
+        if max_videos is not None:
+            report.deferred = [v.key for v in pending[max_videos:]]
+            pending = pending[:max_videos]
         for video in pending:
             log(f"would process {video.key} ({video.size / 1e6:.1f} MB) -> {frames_prefix(video.key)}")
         return report
 
     all_stats: list[_VideoStats] = []
+    attempted = 0
     for n, video in enumerate(pending, 1):
+        if max_videos is not None and len(report.processed) >= max_videos:
+            break
+        attempted = n
         log(f"[{n}/{len(pending)}] {video.key} ({video.size / 1e6:.1f} MB)")
         try:
             stats = _process_video(
@@ -239,6 +252,8 @@ def run_frames(
             f"download {stats.download_s:.1f}s | extract {stats.extract_s:.1f}s | "
             f"upload {stats.upload_s:.1f}s"
         )
+
+    report.deferred = [v.key for v in pending[attempted:]]
 
     if all_stats:
         log(
@@ -282,7 +297,8 @@ def _parse_args(argv: list[str] | None, env: Mapping[str, str]) -> argparse.Name
     parser.add_argument(
         "--limit", type=int,
         default=_limit_from_env(env),
-        help="process at most N pending videos (default: MAX_FRAME_VIDEOS_PER_RUN, "
+        help="stop after N videos were processed successfully; failed videos "
+             "do not count (default: MAX_FRAME_VIDEOS_PER_RUN, "
              "unset means no limit)",
     )
     parser.add_argument("--dry-run", action="store_true", help="only list what would be done")
@@ -291,6 +307,9 @@ def _parse_args(argv: list[str] | None, env: Mapping[str, str]) -> argparse.Name
     parser.add_argument("--fps", type=int, default=DEFAULT_FPS,
                         help=f"frames per second (default: {DEFAULT_FPS})")
     parser.add_argument("--tmp-dir", help="parent directory for temporary files")
+    parser.add_argument("--timeout", type=int, default=DEFAULT_TIMEOUT,
+                        help="per-video ffprobe/ffmpeg timeout in seconds, "
+                             f"0 disables it (default: {DEFAULT_TIMEOUT})")
     return parser.parse_args(argv)
 
 
@@ -325,7 +344,7 @@ def main(
     report = run_frames(
         client=client_factory(config, args.workers),
         bucket=bucket,
-        extractor=extractor or FfmpegFrameExtractor(),
+        extractor=extractor or FfmpegFrameExtractor(timeout=args.timeout or None),
         workdir=Path(workdir) if workdir else None,
         fps=args.fps,
         workers=args.workers,

@@ -256,6 +256,71 @@ def test_max_videos_limits_pending_and_reports_the_rest_as_deferred(tmp_path):
     assert report.deferred == ["d/c.mp4"]
 
 
+def test_failed_videos_do_not_consume_the_max_videos_cap(tmp_path):
+    client = FakeS3(
+        keys=["d/a.mp4", "d/b.mp4", "d/c.mp4", "d/d.mp4"],
+        fail_download={"d/a.mp4", "d/b.mp4"})
+    report = _run(tmp_path, client, max_videos=1)
+
+    assert list(report.failed) == ["d/a.mp4", "d/b.mp4"]
+    assert report.processed == ["d/c.mp4"]
+    assert report.deferred == ["d/d.mp4"]
+
+
+def test_max_videos_zero_processes_nothing(tmp_path):
+    client = FakeS3(keys=["d/a.mp4", "d/b.mp4"])
+    report = _run(tmp_path, client, max_videos=0)
+
+    assert report.processed == [] and report.failed == {}
+    assert report.deferred == ["d/a.mp4", "d/b.mp4"]
+    assert client.events == []
+
+
+def test_progress_logs_count_attempts_and_cap_under_the_new_limit(tmp_path):
+    client = FakeS3(keys=["d/a.mp4", "d/b.mp4", "d/c.mp4"], fail_download={"d/a.mp4"})
+    logs = []
+    run_frames(
+        client=client, bucket="b", extractor=FakeExtractor(),
+        workdir=tmp_path / "w", max_videos=1, log=logs.append,
+    )
+
+    assert "3 video(s) pending, processing up to 1" in logs
+    assert any(m.startswith("[1/3] d/a.mp4") for m in logs)
+    assert any(m.startswith("[2/3] d/b.mp4") for m in logs)
+
+
+def test_max_videos_dry_run_lists_the_first_pending_videos(tmp_path):
+    client = FakeS3(keys=["d/a.mp4", "d/b.mp4", "d/c.mp4"])
+    logs = []
+    report = run_frames(
+        client=client, bucket="b", extractor=FakeExtractor(),
+        workdir=tmp_path / "w", max_videos=2, dry_run=True, log=logs.append,
+    )
+
+    assert [m.split()[2] for m in logs if m.startswith("would process")] == [
+        "d/a.mp4", "d/b.mp4"]
+    assert report.deferred == ["d/c.mp4"]
+
+
+def test_failed_frame_upload_cancels_the_remaining_uploads(tmp_path):
+    client = FakeS3(keys=["d/a.mp4"])
+    attempted = []
+
+    def upload(local, bucket, key, ExtraArgs=None):
+        attempted.append(key)
+        raise RuntimeError("upload failed")
+
+    client.upload_file = upload
+    report = _run(tmp_path, client, FakeExtractor(count=5), workers=1)
+
+    assert list(report.failed) == ["d/a.mp4"]
+    # With one worker at most one more upload can already be dequeued when the
+    # failure is seen; the other three must never start.
+    assert attempted[0] == "frames/d/a/frame_000001.jpg"
+    assert len(attempted) <= 2
+    assert _puts(client) == []
+
+
 def test_dry_run_downloads_nothing(tmp_path):
     client = FakeS3(keys=["d/a.mp4"])
     logs = []
@@ -383,6 +448,27 @@ def test_main_limit_unset_or_empty_means_no_limit(tmp_path, value):
     client = FakeS3(keys=["d/a.mp4", "d/b.mp4"])
     _main(tmp_path, env, ["--tmp-dir", str(tmp_path / "t")], client=client)
     assert len([e for e in client.events if e[0] == "download"]) == 2
+
+
+@pytest.mark.parametrize("argv, expected", [
+    ([], 600), (["--timeout", "30"], 30), (["--timeout", "0"], None)])
+def test_main_passes_the_timeout_to_the_extractor(tmp_path, monkeypatch, argv, expected):
+    built = {}
+
+    class RecordingExtractor(FakeExtractor):
+        def __init__(self, timeout):
+            super().__init__()
+            built["timeout"] = timeout
+
+    monkeypatch.setattr(frames_mod, "FfmpegFrameExtractor", RecordingExtractor)
+    code = frames_mod.main(
+        [*argv, "--tmp-dir", str(tmp_path / "t")], env=dict(R2_ENV),
+        dotenv_path=tmp_path / "missing.env",
+        client_factory=lambda config, workers: FakeS3(keys=["d/a.mp4"]),
+    )
+
+    assert code == 0
+    assert built["timeout"] == expected
 
 
 def test_main_dry_run_writes_nothing(tmp_path):

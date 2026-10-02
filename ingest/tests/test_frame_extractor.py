@@ -65,7 +65,8 @@ def test_ffprobe_argv_matches_the_original_script(tmp_path):
         "format=duration,start_time:stream=r_frame_rate,avg_frame_rate,nb_frames",
         "-of", "json", str(tmp_path / "video.mp4"),
     ]
-    assert kwargs == {"check": True, "capture_output": True, "text": True}
+    assert kwargs == {
+        "check": True, "capture_output": True, "text": True, "timeout": 600}
 
 
 def test_ffmpeg_argv_matches_the_original_script(tmp_path):
@@ -81,7 +82,7 @@ def test_ffmpeg_argv_matches_the_original_script(tmp_path):
         "-q:v", "3",
         str(out / "frame_%06d.jpg"),
     ]
-    assert kwargs == {"capture_output": True, "text": True}
+    assert kwargs == {"capture_output": True, "text": True, "timeout": 600}
 
 
 def test_returns_sorted_frames_timestamps_duration_and_start_time(tmp_path):
@@ -150,3 +151,29 @@ def test_probe_binary_is_derived_from_ffmpeg_binary(tmp_path, monkeypatch):
 def test_constants_are_frozen():
     assert frames_mod.JPEG_QUALITY == 3
     assert frames_mod.FRAME_PATTERN == "frame_%06d.jpg"
+
+
+def test_timeout_is_configurable_and_can_be_disabled(tmp_path):
+    runner = FakeRunner()
+    _extract(tmp_path, runner, timeout=30)
+    assert [kwargs["timeout"] for _, kwargs in runner.calls] == [30, 30]
+
+    runner = FakeRunner()
+    out = tmp_path / "again"
+    out.mkdir()
+    FfmpegFrameExtractor(runner=runner, timeout=None).extract(
+        tmp_path / "video.mp4", out, 5)
+    assert [kwargs["timeout"] for _, kwargs in runner.calls] == [None, None]
+
+
+@pytest.mark.parametrize("stage, binary", [("ffprobe", "ffprobe"), ("ffmpeg", "ffmpeg")])
+def test_timeout_becomes_a_runtime_error_naming_binary_and_limit(tmp_path, stage, binary):
+    inner = FakeRunner()
+
+    def runner(argv, **kwargs):
+        if Path(argv[0]).name == stage:
+            raise subprocess.TimeoutExpired(argv, kwargs["timeout"])
+        return inner(argv, **kwargs)
+
+    with pytest.raises(RuntimeError, match=rf"{binary} timed out after 45s"):
+        _extract(tmp_path, runner, timeout=45)
