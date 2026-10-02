@@ -77,4 +77,4 @@ One pipeline, one schedule. Videos must reach R2 and the site first; frames are 
   - CI only, left open on purpose (user: the pipeline will not run in GitHub Actions): README omits the CI default of 10, the `frames` job runs when `ingest` failed, the ffmpeg static build is an unpinned rolling release without checksum.
 
 ## Next step
-User decisions: whether to cap failures per run; push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
+User decisions (cap on failures per run declined 2026-10-01; `docs/architecture.md` added): push / PR; run `python -m ingest.frames --dry-run` where ffmpeg and the R2 credentials are available.
