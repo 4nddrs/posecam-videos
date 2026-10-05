@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-05T12:56:35.109094+00:00",
+  "generated_at": "2026-10-05T12:58:46.765058+00:00",
   "days": [
     {
       "day": "2026-10-05",
@@ -1595,14 +1595,44 @@
           "uploader": "arshilb12j206"
         },
         {
+          "duration": 85.9,
           "id": "2026-10-05/RGB_2026-10-05-12_33_45-a1e207-s1.mp4",
           "name": "RGB_2026-10-05-12_33_45-a1e207-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_33_45-a1e207-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_33_45-a1e207-s1.jpg",
-          "duration": 85.9,
           "source_zip": "PoseCam capture-20261005T180345-a1e207-pipeline",
           "category": "Black pipes",
           "uploader": "Harshad madaliya"
+        },
+        {
+          "id": "2026-10-05/RGB_2026-10-05-12_34_13-23f081-s1.mp4",
+          "name": "RGB_2026-10-05-12_34_13-23f081-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_34_13-23f081-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_34_13-23f081-s1.jpg",
+          "duration": 76.066667,
+          "source_zip": "PoseCam capture-20261005T180413-23f081-pipeline",
+          "category": "Black pipes",
+          "uploader": "arshilb12j206"
+        },
+        {
+          "duration": 84.933333,
+          "id": "2026-10-05/RGB_2026-10-05-12_35_47-70f4f8-s1.mp4",
+          "name": "RGB_2026-10-05-12_35_47-70f4f8-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_35_47-70f4f8-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_35_47-70f4f8-s1.jpg",
+          "source_zip": "PoseCam capture-20261005T180547-70f4f8-pipeline",
+          "category": "Black pipes",
+          "uploader": "arshilb12j206"
+        },
+        {
+          "duration": 75.966667,
+          "id": "2026-10-05/RGB_2026-10-05-12_37_24-b380d9-s1.mp4",
+          "name": "RGB_2026-10-05-12_37_24-b380d9-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_37_24-b380d9-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-12_37_24-b380d9-s1.jpg",
+          "source_zip": "PoseCam capture-20261005T180724-b380d9-pipeline",
+          "category": "Black pipes",
+          "uploader": "arshilb12j206"
         }
       ]
     },
