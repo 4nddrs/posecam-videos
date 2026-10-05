@@ -23,7 +23,12 @@ class FakeZipSource:
 class FakePublisher:
     def __init__(self, fail_for_names=None):
         self.published = []
+        self.manifests = []
         self._fail_for_names = fail_for_names or set()
+
+    def publish_manifest(self, manifest_path):
+        self.manifests.append(Path(manifest_path).read_text())
+        return "https://cdn.example.com/manifest.json"
 
     def publish(self, video_path, day, poster_path=None):
         self.posters = getattr(self, 'posters', []) + [poster_path]
@@ -272,3 +277,35 @@ def test_run_ingest_records_category_and_uploader_in_manifest(tmp_path):
     video = load(tmp_path / "m.json").to_dict()["days"][0]["videos"][0]
     assert video["category"] == "Black pipes"
     assert video["uploader"] == "Arshil Bhingradiya"
+
+
+def test_run_ingest_publishes_manifest_once_after_all_zips(tmp_path):
+    uploaded_at = datetime(2026, 9, 27, 10, 0, tzinfo=timezone.utc)
+    entries = [
+        ZipEntry(id="zip-1", name="a.zip", uploaded_at=uploaded_at),
+        ZipEntry(id="zip-2", name="b.zip", uploaded_at=uploaded_at),
+    ]
+    zips = {
+        "zip-1": _make_zip_bytes(tmp_path, "a.zip", ["a.mp4"]),
+        "zip-2": _make_zip_bytes(tmp_path, "b.zip", ["b.mp4"]),
+    }
+    publisher = FakePublisher()
+
+    run_ingest(
+        FakeZipSource(entries, zips), publisher, FakeStateStore(),
+        tmp_path / "manifest.json", tmp_path / "work",
+    )
+
+    assert len(publisher.manifests) == 1
+    assert "b.mp4" in publisher.manifests[0]
+
+
+def test_run_ingest_does_not_publish_manifest_when_nothing_processed(tmp_path):
+    publisher = FakePublisher()
+
+    run_ingest(
+        FakeZipSource([], {}), publisher, FakeStateStore(),
+        tmp_path / "manifest.json", tmp_path / "work",
+    )
+
+    assert publisher.manifests == []

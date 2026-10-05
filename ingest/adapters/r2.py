@@ -17,6 +17,7 @@ from urllib.parse import quote
 from ingest.ports import PublishedVideo
 
 _DEFAULT_CONTENT_TYPE = "application/octet-stream"
+_MANIFEST_KEY = "manifest.json"
 
 
 class R2VideoPublisher:
@@ -60,6 +61,16 @@ class R2VideoPublisher:
             url=f"{self._public_base_url}/{quote(key)}",
             poster_url=poster_url,
         )
+
+    def publish_manifest(self, manifest_path: Path) -> str:
+        key = _MANIFEST_KEY
+        self._client.upload_file(
+            str(manifest_path),
+            self._bucket,
+            key,
+            ExtraArgs={"ContentType": "application/json", "CacheControl": "no-cache"},
+        )
+        return f"{self._public_base_url}/{key}"
 
 
 def build_r2_publisher(

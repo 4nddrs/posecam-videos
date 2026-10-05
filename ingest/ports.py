@@ -70,6 +70,9 @@ class VideoPublisher(Protocol):
     ) -> PublishedVideo:
         ...
 
+    def publish_manifest(self, manifest_path: Path) -> str:
+        ...
+
 
 class StateStore(Protocol):
     def processed_ids(self) -> set[str]:
