@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-06T06:38:01.903809+00:00",
+  "generated_at": "2026-10-06T12:46:38.877499+00:00",
   "days": [
     {
       "day": "2026-10-06",
@@ -25,6 +25,16 @@
           "uploader": "jaganijay641"
         },
         {
+          "duration": 104.533333,
+          "id": "2026-10-06/RGB_2026-10-06-03_57_13-4f974b-s1.mp4",
+          "name": "RGB_2026-10-06-03_57_13-4f974b-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-03_57_13-4f974b-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-03_57_13-4f974b-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T092714-4f974b-pipeline",
+          "category": "White pipes",
+          "uploader": "arshilb12j206"
+        },
+        {
           "duration": 87.766667,
           "id": "2026-10-06/RGB_2026-10-06-03_58_43-d6c700-s1.mp4",
           "name": "RGB_2026-10-06-03_58_43-d6c700-s1.mp4",
@@ -33,6 +43,16 @@
           "source_zip": "PoseCam capture-20261006T092843-d6c700-pipeline",
           "category": "Black pipes",
           "uploader": "jaganijay641"
+        },
+        {
+          "duration": 110.8,
+          "id": "2026-10-06/RGB_2026-10-06-03_59_25-827db5-s1.mp4",
+          "name": "RGB_2026-10-06-03_59_25-827db5-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-03_59_25-827db5-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-03_59_25-827db5-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T092925-827db5-pipeline",
+          "category": "White pipes",
+          "uploader": "arshilb12j206"
         },
         {
           "duration": 92.433333,
@@ -45,6 +65,16 @@
           "uploader": "jaganijay641"
         },
         {
+          "duration": 111.966667,
+          "id": "2026-10-06/RGB_2026-10-06-04_01_34-ca3cbf-s1.mp4",
+          "name": "RGB_2026-10-06-04_01_34-ca3cbf-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_01_34-ca3cbf-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_01_34-ca3cbf-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T093134-ca3cbf-pipeline",
+          "category": "White pipes",
+          "uploader": "arshilb12j206"
+        },
+        {
           "duration": 96.2,
           "id": "2026-10-06/RGB_2026-10-06-04_02_22-bc85c4-s1.mp4",
           "name": "RGB_2026-10-06-04_02_22-bc85c4-s1.mp4",
@@ -53,6 +83,16 @@
           "source_zip": "PoseCam capture-20261006T093223-bc85c4-pipeline",
           "category": "Black pipes",
           "uploader": "jaganijay641"
+        },
+        {
+          "duration": 81.466667,
+          "id": "2026-10-06/RGB_2026-10-06-04_03_44-d7ab04-s1.mp4",
+          "name": "RGB_2026-10-06-04_03_44-d7ab04-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_03_44-d7ab04-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_03_44-d7ab04-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T093344-d7ab04-pipeline",
+          "category": "White pipes",
+          "uploader": "arshilb12j206"
         },
         {
           "duration": 96.433333,
@@ -65,6 +105,16 @@
           "uploader": "jaganijay641"
         },
         {
+          "duration": 68.566667,
+          "id": "2026-10-06/RGB_2026-10-06-04_06_32-90e846-s1.mp4",
+          "name": "RGB_2026-10-06-04_06_32-90e846-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_06_32-90e846-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_06_32-90e846-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T093632-90e846-pipeline",
+          "category": "White pipes",
+          "uploader": "arshilb12j206"
+        },
+        {
           "duration": 97.833333,
           "id": "2026-10-06/RGB_2026-10-06-04_08_15-ce7553-s1.mp4",
           "name": "RGB_2026-10-06-04_08_15-ce7553-s1.mp4",
@@ -75,11 +125,11 @@
           "uploader": "jaganijay641"
         },
         {
+          "duration": 77.3,
           "id": "2026-10-06/RGB_2026-10-06-04_08_17-f38bb1-s1.mp4",
           "name": "RGB_2026-10-06-04_08_17-f38bb1-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_08_17-f38bb1-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_08_17-f38bb1-s1.jpg",
-          "duration": 77.3,
           "source_zip": "PoseCam capture-20261006T093817-f38bb1-pipeline",
           "category": "White pipes",
           "uploader": "arshilb12j206"
@@ -203,6 +253,156 @@
           "source_zip": "PoseCam capture-20261006T095721-e473f6-pipeline",
           "category": "White pipes",
           "uploader": "arshilb12j206"
+        },
+        {
+          "duration": 103.766667,
+          "id": "2026-10-06/RGB_2026-10-06-04_27_32-f75ad0-s1.mp4",
+          "name": "RGB_2026-10-06-04_27_32-f75ad0-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_27_32-f75ad0-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_27_32-f75ad0-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T095732-f75ad0-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 100.9,
+          "id": "2026-10-06/RGB_2026-10-06-04_29_43-7f698e-s1.mp4",
+          "name": "RGB_2026-10-06-04_29_43-7f698e-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_29_43-7f698e-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_29_43-7f698e-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T095944-7f698e-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 101.833333,
+          "id": "2026-10-06/RGB_2026-10-06-04_31_38-265312-s1.mp4",
+          "name": "RGB_2026-10-06-04_31_38-265312-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_31_38-265312-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_31_38-265312-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T100138-265312-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 100.066667,
+          "id": "2026-10-06/RGB_2026-10-06-04_34_15-6390de-s1.mp4",
+          "name": "RGB_2026-10-06-04_34_15-6390de-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_34_15-6390de-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_34_15-6390de-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T100415-6390de-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 96.7,
+          "id": "2026-10-06/RGB_2026-10-06-04_40_16-9fb280-s1.mp4",
+          "name": "RGB_2026-10-06-04_40_16-9fb280-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_40_16-9fb280-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_40_16-9fb280-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T101016-9fb280-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 105.466667,
+          "id": "2026-10-06/RGB_2026-10-06-04_42_31-e4cac8-s1.mp4",
+          "name": "RGB_2026-10-06-04_42_31-e4cac8-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_42_31-e4cac8-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_42_31-e4cac8-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T101231-e4cac8-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 103.966667,
+          "id": "2026-10-06/RGB_2026-10-06-04_44_36-17ca93-s1.mp4",
+          "name": "RGB_2026-10-06-04_44_36-17ca93-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_44_36-17ca93-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_44_36-17ca93-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T101436-17ca93-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 105.4,
+          "id": "2026-10-06/RGB_2026-10-06-04_51_34-3c503b-s1.mp4",
+          "name": "RGB_2026-10-06-04_51_34-3c503b-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_51_34-3c503b-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_51_34-3c503b-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T102134-3c503b-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 109.966667,
+          "id": "2026-10-06/RGB_2026-10-06-04_53_40-3af92f-s1.mp4",
+          "name": "RGB_2026-10-06-04_53_40-3af92f-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_53_40-3af92f-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_53_40-3af92f-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T102340-3af92f-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 103.266667,
+          "id": "2026-10-06/RGB_2026-10-06-04_55_45-c7ef15-s1.mp4",
+          "name": "RGB_2026-10-06-04_55_45-c7ef15-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_55_45-c7ef15-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-04_55_45-c7ef15-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T102546-c7ef15-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "id": "2026-10-06/RGB_2026-10-06-05_18_28-6a7607-s1.mp4",
+          "name": "RGB_2026-10-06-05_18_28-6a7607-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_18_28-6a7607-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_18_28-6a7607-s1.jpg",
+          "duration": 99.1,
+          "source_zip": "PoseCam capture-20261006T104829-6a7607-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 104.466667,
+          "id": "2026-10-06/RGB_2026-10-06-05_20_47-424089-s1.mp4",
+          "name": "RGB_2026-10-06-05_20_47-424089-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_20_47-424089-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_20_47-424089-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T105047-424089-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 95.8,
+          "id": "2026-10-06/RGB_2026-10-06-05_22_50-8376e8-s1.mp4",
+          "name": "RGB_2026-10-06-05_22_50-8376e8-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_22_50-8376e8-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_22_50-8376e8-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T105250-8376e8-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 110.266667,
+          "id": "2026-10-06/RGB_2026-10-06-05_25_25-553fc1-s1.mp4",
+          "name": "RGB_2026-10-06-05_25_25-553fc1-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_25_25-553fc1-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_25_25-553fc1-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T105525-553fc1-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
+        },
+        {
+          "duration": 104.2,
+          "id": "2026-10-06/RGB_2026-10-06-05_27_42-653ae4-s1.mp4",
+          "name": "RGB_2026-10-06-05_27_42-653ae4-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_27_42-653ae4-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-06/RGB_2026-10-06-05_27_42-653ae4-s1.jpg",
+          "source_zip": "PoseCam capture-20261006T105742-653ae4-pipeline",
+          "category": "Black pipes",
+          "uploader": "jaganijay641"
         }
       ]
     },
