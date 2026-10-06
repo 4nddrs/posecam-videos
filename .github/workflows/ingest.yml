@@ -6,12 +6,17 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "ingest = process new zips; posters = backfill posters for existing videos"
+        description: "ingest = process new zips; posters = backfill posters for existing videos; sidecars = backfill .txt/.json sidecars for existing videos"
         type: choice
         options:
           - ingest
           - posters
+          - sidecars
         default: ingest
+      dry_run:
+        description: "sidecars only: preview planned sidecar uploads without writing"
+        type: boolean
+        default: false
   push:
     branches:
       - main
@@ -77,6 +82,12 @@ jobs:
         run: |
           if [ "${{ inputs.mode }}" = "posters" ]; then
             python -m ingest.posters
+          elif [ "${{ inputs.mode }}" = "sidecars" ]; then
+            if [ "${{ inputs.dry_run }}" = "true" ]; then
+              python -m ingest.sidecars --dry-run
+            else
+              python -m ingest.sidecars
+            fi
           else
             python -m ingest.main
           fi
@@ -103,7 +114,7 @@ jobs:
     # site never waits for frames. The run stays in the concurrency group
     # until this job ends, hence the per-run limit and the timeout.
     needs: ingest
-    if: ${{ !cancelled() && needs.ingest.result != 'skipped' && inputs.mode != 'posters' }}
+    if: ${{ !cancelled() && needs.ingest.result != 'skipped' && inputs.mode != 'posters' && inputs.mode != 'sidecars' }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     permissions:
