@@ -121,6 +121,35 @@ export function posterUrl(video) {
   return typeof poster === "string" && poster !== "" ? poster : null;
 }
 
+/**
+ * Public URLs of a video's optional `.txt` and `.json` sidecars. Each entry is
+ * the URL string when present, or null when missing/empty/non-string.
+ * @param {{metadata?: {txt?: unknown, json?: unknown}}|null|undefined} video
+ * @returns {{txt: string|null, json: string|null}}
+ */
+export function sidecarLinks(video) {
+  const read = (value) => (typeof value === "string" && value !== "" ? value : null);
+  const meta = video && video.metadata;
+  return {
+    txt: read(meta && meta.txt),
+    json: read(meta && meta.json),
+  };
+}
+
+/**
+ * Download filename for a sidecar: the video's name stem plus `ext`
+ * (e.g. `clip.mp4` + `txt` -> `clip.txt`). Falls back to `download.<ext>`
+ * when the name is missing or has no usable stem.
+ * @param {{name?: unknown}|null|undefined} video
+ * @param {string} ext
+ * @returns {string}
+ */
+export function sidecarFilename(video, ext) {
+  const name = video && typeof video.name === "string" ? video.name : "";
+  const stem = name.includes(".") ? name.slice(0, name.lastIndexOf(".")) : name;
+  return `${stem || "download"}.${ext}`;
+}
+
 export const BUCKET_SEC = 30;
 /** Ten 30 s buckets (0-5 min) plus a final open-ended "5 min+" bucket. */
 export const BUCKET_COUNT = 11;

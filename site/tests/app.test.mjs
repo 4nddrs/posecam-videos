@@ -10,6 +10,8 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
+  sidecarLinks,
+  sidecarFilename,
   durationBucket,
   durationHistogram,
   bucketAxisLabel,
@@ -152,6 +154,50 @@ test("posterUrl returns null for null, missing, empty or non-string posters", ()
   assert.equal(posterUrl({ poster: "" }), null);
   assert.equal(posterUrl({ poster: 42 }), null);
   assert.equal(posterUrl(undefined), null);
+});
+
+test("sidecarLinks returns both sidecar URLs when present", () => {
+  const v = { metadata: { txt: "https://cdn.example/a.txt", json: "https://cdn.example/a.json" } };
+  assert.deepEqual(sidecarLinks(v), {
+    txt: "https://cdn.example/a.txt",
+    json: "https://cdn.example/a.json",
+  });
+});
+
+test("sidecarLinks returns null for a missing sidecar", () => {
+  assert.deepEqual(sidecarLinks({ metadata: { txt: "https://cdn.example/a.txt" } }), {
+    txt: "https://cdn.example/a.txt",
+    json: null,
+  });
+  assert.deepEqual(sidecarLinks({ metadata: { json: "https://cdn.example/a.json" } }), {
+    txt: null,
+    json: "https://cdn.example/a.json",
+  });
+});
+
+test("sidecarLinks returns both null when metadata is absent", () => {
+  assert.deepEqual(sidecarLinks({}), { txt: null, json: null });
+  assert.deepEqual(sidecarLinks({ metadata: null }), { txt: null, json: null });
+  assert.deepEqual(sidecarLinks(undefined), { txt: null, json: null });
+});
+
+test("sidecarLinks ignores empty and non-string values", () => {
+  assert.deepEqual(sidecarLinks({ metadata: { txt: "", json: 42 } }), { txt: null, json: null });
+});
+
+test("sidecarFilename builds the download name from the video name stem", () => {
+  assert.equal(sidecarFilename({ name: "clip.mp4" }, "txt"), "clip.txt");
+  assert.equal(sidecarFilename({ name: "RGB_2026-09-25-08_35_52-f74bef-s1.mp4" }, "json"), "RGB_2026-09-25-08_35_52-f74bef-s1.json");
+});
+
+test("sidecarFilename appends the extension when the name has none", () => {
+  assert.equal(sidecarFilename({ name: "clip" }, "txt"), "clip.txt");
+});
+
+test("sidecarFilename falls back to download.<ext> for a missing name", () => {
+  assert.equal(sidecarFilename({}, "txt"), "download.txt");
+  assert.equal(sidecarFilename(undefined, "json"), "download.json");
+  assert.equal(sidecarFilename({ name: "" }, "txt"), "download.txt");
 });
 
 const rec = (h, m, duration) => ({

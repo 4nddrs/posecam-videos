@@ -7,6 +7,8 @@ import {
   relativeTime,
   isPipelineZip,
   posterUrl,
+  sidecarLinks,
+  sidecarFilename,
   durationHistogram,
   bucketAxisLabel,
   daySummary,
@@ -282,7 +284,8 @@ function copyLinkButton(video, className) {
 
 /**
  * Render one video entry as a player card.
- * @param {{id: string, name: string, url: string, source_zip: string}} video
+ * @param {{id: string, name: string, url: string, source_zip: string,
+ *   metadata?: {txt?: string, json?: string}}} video
  * @returns {HTMLElement}
  */
 export function renderVideo(video) {
@@ -334,6 +337,29 @@ export function renderVideo(video) {
 
   const copyBtn = copyLinkButton(video, "action");
 
+  // Sidecar links open in a new tab (the R2 bucket sends no CORS headers, so
+  // opening the file directly is the only reliable way to view it).
+  const sidecars = sidecarLinks(video);
+  const sidecarActions = ["txt", "json"]
+    .filter((ext) => sidecars[ext])
+    .map((ext) => el("a", {
+      className: "action",
+      href: sidecars[ext],
+      target: "_blank",
+      rel: "noopener noreferrer",
+      text: `View .${ext}`,
+    }));
+  for (const ext of ["txt", "json"]) {
+    if (sidecars[ext]) {
+      sidecarActions.push(el("a", {
+        className: "action",
+        href: sidecars[ext],
+        download: sidecarFilename(video, ext),
+        text: `Download .${ext}`,
+      }));
+    }
+  }
+
   const speedGroup = el("div", { className: "speed-group", role: "group", "aria-label": "Playback speed" });
   for (const value of driveId ? [] : SPEEDS) {
     const btn = el("button", { type: "button", className: "speed-btn", text: `${value}×` });
@@ -354,6 +380,7 @@ export function renderVideo(video) {
       el("div", { className: "actions" }, [
         el("a", { className: "action", href: video.url, download: video.name || "", text: "Download" }),
         copyBtn,
+        ...sidecarActions,
       ]),
     ]),
   ]);
