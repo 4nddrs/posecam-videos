@@ -98,6 +98,60 @@ jobs:
             git push origin HEAD:main
           fi
 
+  frames:
+    # Runs once the videos are published, in parallel with deploy, so the
+    # site never waits for frames. The run stays in the concurrency group
+    # until this job ends, hence the per-run limit and the timeout.
+    needs: ingest
+    if: ${{ !cancelled() && needs.ingest.result != 'skipped' && inputs.mode != 'posters' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Cache ffmpeg
+        uses: actions/cache@v4
+        with:
+          path: ~/ffmpeg-bin
+          key: ffmpeg-static-linux64-v1
+
+      - name: Install ffmpeg
+        timeout-minutes: 5
+        run: |
+          if [ ! -x "$HOME/ffmpeg-bin/ffmpeg" ] || [ ! -x "$HOME/ffmpeg-bin/ffprobe" ]; then
+            mkdir -p "$HOME/ffmpeg-bin"
+            curl -fsSL --retry 3 --max-time 180 -o /tmp/ffmpeg.tar.xz \
+              https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz
+            tar -xJf /tmp/ffmpeg.tar.xz -C "$HOME/ffmpeg-bin" --strip-components=2 \
+              --wildcards '*/bin/ffmpeg' '*/bin/ffprobe'
+          fi
+          echo "$HOME/ffmpeg-bin" >> "$GITHUB_PATH"
+          "$HOME/ffmpeg-bin/ffmpeg" -version | head -1
+          "$HOME/ffmpeg-bin/ffprobe" -version | head -1
+
+      - name: Extract frames
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
+          MAX_FRAME_VIDEOS_PER_RUN: ${{ vars.MAX_FRAME_VIDEOS_PER_RUN || '10' }}
+        run: python -m ingest.frames
+
   deploy:
     needs: ingest
     if: always() && (needs.ingest.result == 'success' || needs.ingest.result == 'skipped')

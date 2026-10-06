@@ -117,3 +117,20 @@ def test_publish_without_poster_has_no_poster_url(tmp_path):
     video_path.write_bytes(b"v")
     publisher = R2VideoPublisher(FakeClient(), bucket="b", public_base_url="https://cdn.example.com")
     assert publisher.publish(video_path, day="d").poster_url is None
+
+
+def test_publish_manifest_uploads_to_bucket_root_without_cache(tmp_path):
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text("{}")
+    client = FakeClient()
+    publisher = R2VideoPublisher(client, bucket="b", public_base_url="https://cdn.example.com/")
+
+    url = publisher.publish_manifest(manifest)
+
+    assert client.upload_file_calls == [{
+        "filename": str(manifest),
+        "bucket": "b",
+        "key": "manifest.json",
+        "ExtraArgs": {"ContentType": "application/json", "CacheControl": "no-cache"},
+    }]
+    assert url == "https://cdn.example.com/manifest.json"

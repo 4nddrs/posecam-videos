@@ -84,4 +84,7 @@ def run_ingest(
         state.mark_processed(entry.id)
         report.processed.append(entry.id)
 
+    if report.processed:
+        publisher.publish_manifest(manifest_path)
+
     return report

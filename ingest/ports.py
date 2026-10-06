@@ -43,6 +43,19 @@ class VideoProcessor(Protocol):
         ...
 
 
+@dataclass(frozen=True)
+class ExtractedFrames:
+    frames: tuple[Path, ...]
+    timestamps: tuple[float, ...]
+    duration: float
+    start_time: float
+
+
+class FrameExtractor(Protocol):
+    def extract(self, video_path: Path, out_dir: Path, fps: int) -> ExtractedFrames:
+        ...
+
+
 class ZipSource(Protocol):
     def list_zips(self) -> list[ZipEntry]:
         ...
@@ -55,6 +68,9 @@ class VideoPublisher(Protocol):
     def publish(
         self, video_path: Path, day: str, poster_path: Path | None = None
     ) -> PublishedVideo:
+        ...
+
+    def publish_manifest(self, manifest_path: Path) -> str:
         ...
 
 
