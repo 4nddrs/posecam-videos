@@ -1,10 +1,12 @@
-"""Extract video files from a zip archive, safely."""
+"""Extract video files and sidecars from a zip archive, safely."""
 from __future__ import annotations
 
 import zipfile
 from pathlib import Path, PurePosixPath
+from typing import Iterable
 
 VIDEO_EXTENSIONS = {".mp4", ".mov", ".mkv", ".webm", ".avi"}
+SIDECAR_EXTENSIONS = {".txt", ".json"}
 
 
 def _is_safe_member(name: str) -> bool:
@@ -18,7 +20,14 @@ def _is_safe_member(name: str) -> bool:
     return True
 
 
-def extract_videos(zip_path: Path, dest_dir: Path) -> list[Path]:
+def _extract_by_suffixes(
+    zip_path: Path, dest_dir: Path, suffixes: set[str]
+) -> list[Path]:
+    """Flatten every safe member whose lowercased suffix is in `suffixes`.
+
+    Members are written to `dest_dir / Path(name).name`; absolute paths,
+    `..` traversal and directory entries are skipped by `_is_safe_member`.
+    """
     dest_dir = Path(dest_dir)
     dest_dir.mkdir(parents=True, exist_ok=True)
     extracted: list[Path] = []
@@ -28,8 +37,7 @@ def extract_videos(zip_path: Path, dest_dir: Path) -> list[Path]:
             name = info.filename
             if not _is_safe_member(name):
                 continue
-            suffix = Path(name).suffix.lower()
-            if suffix not in VIDEO_EXTENSIONS:
+            if Path(name).suffix.lower() not in suffixes:
                 continue
 
             target = dest_dir / Path(name).name
@@ -38,3 +46,20 @@ def extract_videos(zip_path: Path, dest_dir: Path) -> list[Path]:
             extracted.append(target)
 
     return extracted
+
+
+def extract_videos(zip_path: Path, dest_dir: Path) -> list[Path]:
+    """Extract video files from a zip, flattened into `dest_dir`."""
+    return _extract_by_suffixes(zip_path, dest_dir, VIDEO_EXTENSIONS)
+
+
+def extract_sidecars(
+    zip_path: Path,
+    dest_dir: Path,
+    extensions: Iterable[str] = SIDECAR_EXTENSIONS,
+) -> list[Path]:
+    """Extract `.txt`/`.json` sidecars from a zip, flattened into `dest_dir`.
+
+    `extensions` is matched case-insensitively against each member suffix.
+    """
+    return _extract_by_suffixes(zip_path, dest_dir, {ext.lower() for ext in extensions})
