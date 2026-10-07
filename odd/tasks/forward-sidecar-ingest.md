@@ -25,7 +25,7 @@ User request (2026-10-07): each zip must yield `.txt`, `.json` and `.mp4` in R2 
 - Categories preserved (Drive subfolder name -> `category`), unchanged.
 
 ## Tasks
-- [ ] T1 ports + r2 adapter + use_case + manifest + tests. Route: delegated writer (writer trigger: 4+ non-trivial files).
+- [x] T1 ports + r2 adapter + use_case + manifest + tests. Route: delegated writer (writer trigger: 4+ non-trivial files). Commit `aba7c16`.
 
 ## Acceptance
 - A zip containing mp4+txt+json produces in R2: the video, the poster (if any), `{day}/{session}/AR_Pose_<session>.txt`, `{day}/{session}/posecam_export.json`.
@@ -42,7 +42,9 @@ User request (2026-10-07): each zip must yield `.txt`, `.json` and `.mp4` in R2 
 - RDD: on (global). Assess after the work-unit commit.
 
 ## Progress
-- 2026-10-07: verified real R2 format and zip inner layout (Engram: Drive/R2 format discovery). Feature branched from main.
+- 2026-10-07: verified real R2 format and zip inner layout (Engram: Drive/R2 format discovery). Branch `feat/forward-sidecar-ingest` from main.
+- 2026-10-07: T1 committed `aba7c16` (delegated writer, TDD: 6 new tests RED — AttributeError/TypeError/no-publish — then GREEN; 192 passed, +7). Parent spot check: pytest re-run 192 passed; diff reviewed, forbidden files untouched (`sidecars.py`, `unzip.py`, `drive.py`, workflows).
+- 2026-10-07: RDD assess on main..aba7c16 (committed-only, untracked excluded): medium (`executable_change`), 245 changed lines, `review_due: false` (`under_budget`). No review this slice; boundary stays pending.
 
 ## Verification gaps
 - No real R2/Drive write from the forward path in this session (tests use fakes). The first real drain after landing is the end-to-end check.
