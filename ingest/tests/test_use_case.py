@@ -329,7 +329,7 @@ def test_run_ingest_records_category_and_uploader_in_manifest(tmp_path):
     run_ingest(source, FakePublisher(), FakeStateStore(), tmp_path / "m.json", tmp_path / "w")
 
     video = load(tmp_path / "m.json").to_dict()["days"][0]["videos"][0]
-    assert video["category"] == "Black pipes"
+    assert video["category"] == "Black Pipes"
     assert video["uploader"] == "Arshil Bhingradiya"
 
 

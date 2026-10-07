@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ingest.ports import PublishedVideo
 
-DEFAULT_CATEGORY = "Black/White pipes"
+DEFAULT_CATEGORY = "Black/White Pipes"
 
 # Real month names only: "Deck 1" or "Mark 2" must not read as a date.
 _MONTH = (
@@ -22,17 +22,26 @@ _TRAILING_DATE_RE = re.compile(
 )
 
 
+def _canonical_case(name: str) -> str:
+    """Capitalize the first letter of each whitespace-separated word."""
+    return " ".join(w[:1].upper() + w[1:] for w in name.split())
+
+
 def normalize_category(name: object) -> str | None:
     """Drop a trailing date from a category name, or None when it is empty.
 
-    Uploaders create one Drive folder per batch ("Black pipes 1 Oct"); those
-    videos belong to the base category ("Black pipes"), and the day comes from
-    the recording itself.
+    Uploaders create one Drive folder per batch ("Black Pipes 1 Oct"); those
+    videos belong to the base category ("Black Pipes"), and the day comes from
+    the recording itself. The surviving words are canonicalized so casing
+    variants ("Black pipes", "Black Pipes") unify.
     """
     if not isinstance(name, str):
         return None
     cleaned = name.strip()
-    return _TRAILING_DATE_RE.sub("", cleaned).strip() or cleaned or None
+    stripped = _TRAILING_DATE_RE.sub("", cleaned).strip() or cleaned
+    if not stripped:
+        return None
+    return _canonical_case(stripped)
 
 
 class Manifest:
