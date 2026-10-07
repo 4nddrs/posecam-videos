@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T14:00:54.955500+00:00",
+  "generated_at": "2026-10-07T14:07:48.532985+00:00",
   "days": [
     {
       "day": "2026-10-07",
@@ -289,11 +289,11 @@
           }
         },
         {
+          "duration": 88.333333,
           "id": "2026-10-07/RGB_2026-10-07-05_18_59-531350-s1.mp4",
           "name": "RGB_2026-10-07-05_18_59-531350-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-05_18_59-531350-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-05_18_59-531350-s1.jpg",
-          "duration": 88.333333,
           "source_zip": "PoseCam capture-20261007T104859-531350-pipeline",
           "category": "White Pipes",
           "uploader": "jaganijay641",
