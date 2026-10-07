@@ -4,10 +4,15 @@ Usage: python -m ingest.sidecars [--dry-run] [--no-manifest] [--force] [--zip NA
 
 Reads site/manifest.json, lists the configured Drive sources, downloads the
 zips that produced the manifest videos, extracts their `.txt`/`.json`
-sidecars and uploads each one to the deterministic R2 key beside its video
-(`<day>/<stem><suffix>`). The public URL is stored under
-`video["metadata"]["<suffix>"]` (e.g. `metadata.txt`, `metadata.json`) and the
-manifest is re-uploaded.
+sidecars and uploads each one into the per-session folder beside its video
+(`<day>/<session>/<filename>`). The video's R2 key is never changed. The public
+URL is stored under `video["metadata"]["<suffix>"]` (e.g. `metadata.txt`,
+`metadata.json`) and the manifest is re-uploaded.
+
+Sidecars are paired to videos by SESSION FOLDER, not by basename: each zip
+contains one or more `<session-token>/` folders whose session token also
+appears in the video name (`RGB_<session>.mp4`) and in the sidecar names
+(`AR_Pose_<session>.txt`, `posecam_export.json`).
 
 Environment variables (reused from the ingest pipeline):
 DRIVE_SOURCES (or DRIVE_FOLDER_ID), GOOGLE_API_KEY (or
@@ -25,6 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -42,9 +48,15 @@ _CONTENT_TYPES = {
     ".json": "application/json",
 }
 
+# Session token shared by the video and sidecar names, e.g.
+# `2026-10-06-08_23_23-e6ea35-s1`.
+_SESSION_RE = re.compile(r"\d{4}-\d{2}-\d{2}-\d{2}_\d{2}_\d{2}-[0-9a-f]+-s\d+")
 
-def _stem(name: str) -> str:
-    return Path(name).stem
+
+def _session_token(text: str) -> str | None:
+    """Return the first session token embedded in `text`, or `None`."""
+    match = _SESSION_RE.search(text)
+    return match.group(0) if match else None
 
 
 def _plan_zips(
@@ -61,28 +73,36 @@ def _plan_zips(
     return kept, []
 
 
-def _match_video(
-    stem: str,
-    by_stem: dict[str, list[tuple[str, dict]]],
-    no_zip_videos: list[tuple[str, dict]],
+def _resolve_video(
+    session: str,
+    by_session: dict[str, tuple[str, dict]],
+    no_token_videos: list[tuple[str, dict]],
+    manifest_by_session: dict[str, list[tuple[str, dict]]],
 ) -> tuple[tuple[str, dict] | None, str | None]:
-    """Resolve one sidecar stem to a single `(day, video)` inside its zip.
+    """Resolve one session folder to a single `(day, video)`.
 
-    Videos without a `source_zip` are matched by a whole-manifest stem search,
-    but only when exactly one candidate exists. Returns `(match, reason)`;
-    `reason` is set when the stem is ambiguous or matches nothing.
+    The zip's own videos (indexed by session token) win; if the token is not
+    found there, a whole-manifest session-token search is used but only when
+    exactly one candidate exists. Videos whose names carry no session token are
+    kept in `no_token_videos` and used as a last resort when the folder has no
+    token either. Returns `(match, reason)`.
     """
-    matches = by_stem.get(stem)
-    if not matches:
-        fallback = [pair for pair in no_zip_videos if _stem(pair[1]["name"]) == stem]
-        if len(fallback) > 1:
-            return None, "ambiguous stem"
-        if not fallback:
+    token = _session_token(session)
+    if token is None:
+        if len(no_token_videos) > 1:
+            return None, "ambiguous session"
+        if not no_token_videos:
             return None, "no matching video"
-        matches = fallback
-    if len(matches) > 1:
-        return None, "ambiguous stem"
-    return matches[0], None
+        return no_token_videos[0], None
+    match = by_session.get(token)
+    if match is not None:
+        return match, None
+    candidates = manifest_by_session.get(token, [])
+    if len(candidates) > 1:
+        return None, "ambiguous session"
+    if not candidates:
+        return None, "no matching video"
+    return candidates[0], None
 
 
 def run_sidecars(
@@ -112,15 +132,17 @@ def run_sidecars(
 
     # zip name -> [(day, video record), ...]
     index: dict[str, list[tuple[str, dict]]] = {}
-    no_zip_videos: list[tuple[str, dict]] = []
+    # session token -> [(day, video record), ...] across the whole manifest
+    manifest_by_session: dict[str, list[tuple[str, dict]]] = {}
     for day_entry in data.get("days", []):
         day = day_entry["day"]
         for video in day_entry.get("videos", []):
+            token = _session_token(video.get("name", ""))
+            if token:
+                manifest_by_session.setdefault(token, []).append((day, video))
             zip_name = video.get("source_zip")
             if zip_name:
                 index.setdefault(zip_name, []).append((day, video))
-            else:
-                no_zip_videos.append((day, video))
 
     report: dict = {
         "processed": [],
@@ -144,54 +166,90 @@ def run_sidecars(
         try:
             zip_workdir.mkdir(parents=True, exist_ok=True)
             zip_path = source.download(entry, zip_workdir)
-            sidecars = extract_sidecars(zip_path, zip_workdir / "sidecars")
+            extract_dir = zip_workdir / "sidecars"
+            sidecars = extract_sidecars(zip_path, extract_dir, preserve_dirs=True)
 
             zip_videos = index.get(entry.name, [])
-            by_stem: dict[str, list[tuple[str, dict]]] = {}
+            by_session: dict[str, tuple[str, dict]] = {}
+            no_token_videos: list[tuple[str, dict]] = []
             for day, video in zip_videos:
-                by_stem.setdefault(_stem(video["name"]), []).append((day, video))
+                token = _session_token(video["name"])
+                if token:
+                    by_session[token] = (day, video)
+                else:
+                    no_token_videos.append((day, video))
 
-            matched_ids: set[str] = set()
+            # Session folder (immediate parent dir name) -> sidecar files in it.
+            folders: dict[str, list[Path]] = {}
             for sidecar in sidecars:
-                stem = _stem(sidecar.name)
-                suffix = Path(sidecar.name).suffix.lower()
-                content_type = _CONTENT_TYPES.get(suffix)
-                if content_type is None:
+                if sidecar.parent == extract_dir:
                     report["unmatched"].append({
                         "zip": entry.name,
                         "sidecar": sidecar.name,
-                        "reason": "unsupported sidecar type",
+                        "reason": "no session folder",
                     })
                     continue
+                folders.setdefault(sidecar.parent.name, []).append(sidecar)
 
-                match, reason = _match_video(stem, by_stem, no_zip_videos)
+            matched_ids: set[str] = set()
+            for session, files in folders.items():
+                match, reason = _resolve_video(
+                    session, by_session, no_token_videos, manifest_by_session
+                )
                 if match is None:
-                    report["unmatched"].append({
-                        "zip": entry.name,
-                        "sidecar": sidecar.name,
-                        "reason": reason,
-                    })
+                    for sidecar in files:
+                        report["unmatched"].append({
+                            "zip": entry.name,
+                            "sidecar": sidecar.name,
+                            "reason": reason,
+                        })
                     continue
 
                 day, video = match
                 matched_ids.add(video["id"])
-                key = f"{day}/{stem}{suffix}"
-                metadata = video.setdefault("metadata", {})
-                suffix_key = suffix.lstrip(".")
 
-                if suffix_key in metadata and not force:
-                    report["skipped"].append(key)
-                    continue
-                if dry_run:
-                    report["planned"].append(key)
-                    continue
+                by_suffix: dict[str, list[Path]] = {}
+                for sidecar in files:
+                    by_suffix.setdefault(sidecar.suffix.lower(), []).append(sidecar)
 
-                r2_client.upload_file(
-                    str(sidecar), bucket, key,
-                    ExtraArgs={"ContentType": content_type},
-                )
-                metadata[suffix_key] = f"{base}/{quote(key)}"
-                report["uploaded"].append(key)
+                for suffix, group in by_suffix.items():
+                    content_type = _CONTENT_TYPES.get(suffix)
+                    if content_type is None:
+                        for sidecar in group:
+                            report["unmatched"].append({
+                                "zip": entry.name,
+                                "sidecar": sidecar.name,
+                                "reason": "unsupported sidecar type",
+                            })
+                        continue
+
+                    # One file per suffix; the extra ones are ambiguous.
+                    group = sorted(group, key=lambda path: path.name)
+                    for sidecar in group[1:]:
+                        report["unmatched"].append({
+                            "zip": entry.name,
+                            "sidecar": sidecar.name,
+                            "reason": "ambiguous sidecar",
+                        })
+                    sidecar = group[0]
+
+                    key = f"{day}/{session}/{sidecar.name}"
+                    metadata = video.setdefault("metadata", {})
+                    suffix_key = suffix.lstrip(".")
+
+                    if suffix_key in metadata and not force:
+                        report["skipped"].append(key)
+                        continue
+                    if dry_run:
+                        report["planned"].append(key)
+                        continue
+
+                    r2_client.upload_file(
+                        str(sidecar), bucket, key,
+                        ExtraArgs={"ContentType": content_type},
+                    )
+                    metadata[suffix_key] = f"{base}/{quote(key)}"
+                    report["uploaded"].append(key)
 
             for _day, video in zip_videos:
                 if video["id"] not in matched_ids:

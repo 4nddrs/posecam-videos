@@ -92,3 +92,39 @@ def test_extract_sidecars_honors_custom_extensions(tmp_path):
     sidecars = extract_sidecars(zip_path, tmp_path / "out", extensions={".srt"})
 
     assert [p.name for p in sidecars] == ["captions.srt"]
+
+
+def test_extract_sidecars_preserve_dirs_keeps_nested_folders(tmp_path):
+    session = "2026-01-01-08_00_00-abc123-s1"
+    zip_path = tmp_path / "nested.zip"
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr(f"capture-x/{session}/AR_Pose_{session}.txt", b"text")
+        zf.writestr(f"capture-x/{session}/posecam_export.json", b"{}")
+
+    dest_dir = tmp_path / "out"
+    sidecars = extract_sidecars(zip_path, dest_dir, preserve_dirs=True)
+
+    assert sorted(p.relative_to(dest_dir).as_posix() for p in sidecars) == [
+        f"capture-x/{session}/AR_Pose_{session}.txt",
+        f"capture-x/{session}/posecam_export.json",
+    ]
+    for sidecar in sidecars:
+        assert sidecar.exists()
+
+
+def test_extract_sidecars_preserve_dirs_still_rejects_unsafe_entries(tmp_path):
+    zip_path = tmp_path / "unsafe-nested.zip"
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr("../evil.txt", b"traversal-attempt")
+        zf.writestr("/etc/passwd.json", b"absolute-path-attempt")
+        zf.writestr("folder/", b"")
+        zf.writestr("session-2026-01-01-08_00_00-abc123-s1/good.txt", b"ok")
+
+    dest_dir = tmp_path / "out"
+    sidecars = extract_sidecars(zip_path, dest_dir, preserve_dirs=True)
+
+    assert [p.relative_to(dest_dir).as_posix() for p in sidecars] == [
+        "session-2026-01-01-08_00_00-abc123-s1/good.txt"]
+    assert not (tmp_path / "evil.txt").exists()
+    assert not (dest_dir / "etc" / "passwd.json").exists()
+
