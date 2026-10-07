@@ -392,3 +392,73 @@ def test_normalize_zip_name_strips_counter_on_extensionless_names():
     from ingest.adapters.drive import normalize_zip_name
 
     assert normalize_zip_name("PoseCam capture-1-pipeline (2)") == "PoseCam capture-1-pipeline"
+
+
+def _nested_recursive_fixture():
+    """root -> Archive -> Deep, with one zip at each level."""
+    folders = {
+        "root": [{"id": "f1", "name": "Archive"}],
+        "f1": [{"id": "f2", "name": "Deep"}],
+    }
+    pages = {
+        "root": [{"files": [_zip_file("r", "root.zip")]}],
+        "f1": [{"files": [_zip_file("a", "one.zip")]}],
+        "f2": [{"files": [_zip_file("b", "two.zip")]}],
+    }
+    return pages, folders
+
+
+def test_list_zips_recursive_finds_zips_two_levels_deep():
+    pages, folders = _nested_recursive_fixture()
+    source = DriveZipSource(
+        FakeService(pages, folders), folder_id="root", recursive=True
+    )
+
+    entries = source.list_zips()
+
+    assert {e.id for e in entries} == {"r", "a", "b"}
+    assert {e.id: e.category for e in entries} == {
+        "r": None,
+        "a": "Archive",
+        "b": "Deep",
+    }
+
+
+def test_list_zips_non_recursive_stops_after_one_level():
+    pages, folders = _nested_recursive_fixture()
+    source = DriveZipSource(FakeService(pages, folders), folder_id="root")
+
+    entries = source.list_zips()
+
+    # Folder + one level only; the two-levels-deep zip is never seen.
+    assert {e.id for e in entries} == {"r", "a"}
+
+
+def test_list_zips_recursive_configured_category_fills_in_for_dated_folders():
+    folders = {
+        "root": [{"id": "f1", "name": "26-09-2026"}],
+        "f1": [{"id": "f2", "name": "Deep"}],
+    }
+    pages = {
+        "root": [{"files": [_zip_file("r", "root.zip")]}],
+        "f1": [{"files": [_zip_file("a", "one.zip")]}],
+        "f2": [{"files": [_zip_file("b", "two.zip")]}],
+    }
+    source = DriveZipSource(
+        FakeService(pages, folders),
+        folder_id="root",
+        category="Recovery",
+        recursive=True,
+    )
+
+    by_id = {e.id: e for e in source.list_zips()}
+
+    assert by_id["r"].category == "Recovery"
+    assert by_id["r"].day is None
+    # Dated folder names a day, so the configured category fills in.
+    assert by_id["a"].category == "Recovery"
+    assert by_id["a"].day == "2026-09-26"
+    # A real folder name wins as the category.
+    assert by_id["b"].category == "Deep"
+    assert by_id["b"].day is None
+

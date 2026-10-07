@@ -31,15 +31,19 @@ class DriveZipSource:
         folder_id: str,
         downloader_factory: Optional[DownloaderFactory] = None,
         category: Optional[str] = None,
+        recursive: bool = False,
     ) -> None:
         self._service = service
         self._folder_id = folder_id
         self._category = category
         self._downloader_factory = downloader_factory
+        self._recursive = recursive
 
     def list_zips(self) -> list[ZipEntry]:
+        if self._recursive:
+            return self._list_zips_recursive()
         entries = self._list_zips_in(self._folder_id, day=None, category=self._category)
-        for folder in self._list_subfolders():
+        for folder in self._list_subfolders(self._folder_id):
             folder_day = _parse_day(folder["name"])
             # A dated folder names a day, never a category.
             category = self._category or (None if folder_day else folder["name"].strip())
@@ -48,9 +52,27 @@ class DriveZipSource:
             )
         return _dedupe_entries(entries)
 
-    def _list_subfolders(self) -> list[dict]:
+    def _list_zips_recursive(self) -> list[ZipEntry]:
+        """List zips in the configured folder and every descendant folder."""
+        entries = self._list_zips_in(self._folder_id, day=None, category=self._category)
+        pending = [self._folder_id]
+        while pending:
+            parent_id = pending.pop()
+            for folder in self._list_subfolders(parent_id):
+                folder_day = _parse_day(folder["name"])
+                # The immediate parent folder names the category; a dated
+                # folder names a day, never a category.
+                category = (None if folder_day else folder["name"].strip()) or self._category
+                entries.extend(
+                    self._list_zips_in(folder["id"], day=folder_day, category=category)
+                )
+                pending.append(folder["id"])
+        return _dedupe_entries(entries)
+
+    def _list_subfolders(self, parent_id: Optional[str] = None) -> list[dict]:
+        parent = parent_id or self._folder_id
         query = (
-            f"'{self._folder_id}' in parents and trashed = false and "
+            f"'{parent}' in parents and trashed = false and "
             f"mimeType = '{_FOLDER_MIME}'"
         )
         return list(self._paginate(query, "nextPageToken, files(id, name)"))
@@ -174,7 +196,10 @@ def _parse_created_time(created_time: str) -> datetime:
 
 
 def build_drive_source(
-    folder_id: str, service_account_file: Path, category: Optional[str] = None
+    folder_id: str,
+    service_account_file: Path,
+    category: Optional[str] = None,
+    recursive: bool = False,
 ) -> DriveZipSource:
     """Build a DriveZipSource backed by a real Drive v3 service.
 
@@ -188,14 +213,21 @@ def build_drive_source(
         str(service_account_file), scopes=[_DRIVE_READONLY_SCOPE]
     )
     service = build("drive", "v3", credentials=credentials)
-    return DriveZipSource(service, folder_id=folder_id, category=category)
+    return DriveZipSource(
+        service, folder_id=folder_id, category=category, recursive=recursive
+    )
 
 
 def build_drive_source_with_api_key(
-    folder_id: str, api_key: str, category: Optional[str] = None
+    folder_id: str,
+    api_key: str,
+    category: Optional[str] = None,
+    recursive: bool = False,
 ) -> DriveZipSource:
     """Build a DriveZipSource using a Google API key (public folders only)."""
     from googleapiclient.discovery import build
 
     service = build("drive", "v3", developerKey=api_key, cache_discovery=False)
-    return DriveZipSource(service, folder_id=folder_id, category=category)
+    return DriveZipSource(
+        service, folder_id=folder_id, category=category, recursive=recursive
+    )

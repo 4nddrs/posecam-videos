@@ -414,3 +414,43 @@ def test_update_manifest_false_skips_save_and_publish(tmp_path):
     assert client.uploads
     assert publisher.published == []
     assert (tmp_path / "m.json").read_text() == before
+
+
+def test_sidecar_sources_env_builds_recursive_source(monkeypatch):
+    from types import SimpleNamespace
+
+    import ingest.sidecars as sidecars
+    from ingest.main import MultiZipSource
+
+    calls = []
+
+    def fake_api_key(folder_id, api_key, category=None, recursive=False):
+        calls.append((folder_id, api_key, category, recursive))
+        return FakeSource({})
+
+    monkeypatch.setattr(sidecars, "build_drive_source_with_api_key", fake_api_key)
+    config = SimpleNamespace(google_api_key="key-xyz", google_service_account_file=None)
+
+    source = sidecars._build_sidecar_source(
+        config, {"SIDECAR_SOURCES": "folder-a=Recovery, folder-b"}
+    )
+
+    assert isinstance(source, MultiZipSource)
+    assert calls == [
+        ("folder-a", "key-xyz", "Recovery", True),
+        ("folder-b", "key-xyz", None, True),
+    ]
+
+
+def test_sidecar_sources_unset_uses_non_recursive_default(monkeypatch):
+    from types import SimpleNamespace
+
+    import ingest.sidecars as sidecars
+
+    sentinel = FakeSource({})
+    monkeypatch.setattr(sidecars, "_default_source_builder", lambda cfg: sentinel)
+    config = SimpleNamespace(google_api_key="key-xyz", google_service_account_file=None)
+
+    assert sidecars._build_sidecar_source(config, {}) is sentinel
+    assert sidecars._build_sidecar_source(config, {"SIDECAR_SOURCES": ""}) is sentinel
+    assert sidecars._build_sidecar_source(config, {"SIDECAR_SOURCES": "  "}) is sentinel

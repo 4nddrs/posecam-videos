@@ -21,6 +21,12 @@ R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME (or R2_BUCKET), R2_PUBLIC_BASE_URL,
 optionally R2_ENDPOINT, MANIFEST_PATH, WORKDIR and MAX_ZIPS_PER_RUN. Values
 already present in the environment win over the repository-root `.env` file.
 
+`SIDECAR_SOURCES` (optional) takes the same `folderId[=Category],...` format as
+`DRIVE_SOURCES`. When set and non-empty the backfill lists those folder(s)
+RECURSIVELY (every descendant folder), which is useful for recovery archives
+whose zips are nested deeper than the one level the forward ingest scans. When
+unset or empty the backfill uses the normal, non-recursive Drive source.
+
 WARNING: this talks to the REAL Drive and R2 accounts and rewrites the
 manifest. Use --dry-run to preview planned keys, and --no-manifest to skip the
 manifest save/publish.
@@ -34,12 +40,19 @@ import re
 import shutil
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 from urllib.parse import quote
 
 from ingest import manifest as manifest_mod
+from ingest.adapters.drive import build_drive_source, build_drive_source_with_api_key
 from ingest.adapters.r2 import R2VideoPublisher
-from ingest.main import _default_source_builder, load_config, load_dotenv_file
+from ingest.main import (
+    MultiZipSource,
+    _default_source_builder,
+    load_config,
+    load_dotenv_file,
+    parse_drive_sources,
+)
 from ingest.ports import VideoPublisher, ZipSource
 from ingest.unzip import extract_sidecars
 
@@ -282,6 +295,42 @@ def run_sidecars(
     return report
 
 
+def _build_sidecar_source(config: Any, env: Mapping[str, str]) -> ZipSource:
+    """Build the backfill's Drive source.
+
+    When `SIDECAR_SOURCES` is set and non-empty, it is parsed like
+    `DRIVE_SOURCES` and each folder is listed recursively. Otherwise the
+    default (non-recursive) source builder is used, so behavior is unchanged.
+    """
+    raw = (env.get("SIDECAR_SOURCES") or "").strip()
+    sources = parse_drive_sources(raw) if raw else ()
+    if not sources:
+        return _default_source_builder(config)
+
+    built: list[ZipSource] = []
+    for item in sources:
+        if config.google_api_key:
+            built.append(
+                build_drive_source_with_api_key(
+                    item.folder_id,
+                    config.google_api_key,
+                    category=item.category,
+                    recursive=True,
+                )
+            )
+        else:
+            assert config.google_service_account_file is not None
+            built.append(
+                build_drive_source(
+                    item.folder_id,
+                    config.google_service_account_file,
+                    category=item.category,
+                    recursive=True,
+                )
+            )
+    return MultiZipSource(built)
+
+
 def main() -> None:
     repo_root = Path(__file__).resolve().parent.parent
     load_dotenv_file(repo_root / ".env", os.environ)
@@ -315,7 +364,7 @@ def main() -> None:
     )
     report = run_sidecars(
         manifest_path=config.manifest_path,
-        source=_default_source_builder(config),
+        source=_build_sidecar_source(config, os.environ),
         publisher=R2VideoPublisher(client, config.r2_bucket, config.r2_public_base_url),
         r2_client=client,
         bucket=config.r2_bucket,

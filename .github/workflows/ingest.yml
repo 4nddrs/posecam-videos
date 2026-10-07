@@ -17,6 +17,10 @@ on:
         description: "sidecars only: preview planned sidecar uploads without writing"
         type: boolean
         default: false
+      sidecar_sources:
+        description: "sidecars only: extra Drive folder(s) to scan recursively, folderId[=Category],..."
+        type: string
+        default: ""
   push:
     branches:
       - main
@@ -79,6 +83,7 @@ jobs:
           R2_BUCKET_NAME: ${{ vars.R2_BUCKET_NAME }}
           R2_PUBLIC_BASE_URL: ${{ vars.R2_PUBLIC_BASE_URL }}
           MAX_ZIPS_PER_RUN: ${{ vars.MAX_ZIPS_PER_RUN || '10' }}
+          SIDECAR_SOURCES: ${{ inputs.sidecar_sources }}
         run: |
           if [ "${{ inputs.mode }}" = "posters" ]; then
             python -m ingest.posters
