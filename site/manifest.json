@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T01:42:25.871213+00:00",
+  "generated_at": "2026-10-07T01:44:50.031783+00:00",
   "days": [
     {
       "day": "2026-10-06",
@@ -1897,7 +1897,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_36_19-a1d814-s1.jpg",
           "source_zip": "PoseCam capture-20261005T110619-a1d814-pipeline",
           "category": "White pipes",
-          "uploader": "arshilb12j206"
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_36_19-a1d814-s1/AR_Pose_2026-10-05-05_36_19-a1d814-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_36_19-a1d814-s1/posecam_export.json"
+          }
         },
         {
           "duration": 102.533333,
@@ -1917,7 +1921,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_45_23-35ba83-s1.jpg",
           "source_zip": "capture-20261005T111523-35ba83-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_45_23-35ba83-s1/AR_Pose_2026-10-05-05_45_23-35ba83-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_45_23-35ba83-s1/posecam_export.json"
+          }
         },
         {
           "duration": 86.266667,
@@ -1927,7 +1935,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_46_54-d4b0df-s1.jpg",
           "source_zip": "PoseCam capture-20261005T111654-d4b0df-pipeline",
           "category": "White pipes",
-          "uploader": "arshilb12j206"
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_46_54-d4b0df-s1/AR_Pose_2026-10-05-05_46_54-d4b0df-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_46_54-d4b0df-s1/posecam_export.json"
+          }
         },
         {
           "duration": 90.633333,
@@ -1937,7 +1949,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_48_53-4f57ce-s1.jpg",
           "source_zip": "PoseCam capture-20261005T111853-4f57ce-pipeline",
           "category": "White pipes",
-          "uploader": "arshilb12j206"
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_48_53-4f57ce-s1/AR_Pose_2026-10-05-05_48_53-4f57ce-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_48_53-4f57ce-s1/posecam_export.json"
+          }
         },
         {
           "duration": 88.966667,
@@ -1947,7 +1963,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_50_33-883c91-s1.jpg",
           "source_zip": "capture-20261005T112033-883c91-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_50_33-883c91-s1/AR_Pose_2026-10-05-05_50_33-883c91-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_50_33-883c91-s1/posecam_export.json"
+          }
         },
         {
           "duration": 90.966667,
@@ -1957,7 +1977,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_52_33-d511e4-s1.jpg",
           "source_zip": "capture-20261005T112233-d511e4-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_52_33-d511e4-s1/AR_Pose_2026-10-05-05_52_33-d511e4-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_52_33-d511e4-s1/posecam_export.json"
+          }
         },
         {
           "duration": 74.033333,
@@ -1967,7 +1991,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_54_53-483ebc-s1.jpg",
           "source_zip": "PoseCam capture-20261005T112453-483ebc-pipeline",
           "category": "White pipes",
-          "uploader": "arshilb12j206"
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_54_53-483ebc-s1/AR_Pose_2026-10-05-05_54_53-483ebc-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_54_53-483ebc-s1/posecam_export.json"
+          }
         },
         {
           "duration": 102.566667,
@@ -1987,7 +2015,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_57_05-53ad1d-s1.jpg",
           "source_zip": "capture-20261005T112705-53ad1d-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_57_05-53ad1d-s1/AR_Pose_2026-10-05-05_57_05-53ad1d-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_57_05-53ad1d-s1/posecam_export.json"
+          }
         },
         {
           "duration": 107.233333,
@@ -2007,7 +2039,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-05_58_38-88f8f0-s1.jpg",
           "source_zip": "PoseCam capture-20261005T112838-88f8f0-pipeline",
           "category": "White pipes",
-          "uploader": "arshilb12j206"
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_58_38-88f8f0-s1/AR_Pose_2026-10-05-05_58_38-88f8f0-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-05_58_38-88f8f0-s1/posecam_export.json"
+          }
         },
         {
           "duration": 102.2,
@@ -2247,7 +2283,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-06_47_51-efe5cb-s1.jpg",
           "source_zip": "capture-20261005T121751-efe5cb-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_47_51-efe5cb-s1/AR_Pose_2026-10-05-06_47_51-efe5cb-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_47_51-efe5cb-s1/posecam_export.json"
+          }
         },
         {
           "duration": 95.566667,
@@ -2267,7 +2307,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-06_49_35-9f70d4-s1.jpg",
           "source_zip": "capture-20261005T121935-9f70d4-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_49_35-9f70d4-s1/AR_Pose_2026-10-05-06_49_35-9f70d4-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_49_35-9f70d4-s1/posecam_export.json"
+          }
         },
         {
           "duration": 86.566667,
@@ -2277,7 +2321,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-06_51_59-29037f-s1.jpg",
           "source_zip": "capture-20261005T122159-29037f-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_51_59-29037f-s1/AR_Pose_2026-10-05-06_51_59-29037f-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_51_59-29037f-s1/posecam_export.json"
+          }
         },
         {
           "duration": 88.466667,
@@ -2287,7 +2335,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-06_54_38-6c18a3-s1.jpg",
           "source_zip": "capture-20261005T122438-6c18a3-pipeline.zip",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_54_38-6c18a3-s1/AR_Pose_2026-10-05-06_54_38-6c18a3-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-06_54_38-6c18a3-s1/posecam_export.json"
+          }
         },
         {
           "duration": 70.066667,
@@ -2517,7 +2569,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_04_26-6efae0-s1.jpg",
           "source_zip": "PoseCam capture-20261005T143426-6efae0-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_04_26-6efae0-s1/AR_Pose_2026-10-05-09_04_26-6efae0-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_04_26-6efae0-s1/posecam_export.json"
+          }
         },
         {
           "duration": 78.366667,
@@ -2527,7 +2583,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_12_14-d536df-s1.jpg",
           "source_zip": "PoseCam capture-20261005T144214-d536df-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_12_14-d536df-s1/AR_Pose_2026-10-05-09_12_14-d536df-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_12_14-d536df-s1/posecam_export.json"
+          }
         },
         {
           "duration": 88.566667,
@@ -2547,7 +2607,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_14_04-88a45d-s1.jpg",
           "source_zip": "PoseCam capture-20261005T144404-88a45d-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_14_04-88a45d-s1/AR_Pose_2026-10-05-09_14_04-88a45d-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_14_04-88a45d-s1/posecam_export.json"
+          }
         },
         {
           "duration": 71.1,
@@ -2557,7 +2621,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_15_49-ea4d19-s1.jpg",
           "source_zip": "PoseCam capture-20261005T144549-ea4d19-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_15_49-ea4d19-s1/AR_Pose_2026-10-05-09_15_49-ea4d19-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_15_49-ea4d19-s1/posecam_export.json"
+          }
         },
         {
           "duration": 94.233333,
@@ -2577,7 +2645,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_17_26-878f8d-s1.jpg",
           "source_zip": "PoseCam capture-20261005T144726-878f8d-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_17_26-878f8d-s1/AR_Pose_2026-10-05-09_17_26-878f8d-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_17_26-878f8d-s1/posecam_export.json"
+          }
         },
         {
           "duration": 98.3,
@@ -2597,7 +2669,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_19_30-868b0e-s1.jpg",
           "source_zip": "PoseCam capture-20261005T144930-868b0e-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_19_30-868b0e-s1/AR_Pose_2026-10-05-09_19_30-868b0e-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_19_30-868b0e-s1/posecam_export.json"
+          }
         },
         {
           "duration": 90.5,
@@ -2607,7 +2683,11 @@
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/RGB_2026-10-05-09_21_26-8f23da-s1.jpg",
           "source_zip": "PoseCam capture-20261005T145126-8f23da-pipeline",
           "category": "White pipes",
-          "uploader": "Arshil Bhingradiya"
+          "uploader": "Arshil Bhingradiya",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_21_26-8f23da-s1/AR_Pose_2026-10-05-09_21_26-8f23da-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-05/2026-10-05-09_21_26-8f23da-s1/posecam_export.json"
+          }
         },
         {
           "duration": 86.733333,
