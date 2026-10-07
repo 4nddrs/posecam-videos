@@ -62,7 +62,7 @@ def test_backfill_sets_missing_category_keeps_existing_and_never_writes_emails(t
 
     text = path.read_text()
     videos = {v["id"]: v for v in json.loads(text)["days"][0]["videos"]}
-    assert videos["a"]["category"] == "Black/White pipes"
+    assert videos["a"]["category"] == "Black/White Pipes"
     assert videos["b"]["category"] == "White pipes"
     assert videos["b"]["uploader"] == "Kept"
     assert "@" not in text

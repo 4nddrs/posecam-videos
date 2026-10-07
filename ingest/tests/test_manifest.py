@@ -37,7 +37,7 @@ def test_manifest_groups_sorts_and_serializes():
         "source_zip": "zip-a.zip",
         "poster": None,
         "duration": None,
-        "category": "Black/White pipes",
+        "category": "Black/White Pipes",
         "uploader": None,
     }
 
@@ -124,32 +124,37 @@ def test_manifest_records_category_and_uploader(tmp_path):
     path = tmp_path / "m.json"
     save(m, path)
     videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
-    assert videos["a"]["category"] == "White pipes"
+    assert videos["a"]["category"] == "White Pipes"
     assert videos["a"]["uploader"] == "jayjagani19"
-    assert videos["b"]["category"] == "Black/White pipes"
+    assert videos["b"]["category"] == "Black/White Pipes"
     assert videos["b"]["uploader"] is None
 
 
 def test_from_dict_defaults_missing_category_to_remaining():
     data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u"}]}]}
     video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
-    assert video["category"] == "Black/White pipes"
+    assert video["category"] == "Black/White Pipes"
 
 
 def test_normalize_category_strips_trailing_date():
-    assert normalize_category("Black pipes 1 Oct") == "Black pipes"
-    assert normalize_category("White pipes 1 OCt") == "White pipes"
-    assert normalize_category("Black pipes - 12 October 2026") == "Black pipes"
-    assert normalize_category("White pipes Oct 1") == "White pipes"
-    assert normalize_category("  Black pipes  ") == "Black pipes"
+    assert normalize_category("Black pipes 1 Oct") == "Black Pipes"
+    assert normalize_category("White pipes 1 OCt") == "White Pipes"
+    assert normalize_category("Black pipes - 12 October 2026") == "Black Pipes"
+    assert normalize_category("White pipes Oct 1") == "White Pipes"
+    assert normalize_category("  Black pipes  ") == "Black Pipes"
 
 
 def test_normalize_category_keeps_names_without_a_date():
-    assert normalize_category("Black/White pipes") == "Black/White pipes"
-    assert normalize_category("Pipes batch 2") == "Pipes batch 2"
+    assert normalize_category("Black/White pipes") == "Black/White Pipes"
+    assert normalize_category("Pipes batch 2") == "Pipes Batch 2"
     assert normalize_category("1 Oct") == "1 Oct"
     assert normalize_category(None) is None
     assert normalize_category("") is None
+
+
+def test_normalize_category_canonicalizes_word_case():
+    assert normalize_category("Black pipes") == "Black Pipes"
+    assert normalize_category("black pipes") == "Black Pipes"
 
 
 def test_dated_category_folders_merge_into_the_base_category(tmp_path):
@@ -161,22 +166,22 @@ def test_dated_category_folders_merge_into_the_base_category(tmp_path):
     m.add("2026-10-01", "z", PublishedVideo(id="new", name="new.mp4", url="u2"), category="White pipes 1 Oct")
     save(m, path)
     videos = {v["id"]: v for v in load(path).to_dict()["days"][0]["videos"]}
-    assert videos["old"]["category"] == "Black pipes"
-    assert videos["new"]["category"] == "White pipes"
+    assert videos["old"]["category"] == "Black Pipes"
+    assert videos["new"]["category"] == "White Pipes"
 
 
 def test_normalize_category_keeps_words_that_only_start_like_a_month():
     assert normalize_category("Pipes Deck 1") == "Pipes Deck 1"
-    assert normalize_category("Black pipes Mark 2") == "Black pipes Mark 2"
+    assert normalize_category("Black pipes Mark 2") == "Black Pipes Mark 2"
     assert normalize_category("Line 2 Marked") == "Line 2 Marked"
     assert normalize_category("Team Junior 2") == "Team Junior 2"
     assert normalize_category("Pipes 99 Oct") == "Pipes 99 Oct"
 
 
 def test_normalize_category_strips_full_and_short_month_names():
-    assert normalize_category("Black pipes 3 Sept") == "Black pipes"
-    assert normalize_category("Black pipes (31 December)") == "Black pipes"
-    assert normalize_category("White pipes March 2nd") == "White pipes"
+    assert normalize_category("Black pipes 3 Sept") == "Black Pipes"
+    assert normalize_category("Black pipes (31 December)") == "Black Pipes"
+    assert normalize_category("White pipes March 2nd") == "White Pipes"
 
 
 def test_manifest_includes_metadata_when_provided(tmp_path):
@@ -214,4 +219,4 @@ def test_normalize_category_ignores_blank_and_non_text_values():
     assert normalize_category(7) is None
     data = {"days": [{"day": "d", "videos": [{"id": "a", "name": "a", "url": "u", "category": 7}]}]}
     video = Manifest.from_dict(data).to_dict()["days"][0]["videos"][0]
-    assert video["category"] == "Black/White pipes"
+    assert video["category"] == "Black/White Pipes"

@@ -432,50 +432,50 @@ const catManifest = () => ({
     {
       day: "2026-09-30",
       videos: [
-        { id: "d30/a", name: "b-1.mp4", category: "White pipes", uploader: "Ann" },
-        { id: "d30/b", name: "b-2.mp4", category: "Black pipes" },
+        { id: "d30/a", name: "b-1.mp4", category: "White Pipes", uploader: "Ann" },
+        { id: "d30/b", name: "b-2.mp4", category: "Black Pipes" },
       ],
     },
     {
       day: "2026-09-28",
       videos: [
-        { id: "d28/a", name: "r-1.mp4", category: "Black/White pipes", uploader: "Zed" },
+        { id: "d28/a", name: "r-1.mp4", category: "Black/White Pipes", uploader: "Zed" },
         { id: "d28/b", name: "r-2.mp4" },
       ],
     },
   ],
 });
 
-test("categoryOf falls back to Black/White pipes and uploaderOf omits blanks", () => {
-  assert.equal(DEFAULT_CATEGORY, "Black/White pipes");
-  assert.equal(categoryOf({ category: "White pipes" }), "White pipes");
-  assert.equal(categoryOf({}), "Black/White pipes");
-  assert.equal(categoryOf({ category: "  " }), "Black/White pipes");
-  assert.equal(categoryOf(null), "Black/White pipes");
+test("categoryOf falls back to Black/White Pipes and uploaderOf omits blanks", () => {
+  assert.equal(DEFAULT_CATEGORY, "Black/White Pipes");
+  assert.equal(categoryOf({ category: "White Pipes" }), "White Pipes");
+  assert.equal(categoryOf({}), "Black/White Pipes");
+  assert.equal(categoryOf({ category: "  " }), "Black/White Pipes");
+  assert.equal(categoryOf(null), "Black/White Pipes");
   assert.equal(uploaderOf({ uploader: " Ann " }), "Ann");
   assert.equal(uploaderOf({ uploader: null }), "");
   assert.equal(uploaderOf({}), "");
   assert.equal(uploaderOf(undefined), "");
 });
 
-test("listCategories counts videos, fixed order first, uncategorized counts as Black/White pipes", () => {
+test("listCategories counts videos, fixed order first, uncategorized counts as Black/White Pipes", () => {
   assert.deepEqual(listCategories(catManifest().days), [
-    { name: "Black/White pipes", count: 2 },
-    { name: "Black pipes", count: 1 },
-    { name: "White pipes", count: 1 },
+    { name: "Black/White Pipes", count: 2 },
+    { name: "Black Pipes", count: 1 },
+    { name: "White Pipes", count: 1 },
   ]);
   assert.deepEqual(listCategories(undefined), []);
 });
 
 test("listCategories puts known categories in CATEGORY_ORDER, then others newest first", () => {
-  assert.deepEqual(CATEGORY_ORDER, ["Black/White pipes", "Black pipes", "White pipes"]);
+  assert.deepEqual(CATEGORY_ORDER, ["Black/White Pipes", "Black Pipes", "White Pipes"]);
   const days = [
-    { day: "2026-09-30", videos: [{ name: "a", category: "Extra" }, { name: "b", category: "White pipes" }] },
-    { day: "2026-09-29", videos: [{ name: "c", category: "Old" }, { name: "d", category: "Black pipes" }] },
+    { day: "2026-09-30", videos: [{ name: "a", category: "Extra" }, { name: "b", category: "White Pipes" }] },
+    { day: "2026-09-29", videos: [{ name: "c", category: "Old" }, { name: "d", category: "Black Pipes" }] },
     { day: "2026-09-28", videos: [{ name: "e" }] },
   ];
-  assert.deepEqual(listCategories(days).map((c) => c.name), ["Black/White pipes", "Black pipes", "White pipes", "Extra", "Old"]);
-  assert.deepEqual(listCategories([days[0]]).map((c) => c.name), ["White pipes", "Extra"]);
+  assert.deepEqual(listCategories(days).map((c) => c.name), ["Black/White Pipes", "Black Pipes", "White Pipes", "Extra", "Old"]);
+  assert.deepEqual(listCategories([days[0]]).map((c) => c.name), ["White Pipes", "Extra"]);
 });
 
 test("listCategories ties on newest video break by name and recency uses day then name", () => {
@@ -488,10 +488,10 @@ test("listCategories ties on newest video break by name and recency uses day the
 
 test("daysForCategory keeps only that category's videos and drops empty days", () => {
   const days = catManifest().days;
-  const mix = daysForCategory(days, "Black/White pipes");
+  const mix = daysForCategory(days, "Black/White Pipes");
   assert.deepEqual(mix.map((d) => d.day), ["2026-09-28"]);
   assert.deepEqual(mix[0].videos.map((v) => v.id), ["d28/a", "d28/b"]);
-  const white = daysForCategory(days, "White pipes");
+  const white = daysForCategory(days, "White Pipes");
   assert.deepEqual(white.map((d) => [d.day, d.videos.length]), [["2026-09-30", 1]]);
   assert.deepEqual(daysForCategory(days, "Nope"), []);
   assert.equal(days[0].videos.length, 2);
@@ -499,31 +499,31 @@ test("daysForCategory keeps only that category's videos and drops empty days", (
 
 test("categoryOfVideoId maps a v- anchor to its category", () => {
   const days = catManifest().days;
-  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d30/b" })), "Black pipes");
-  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d28/b" })), "Black/White pipes");
+  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d30/b" })), "Black Pipes");
+  assert.equal(categoryOfVideoId(days, videoAnchorId({ id: "d28/b" })), "Black/White Pipes");
   assert.equal(categoryOfVideoId(days, "v-missing"), null);
   assert.equal(categoryOfVideoId(days, ""), null);
 });
 
 test("chooseCategory prefers a deep link, then a stored known choice, then the first category", () => {
-  const cats = [{ name: "Black/White pipes" }, { name: "White pipes" }];
-  assert.equal(chooseCategory(cats, { linked: "Black/White pipes", stored: "White pipes" }), "Black/White pipes");
-  assert.equal(chooseCategory(cats, { linked: null, stored: "Black/White pipes" }), "Black/White pipes");
-  assert.equal(chooseCategory(cats, { linked: null, stored: "Gone" }), "Black/White pipes");
-  assert.equal(chooseCategory(cats, { linked: null, stored: "Remaining" }), "Black/White pipes");
-  assert.equal(chooseCategory(cats, { linked: null, stored: "Mix" }), "Black/White pipes");
-  assert.equal(chooseCategory(cats, {}), "Black/White pipes");
+  const cats = [{ name: "Black/White Pipes" }, { name: "White Pipes" }];
+  assert.equal(chooseCategory(cats, { linked: "Black/White Pipes", stored: "White Pipes" }), "Black/White Pipes");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Black/White Pipes" }), "Black/White Pipes");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Gone" }), "Black/White Pipes");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Remaining" }), "Black/White Pipes");
+  assert.equal(chooseCategory(cats, { linked: null, stored: "Mix" }), "Black/White Pipes");
+  assert.equal(chooseCategory(cats, {}), "Black/White Pipes");
   assert.equal(chooseCategory([], {}), null);
 });
 
 test("readCategory and writeCategory never throw", () => {
-  assert.equal(readCategory({ getItem: (k) => (k === CATEGORY_KEY ? "White pipes" : null) }), "White pipes");
+  assert.equal(readCategory({ getItem: (k) => (k === CATEGORY_KEY ? "White Pipes" : null) }), "White Pipes");
   assert.equal(readCategory({ getItem: () => null }), null);
   assert.equal(readCategory({ getItem: () => { throw new Error("denied"); } }), null);
   assert.equal(readCategory(undefined), null);
   const data = {};
-  assert.equal(writeCategory({ setItem: (k, v) => { data[k] = v; } }, "Black pipes"), true);
-  assert.equal(data[CATEGORY_KEY], "Black pipes");
+  assert.equal(writeCategory({ setItem: (k, v) => { data[k] = v; } }, "Black Pipes"), true);
+  assert.equal(data[CATEGORY_KEY], "Black Pipes");
   assert.equal(writeCategory({ setItem: () => { throw new Error("full"); } }, "x"), false);
   assert.equal(writeCategory(undefined, "x"), false);
   assert.equal(writeCategory({ setItem: () => {} }, ""), false);

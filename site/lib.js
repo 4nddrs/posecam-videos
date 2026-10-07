@@ -412,13 +412,13 @@ export function rowData(video) {
   };
 }
 
-export const DEFAULT_CATEGORY = "Black/White pipes";
+export const DEFAULT_CATEGORY = "Black/White Pipes";
 export const CATEGORY_KEY = "category";
 /** Fixed leading tab order; any other category follows, newest first. */
-export const CATEGORY_ORDER = ["Black/White pipes", "Black pipes", "White pipes"];
+export const CATEGORY_ORDER = ["Black/White Pipes", "Black Pipes", "White Pipes"];
 
 /**
- * Category of a video; entries without one belong to "Black/White pipes".
+ * Category of a video; entries without one belong to "Black/White Pipes".
  * @param {{category?: unknown}|null|undefined} video
  * @returns {string}
  */
