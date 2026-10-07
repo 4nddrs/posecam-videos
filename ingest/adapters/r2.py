@@ -19,6 +19,12 @@ from ingest.ports import PublishedVideo
 _DEFAULT_CONTENT_TYPE = "application/octet-stream"
 _MANIFEST_KEY = "manifest.json"
 
+# Same content types the sidecar backfill uses (ingest.sidecars._CONTENT_TYPES).
+_SIDECAR_CONTENT_TYPES = {
+    ".txt": "text/plain; charset=utf-8",
+    ".json": "application/json",
+}
+
 
 class R2VideoPublisher:
     """VideoPublisher adapter backed by a Cloudflare R2 S3-compatible bucket."""
@@ -61,6 +67,20 @@ class R2VideoPublisher:
             url=f"{self._public_base_url}/{quote(key)}",
             poster_url=poster_url,
         )
+
+    def publish_sidecar(self, sidecar_path: Path, day: str, session: str) -> str:
+        sidecar_path = Path(sidecar_path)
+        key = f"{day}/{session}/{sidecar_path.name}"
+        content_type = _SIDECAR_CONTENT_TYPES.get(
+            sidecar_path.suffix.lower(), _DEFAULT_CONTENT_TYPE
+        )
+        self._client.upload_file(
+            str(sidecar_path),
+            self._bucket,
+            key,
+            ExtraArgs={"ContentType": content_type},
+        )
+        return f"{self._public_base_url}/{quote(key)}"
 
     def publish_manifest(self, manifest_path: Path) -> str:
         key = _MANIFEST_KEY

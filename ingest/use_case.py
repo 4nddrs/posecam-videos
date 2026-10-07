@@ -7,7 +7,7 @@ from pathlib import Path
 
 from ingest.manifest import Manifest, save
 from ingest.ports import StateStore, VideoProcessor, VideoPublisher, ZipSource
-from ingest.unzip import extract_videos
+from ingest.unzip import extract_sidecars, extract_videos
 
 
 @dataclass
@@ -16,6 +16,28 @@ class IngestReport:
     skipped: list[str] = field(default_factory=list)
     failed: dict[str, str] = field(default_factory=dict)
     deferred: list[str] = field(default_factory=list)
+
+
+def _group_sidecars_by_session(
+    sidecars: list[Path], extract_dir: Path
+) -> dict[str, list[Path]]:
+    """Group sidecars by their immediate parent folder (the session folder).
+
+    Files extracted directly into `extract_dir` have no session folder and are
+    skipped, matching the sidecar backfill's "no session folder" handling.
+    """
+    by_session: dict[str, list[Path]] = {}
+    for sidecar in sidecars:
+        if sidecar.parent == extract_dir:
+            continue
+        by_session.setdefault(sidecar.parent.name, []).append(sidecar)
+    return by_session
+
+
+def _session_for_video(video_path: Path) -> str:
+    """Session token for a video: `RGB_<session>.mp4` -> `<session>`."""
+    stem = video_path.stem
+    return stem[4:] if stem.startswith("RGB_") else stem
 
 
 def run_ingest(
@@ -55,6 +77,10 @@ def run_ingest(
 
             extract_dir = entry_workdir / "videos"
             video_paths = extract_videos(zip_path, extract_dir)
+            sidecars_by_session = _group_sidecars_by_session(
+                extract_sidecars(zip_path, extract_dir, preserve_dirs=True),
+                extract_dir,
+            )
 
             day = entry.day or entry.uploaded_at.date().isoformat()
             manifest = Manifest()
@@ -69,9 +95,18 @@ def run_ingest(
                     )
                 else:
                     published = publisher.publish(video_path, day)
+
+                session = _session_for_video(video_path)
+                metadata = {
+                    sidecar.suffix.lstrip(".").lower(): publisher.publish_sidecar(
+                        sidecar, day, session
+                    )
+                    for sidecar in sidecars_by_session.get(session, [])
+                }
                 manifest.add(
                     day, entry.name, published,
                     category=entry.category, uploader=entry.uploader,
+                    metadata=metadata or None,
                 )
 
             save(manifest, manifest_path)

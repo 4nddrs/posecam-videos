@@ -24,11 +24,16 @@ class FakePublisher:
     def __init__(self, fail_for_names=None):
         self.published = []
         self.manifests = []
+        self.sidecars = []
         self._fail_for_names = fail_for_names or set()
 
     def publish_manifest(self, manifest_path):
         self.manifests.append(Path(manifest_path).read_text())
         return "https://cdn.example.com/manifest.json"
+
+    def publish_sidecar(self, sidecar_path, day, session):
+        self.sidecars.append((sidecar_path.name, day, session))
+        return f"https://cdn.example.com/{day}/{session}/{sidecar_path.name}"
 
     def publish(self, video_path, day, poster_path=None):
         self.posters = getattr(self, 'posters', []) + [poster_path]
@@ -60,6 +65,55 @@ def _make_zip_bytes(tmp_path, name, video_names):
     data = zip_path.read_bytes()
     zip_path.unlink()
     return data
+
+
+def _make_session_zip_bytes(tmp_path, name, session, with_sidecars=True):
+    """Build a zip shaped like a real recording: <stem>/<session>/{video,sidecars}."""
+    zip_path = tmp_path / name
+    stem = Path(name).stem
+    with zipfile.ZipFile(zip_path, "w") as zf:
+        zf.writestr(f"{stem}/{session}/RGB_{session}.mp4", b"fake-video-bytes")
+        if with_sidecars:
+            zf.writestr(f"{stem}/{session}/AR_Pose_{session}.txt", b"pose")
+            zf.writestr(f"{stem}/{session}/posecam_export.json", b"{}")
+    data = zip_path.read_bytes()
+    zip_path.unlink()
+    return data
+
+
+def test_run_ingest_publishes_sidecars_and_records_metadata(tmp_path):
+    session = "2026-10-07-04_27_08-1cc1cb-s1"
+    entry = _entry("z1", "drain.zip", day="2026-10-07")
+    source = FakeZipSource([entry], {"z1": _make_session_zip_bytes(tmp_path, "drain.zip", session)})
+    publisher = FakePublisher()
+
+    report = run_ingest(source, publisher, FakeStateStore(), tmp_path / "m.json", tmp_path / "w")
+
+    assert report.processed == ["z1"]
+    assert sorted(publisher.sidecars) == [
+        ("AR_Pose_2026-10-07-04_27_08-1cc1cb-s1.txt", "2026-10-07", session),
+        ("posecam_export.json", "2026-10-07", session),
+    ]
+    video = load(tmp_path / "m.json").to_dict()["days"][0]["videos"][0]
+    assert video["metadata"] == {
+        "txt": f"https://cdn.example.com/2026-10-07/{session}/AR_Pose_{session}.txt",
+        "json": f"https://cdn.example.com/2026-10-07/{session}/posecam_export.json",
+    }
+
+
+def test_run_ingest_video_only_zip_has_no_metadata_and_no_sidecar_publish(tmp_path):
+    session = "2026-10-07-04_27_08-1cc1cb-s1"
+    entry = _entry("z1", "drain.zip", day="2026-10-07")
+    source = FakeZipSource(
+        [entry], {"z1": _make_session_zip_bytes(tmp_path, "drain.zip", session, with_sidecars=False)}
+    )
+    publisher = FakePublisher()
+
+    run_ingest(source, publisher, FakeStateStore(), tmp_path / "m.json", tmp_path / "w")
+
+    assert publisher.sidecars == []
+    video = load(tmp_path / "m.json").to_dict()["days"][0]["videos"][0]
+    assert "metadata" not in video
 
 
 def test_run_ingest_processes_new_zips(tmp_path):
