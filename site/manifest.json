@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-07T15:26:30.380523+00:00",
+  "generated_at": "2026-10-07T15:27:42.575183+00:00",
   "days": [
     {
       "day": "2026-10-07",
@@ -1437,11 +1437,39 @@
           }
         },
         {
+          "id": "2026-10-07/RGB_2026-10-07-09_17_35-829484-s1.mp4",
+          "name": "RGB_2026-10-07-09_17_35-829484-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_17_35-829484-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_17_35-829484-s1.jpg",
+          "duration": 61.9,
+          "source_zip": "PoseCam capture-20261007T144735-829484-pipeline",
+          "category": "Green Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/2026-10-07-09_17_35-829484-s1/AR_Pose_2026-10-07-09_17_35-829484-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/2026-10-07-09_17_35-829484-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 65.866667,
+          "id": "2026-10-07/RGB_2026-10-07-09_18_47-6f8800-s1.mp4",
+          "name": "RGB_2026-10-07-09_18_47-6f8800-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_18_47-6f8800-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_18_47-6f8800-s1.jpg",
+          "source_zip": "PoseCam capture-20261007T144847-6f8800-pipeline",
+          "category": "Green Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/2026-10-07-09_18_47-6f8800-s1/AR_Pose_2026-10-07-09_18_47-6f8800-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/2026-10-07-09_18_47-6f8800-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 67.7,
           "id": "2026-10-07/RGB_2026-10-07-09_20_30-594429-s1.mp4",
           "name": "RGB_2026-10-07-09_20_30-594429-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_20_30-594429-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-07/RGB_2026-10-07-09_20_30-594429-s1.jpg",
-          "duration": 67.7,
           "source_zip": "PoseCam capture-20261007T145030-594429-pipeline",
           "category": "Green Pipes",
           "uploader": "jaganijay641",
