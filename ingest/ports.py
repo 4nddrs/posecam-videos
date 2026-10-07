@@ -70,6 +70,9 @@ class VideoPublisher(Protocol):
     ) -> PublishedVideo:
         ...
 
+    def publish_sidecar(self, sidecar_path: Path, day: str, session: str) -> str:
+        ...
+
     def publish_manifest(self, manifest_path: Path) -> str:
         ...
 

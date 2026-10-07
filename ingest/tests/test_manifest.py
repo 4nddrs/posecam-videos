@@ -179,6 +179,36 @@ def test_normalize_category_strips_full_and_short_month_names():
     assert normalize_category("White pipes March 2nd") == "White pipes"
 
 
+def test_manifest_includes_metadata_when_provided(tmp_path):
+    m = Manifest()
+    m.add(
+        "2026-10-07",
+        "z.zip",
+        PublishedVideo(id="a", name="a.mp4", url="u"),
+        metadata={"txt": "https://cdn.example.com/d/s/a.txt"},
+    )
+    path = tmp_path / "m.json"
+    save(m, path)
+
+    video = load(path).to_dict()["days"][0]["videos"][0]
+    assert video["metadata"] == {"txt": "https://cdn.example.com/d/s/a.txt"}
+
+
+def test_manifest_omits_metadata_when_not_provided(tmp_path):
+    m = Manifest()
+    m.add("2026-10-07", "z.zip", PublishedVideo(id="a", name="a.mp4", url="u"))
+    empty = Manifest()
+    empty.add(
+        "2026-10-07", "z.zip", PublishedVideo(id="b", name="b.mp4", url="u2"), metadata={}
+    )
+    path = tmp_path / "m.json"
+    save(m, path)
+    save(empty, tmp_path / "empty.json")
+
+    assert "metadata" not in load(path).to_dict()["days"][0]["videos"][0]
+    assert "metadata" not in load(tmp_path / "empty.json").to_dict()["days"][0]["videos"][0]
+
+
 def test_normalize_category_ignores_blank_and_non_text_values():
     assert normalize_category("   ") is None
     assert normalize_category(7) is None

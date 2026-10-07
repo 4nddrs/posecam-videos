@@ -47,9 +47,10 @@ class Manifest:
         video: PublishedVideo,
         category: str | None = None,
         uploader: str | None = None,
+        metadata: dict[str, str] | None = None,
     ) -> None:
         day_videos = self._days.setdefault(day, {})
-        day_videos[video.id] = {
+        record = {
             "id": video.id,
             "name": video.name,
             "url": video.url,
@@ -59,6 +60,9 @@ class Manifest:
             "category": normalize_category(category) or DEFAULT_CATEGORY,
             "uploader": uploader,
         }
+        if metadata:
+            record["metadata"] = metadata
+        day_videos[video.id] = record
 
     def to_dict(self) -> dict:
         days = []

@@ -119,6 +119,53 @@ def test_publish_without_poster_has_no_poster_url(tmp_path):
     assert publisher.publish(video_path, day="d").poster_url is None
 
 
+def test_publish_sidecar_uploads_txt_with_plain_content_type(tmp_path):
+    session = "2026-10-07-04_27_08-1cc1cb-s1"
+    sidecar = tmp_path / f"AR_Pose_{session}.txt"
+    sidecar.write_bytes(b"pose data")
+    client = FakeClient()
+    publisher = R2VideoPublisher(client, bucket="my-bucket", public_base_url="https://videos.example.com")
+
+    url = publisher.publish_sidecar(sidecar, day="2026-10-07", session=session)
+
+    assert client.upload_file_calls == [{
+        "filename": str(sidecar),
+        "bucket": "my-bucket",
+        "key": f"2026-10-07/{session}/AR_Pose_{session}.txt",
+        "ExtraArgs": {"ContentType": "text/plain; charset=utf-8"},
+    }]
+    assert url == f"https://videos.example.com/2026-10-07/{session}/AR_Pose_{session}.txt"
+
+
+def test_publish_sidecar_uploads_json_with_json_content_type(tmp_path):
+    session = "2026-10-07-04_27_08-1cc1cb-s1"
+    sidecar = tmp_path / "posecam_export.json"
+    sidecar.write_bytes(b"{}")
+    client = FakeClient()
+    publisher = R2VideoPublisher(client, bucket="my-bucket", public_base_url="https://videos.example.com")
+
+    url = publisher.publish_sidecar(sidecar, day="2026-10-07", session=session)
+
+    assert client.upload_file_calls == [{
+        "filename": str(sidecar),
+        "bucket": "my-bucket",
+        "key": f"2026-10-07/{session}/posecam_export.json",
+        "ExtraArgs": {"ContentType": "application/json"},
+    }]
+    assert url == f"https://videos.example.com/2026-10-07/{session}/posecam_export.json"
+
+
+def test_publish_sidecar_url_encodes_spaces_in_the_key(tmp_path):
+    sidecar = tmp_path / "a sidecar.txt"
+    sidecar.write_bytes(b"data")
+    client = FakeClient()
+    publisher = R2VideoPublisher(client, bucket="bucket", public_base_url="https://videos.example.com")
+
+    url = publisher.publish_sidecar(sidecar, day="2026-09-03", session="s1")
+
+    assert url == "https://videos.example.com/2026-09-03/s1/a%20sidecar.txt"
+
+
 def test_publish_manifest_uploads_to_bucket_root_without_cache(tmp_path):
     manifest = tmp_path / "manifest.json"
     manifest.write_text("{}")
