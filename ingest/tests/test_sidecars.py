@@ -259,16 +259,22 @@ def test_video_without_sidecar_is_missing(tmp_path):
 
 
 def test_skips_existing_metadata_unless_forced(tmp_path):
-    video = _video(VIDEO_ID, VIDEO_NAME, ZIP)
-    video["metadata"] = {"txt": f"{BASE}/old.txt"}
-    _write_manifest(tmp_path / "m.json", [video])
-    source = FakeSource({ZIP: _members(SESSION, video=True, pose=True)})
+    s1 = SESSION
+    s2 = "2026-01-01-09_00_00-def456-s1"
+    backfilled = _video(f"{DAY}/RGB_{s1}.mp4", f"RGB_{s1}.mp4", ZIP)
+    backfilled["metadata"] = {"txt": f"{BASE}/old.txt"}
+    pending = _video(f"{DAY}/RGB_{s2}.mp4", f"RGB_{s2}.mp4", ZIP)
+    _write_manifest(tmp_path / "m.json", [backfilled, pending])
+    source = FakeSource({ZIP: {
+        **_members(s1, video=True, pose=True),
+        **_members(s2, video=True, pose=True),
+    }})
 
     report, client, _ = _run(tmp_path, source)
 
-    assert report["skipped"] == [_key(SESSION, POSE_NAME)]
-    assert report["uploaded"] == []
-    assert client.uploads == []
+    assert report["skipped"] == [_key(s1, POSE_NAME)]
+    assert report["uploaded"] == [_key(s2, f"AR_Pose_{s2}.txt")]
+    assert [key for key, _ in client.uploads] == [_key(s2, f"AR_Pose_{s2}.txt")]
 
 
 def test_force_reuploads_existing_metadata(tmp_path):
@@ -359,6 +365,42 @@ def test_max_zips_defers_the_remainder(tmp_path):
 
     assert report["processed"] == ["one.zip"]
     assert report["deferred"] == ["two.zip"]
+
+
+def test_done_zip_is_excluded_entirely(tmp_path):
+    video = _video(VIDEO_ID, VIDEO_NAME, ZIP)
+    video["metadata"] = {"txt": f"{BASE}/old.txt", "json": f"{BASE}/old.json"}
+    _write_manifest(tmp_path / "m.json", [video])
+    source = FakeSource({ZIP: _members(SESSION, video=True, pose=True, export=True)})
+
+    report, client, _ = _run(tmp_path, source)
+
+    assert report["processed"] == []
+    assert report["uploaded"] == []
+    assert report["skipped"] == []
+    assert report["deferred"] == []
+    assert client.uploads == []
+    assert source.downloaded == []
+
+
+def test_done_zip_is_not_counted_against_max_zips(tmp_path):
+    s1 = "2026-08-08-19_00_00-abc111-s1"
+    s2 = "2026-08-08-20_00_00-abc222-s1"
+    done = _video(f"{DAY}/RGB_{s1}.mp4", f"RGB_{s1}.mp4", "done.zip")
+    done["metadata"] = {"txt": f"{BASE}/old.txt"}
+    pending = _video(f"{DAY}/RGB_{s2}.mp4", f"RGB_{s2}.mp4", "pending.zip")
+    _write_manifest(tmp_path / "m.json", [done, pending])
+    source = FakeSource({
+        "done.zip": _members(s1, video=True, pose=True),
+        "pending.zip": _members(s2, video=True, pose=True),
+    })
+
+    report, client, _ = _run(tmp_path, source, max_zips=1)
+
+    assert report["processed"] == ["pending.zip"]
+    assert report["deferred"] == []
+    assert report["uploaded"] == [_key(s2, f"AR_Pose_{s2}.txt")]
+    assert source.downloaded == ["pending.zip"]
 
 
 def test_update_manifest_false_skips_save_and_publish(tmp_path):

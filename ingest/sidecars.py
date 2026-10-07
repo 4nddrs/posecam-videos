@@ -59,12 +59,27 @@ def _session_token(text: str) -> str | None:
     return match.group(0) if match else None
 
 
+def _zip_done(videos: list[tuple[str, dict]]) -> bool:
+    """Return True when every video in `videos` already has non-empty metadata."""
+    return bool(videos) and all(
+        video.get("metadata") for _day, video in videos
+    )
+
+
 def _plan_zips(
     entries: list, index: dict[str, list[tuple[str, dict]]],
-    max_zips: int | None, only_zip: str | None,
+    max_zips: int | None, only_zip: str | None, force: bool = False,
 ) -> tuple[list, list[str]]:
-    """Keep entries that own indexed videos, optionally filtered and capped."""
-    kept = [entry for entry in entries if entry.name in index]
+    """Keep not-yet-done entries that own indexed videos, filtered and capped.
+
+    A zip whose videos are all already backfilled (`_zip_done`) is skipped, so
+    it is neither processed nor counted in `deferred`. `force` reprocesses
+    every indexed zip regardless of prior metadata.
+    """
+    kept = [
+        entry for entry in entries
+        if entry.name in index and (force or not _zip_done(index[entry.name]))
+    ]
     if only_zip is not None:
         kept = [entry for entry in kept if entry.name == only_zip]
     if max_zips is not None:
@@ -157,7 +172,7 @@ def run_sidecars(
     }
 
     entries, deferred = _plan_zips(
-        source.list_zips(), index, max_zips, only_zip
+        source.list_zips(), index, max_zips, only_zip, force
     )
     report["deferred"] = deferred
 
