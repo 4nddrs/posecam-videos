@@ -21,6 +21,10 @@ on:
         description: "sidecars only: extra Drive folder(s) to scan recursively, folderId[=Category],..."
         type: string
         default: ""
+      drive_sources:
+        description: "ingest/posters: override DRIVE_SOURCES for this run, folderId[=Category],... (empty = use the repository variable)"
+        type: string
+        default: ""
   push:
     branches:
       - main
@@ -74,7 +78,7 @@ jobs:
 
       - name: Run ingest
         env:
-          DRIVE_SOURCES: ${{ vars.DRIVE_SOURCES }}
+          DRIVE_SOURCES: ${{ inputs.drive_sources || vars.DRIVE_SOURCES }}
           DRIVE_FOLDER_ID: ${{ vars.DRIVE_FOLDER_ID }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
