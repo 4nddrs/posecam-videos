@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-08T13:38:52.189230+00:00",
+  "generated_at": "2026-10-08T13:43:30.377615+00:00",
   "days": [
     {
       "day": "2026-10-08",
@@ -1167,11 +1167,11 @@
           }
         },
         {
+          "duration": 73.8,
           "id": "2026-10-08/RGB_2026-10-08-07_58_50-adeeba-s1.mp4",
           "name": "RGB_2026-10-08-07_58_50-adeeba-s1.mp4",
           "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-07_58_50-adeeba-s1.mp4",
           "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-07_58_50-adeeba-s1.jpg",
-          "duration": 73.8,
           "source_zip": "PoseCam capture-20261008T132850-adeeba-pipeline",
           "category": "White Pipes",
           "uploader": "arshilb12j206",
@@ -1696,6 +1696,286 @@
           "metadata": {
             "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_39_11-af9c53-s1/AR_Pose_2026-10-08-08_39_11-af9c53-s1.txt",
             "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_39_11-af9c53-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 55.966667,
+          "id": "2026-10-08/RGB_2026-10-08-08_45_48-aaf18c-s1.mp4",
+          "name": "RGB_2026-10-08-08_45_48-aaf18c-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_45_48-aaf18c-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_45_48-aaf18c-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T141548-aaf18c-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_45_48-aaf18c-s1/AR_Pose_2026-10-08-08_45_48-aaf18c-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_45_48-aaf18c-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 58.2,
+          "id": "2026-10-08/RGB_2026-10-08-08_46_52-f06677-s1.mp4",
+          "name": "RGB_2026-10-08-08_46_52-f06677-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_46_52-f06677-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_46_52-f06677-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T141652-f06677-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_46_52-f06677-s1/AR_Pose_2026-10-08-08_46_52-f06677-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_46_52-f06677-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 58.366667,
+          "id": "2026-10-08/RGB_2026-10-08-08_48_29-bbe3fd-s1.mp4",
+          "name": "RGB_2026-10-08-08_48_29-bbe3fd-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_48_29-bbe3fd-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_48_29-bbe3fd-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T141829-bbe3fd-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_48_29-bbe3fd-s1/AR_Pose_2026-10-08-08_48_29-bbe3fd-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_48_29-bbe3fd-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 54.766667,
+          "id": "2026-10-08/RGB_2026-10-08-08_49_42-e185ba-s1.mp4",
+          "name": "RGB_2026-10-08-08_49_42-e185ba-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_49_42-e185ba-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_49_42-e185ba-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T141942-e185ba-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_49_42-e185ba-s1/AR_Pose_2026-10-08-08_49_42-e185ba-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_49_42-e185ba-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 54.366667,
+          "id": "2026-10-08/RGB_2026-10-08-08_53_26-dc3aec-s1.mp4",
+          "name": "RGB_2026-10-08-08_53_26-dc3aec-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_53_26-dc3aec-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_53_26-dc3aec-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142326-dc3aec-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_53_26-dc3aec-s1/AR_Pose_2026-10-08-08_53_26-dc3aec-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_53_26-dc3aec-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 57.3,
+          "id": "2026-10-08/RGB_2026-10-08-08_54_33-1470a5-s1.mp4",
+          "name": "RGB_2026-10-08-08_54_33-1470a5-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_54_33-1470a5-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_54_33-1470a5-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142433-1470a5-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_54_33-1470a5-s1/AR_Pose_2026-10-08-08_54_33-1470a5-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_54_33-1470a5-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 59.766667,
+          "id": "2026-10-08/RGB_2026-10-08-08_55_52-309a4a-s1.mp4",
+          "name": "RGB_2026-10-08-08_55_52-309a4a-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_55_52-309a4a-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_55_52-309a4a-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142552-309a4a-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_55_52-309a4a-s1/AR_Pose_2026-10-08-08_55_52-309a4a-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_55_52-309a4a-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 76.7,
+          "id": "2026-10-08/RGB_2026-10-08-08_57_03-993f16-s1.mp4",
+          "name": "RGB_2026-10-08-08_57_03-993f16-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_57_03-993f16-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_57_03-993f16-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142703-993f16-pipeline",
+          "category": "White Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_57_03-993f16-s1/AR_Pose_2026-10-08-08_57_03-993f16-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_57_03-993f16-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 60.0,
+          "id": "2026-10-08/RGB_2026-10-08-08_57_06-63c30a-s1.mp4",
+          "name": "RGB_2026-10-08-08_57_06-63c30a-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_57_06-63c30a-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_57_06-63c30a-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142706-63c30a-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_57_06-63c30a-s1/AR_Pose_2026-10-08-08_57_06-63c30a-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_57_06-63c30a-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 60.266667,
+          "id": "2026-10-08/RGB_2026-10-08-08_58_37-7ca783-s1.mp4",
+          "name": "RGB_2026-10-08-08_58_37-7ca783-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_58_37-7ca783-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_58_37-7ca783-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142837-7ca783-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_58_37-7ca783-s1/AR_Pose_2026-10-08-08_58_37-7ca783-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_58_37-7ca783-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 77.166667,
+          "id": "2026-10-08/RGB_2026-10-08-08_59_29-495ff4-s1.mp4",
+          "name": "RGB_2026-10-08-08_59_29-495ff4-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_59_29-495ff4-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_59_29-495ff4-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142929-495ff4-pipeline",
+          "category": "White Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_59_29-495ff4-s1/AR_Pose_2026-10-08-08_59_29-495ff4-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_59_29-495ff4-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 57.066667,
+          "id": "2026-10-08/RGB_2026-10-08-08_59_53-9927fc-s1.mp4",
+          "name": "RGB_2026-10-08-08_59_53-9927fc-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_59_53-9927fc-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-08_59_53-9927fc-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T142953-9927fc-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_59_53-9927fc-s1/AR_Pose_2026-10-08-08_59_53-9927fc-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-08_59_53-9927fc-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 71.366667,
+          "id": "2026-10-08/RGB_2026-10-08-09_04_08-5a27aa-s1.mp4",
+          "name": "RGB_2026-10-08-09_04_08-5a27aa-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_04_08-5a27aa-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_04_08-5a27aa-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T143408-5a27aa-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_04_08-5a27aa-s1/AR_Pose_2026-10-08-09_04_08-5a27aa-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_04_08-5a27aa-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 63.133333,
+          "id": "2026-10-08/RGB_2026-10-08-09_05_46-a38ec8-s1.mp4",
+          "name": "RGB_2026-10-08-09_05_46-a38ec8-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_05_46-a38ec8-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_05_46-a38ec8-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T143546-a38ec8-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_05_46-a38ec8-s1/AR_Pose_2026-10-08-09_05_46-a38ec8-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_05_46-a38ec8-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 66.2,
+          "id": "2026-10-08/RGB_2026-10-08-09_07_39-c164a3-s1.mp4",
+          "name": "RGB_2026-10-08-09_07_39-c164a3-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_07_39-c164a3-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_07_39-c164a3-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T143739-c164a3-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_07_39-c164a3-s1/AR_Pose_2026-10-08-09_07_39-c164a3-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_07_39-c164a3-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 60.233333,
+          "id": "2026-10-08/RGB_2026-10-08-09_09_37-825d96-s1.mp4",
+          "name": "RGB_2026-10-08-09_09_37-825d96-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_09_37-825d96-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_09_37-825d96-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T143937-825d96-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_09_37-825d96-s1/AR_Pose_2026-10-08-09_09_37-825d96-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_09_37-825d96-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 60.233333,
+          "id": "2026-10-08/RGB_2026-10-08-09_11_09-d0fb25-s1.mp4",
+          "name": "RGB_2026-10-08-09_11_09-d0fb25-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_11_09-d0fb25-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_11_09-d0fb25-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T144109-d0fb25-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_11_09-d0fb25-s1/AR_Pose_2026-10-08-09_11_09-d0fb25-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_11_09-d0fb25-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 53.0,
+          "id": "2026-10-08/RGB_2026-10-08-09_17_15-742907-s1.mp4",
+          "name": "RGB_2026-10-08-09_17_15-742907-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_17_15-742907-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_17_15-742907-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T144715-742907-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_17_15-742907-s1/AR_Pose_2026-10-08-09_17_15-742907-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_17_15-742907-s1/posecam_export.json"
+          }
+        },
+        {
+          "duration": 55.633333,
+          "id": "2026-10-08/RGB_2026-10-08-09_18_15-d5e67f-s1.mp4",
+          "name": "RGB_2026-10-08-09_18_15-d5e67f-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_18_15-d5e67f-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-09_18_15-d5e67f-s1.jpg",
+          "source_zip": "PoseCam capture-20261008T144815-d5e67f-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "jaganijay641",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_18_15-d5e67f-s1/AR_Pose_2026-10-08-09_18_15-d5e67f-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-09_18_15-d5e67f-s1/posecam_export.json"
+          }
+        },
+        {
+          "id": "2026-10-08/RGB_2026-10-08-10_57_25-59869d-s1.mp4",
+          "name": "RGB_2026-10-08-10_57_25-59869d-s1.mp4",
+          "url": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-10_57_25-59869d-s1.mp4",
+          "poster": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/RGB_2026-10-08-10_57_25-59869d-s1.jpg",
+          "duration": 73.3,
+          "source_zip": "PoseCam capture-20261008T162725-59869d-pipeline",
+          "category": "Pink Pipes",
+          "uploader": "arshilb12j206",
+          "metadata": {
+            "txt": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-10_57_25-59869d-s1/AR_Pose_2026-10-08-10_57_25-59869d-s1.txt",
+            "json": "https://pub-bd832e1368be41eea5dd59e4a70be778.r2.dev/2026-10-08/2026-10-08-10_57_25-59869d-s1/posecam_export.json"
           }
         }
       ]
